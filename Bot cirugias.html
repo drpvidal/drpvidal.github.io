@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Quirúrgico</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f5f5f0;min-height:100vh}
+.app{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
+.header{margin-bottom:1.5rem}
+.header h1{font-size:20px;font-weight:600;margin-bottom:2px}
+.header p{font-size:13px;color:#666}
+.nav{display:flex;gap:4px;margin-bottom:1.5rem;background:#e8e8e4;border-radius:12px;padding:4px}
+.nav-btn{flex:1;padding:8px 4px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#666;border-radius:8px;transition:all 0.15s;font-family:inherit}
+.nav-btn.active{background:#fff;color:#1a1a1a;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:600;color:#999;margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.06em}
+.form-label{font-size:12px;color:#555;margin-bottom:4px;display:block}
+.form-group{margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],input[type=date],input[type=email],input[type=tel],input[type=number],select,textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:#1a1a1a;outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:#1a1a1a}
+textarea{resize:vertical}
+.btn{padding:9px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-family:inherit;color:#1a1a1a;transition:all 0.15s}
+.btn:hover{background:#f5f5f0}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:transparent}
+.btn-primary:hover{background:#333}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{color:#dc2626;border-color:#fca5a5}
+.btn-loading{opacity:0.6;cursor:not-allowed}
+.divider{border:none;border-top:1px solid #e8e8e4;margin:1rem 0}
+.upload-zone{border:2px dashed #ddd;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafaf8;position:relative}
+.upload-zone:hover{border-color:#999}
+.tabs-mini{display:flex;gap:4px;margin-bottom:12px}
+.tab-mini{padding:5px 14px;border-radius:99px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;color:#666;transition:all 0.15s}
+.tab-mini.active{background:#1a1a1a;color:#fff;border-color:transparent}
+.record-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e8e8e4;font-size:13px}
+.record-row:last-child{border-bottom:none}
+.badge-success{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;background:#dcfce7;color:#16a34a}
+.badge-error{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;background:#fee2e2;color:#dc2626}
+.ai-box{background:#f5f5f0;border-radius:8px;padding:12px;min-height:80px;font-size:13px;line-height:1.7;color:#1a1a1a;white-space:pre-wrap}
+.mic-btn{width:60px;height:60px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.2s;margin:0 auto}
+.mic-btn.recording{border-color:#dc2626;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.3)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
+.empty{text-align:center;color:#999;font-size:13px;padding:2rem 0}
+.equipo-row{display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:start;margin-bottom:10px}
+.equipo-label{font-size:12px;font-weight:500;color:#555;padding-top:10px}
+.otro-input{margin-top:6px;display:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.scanning-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.55);border-radius:12px;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-direction:column;gap:8px}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}.equipo-row{grid-template-columns:1fr}.equipo-label{padding-top:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Registro Quirúrgico</h1>
+    <p>Dr. Pablo Vidal — Sistema de gestión de cirugías</p>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('nueva')">Nueva cirugía</button>
+    <button class="nav-btn" onclick="showSection('nota')">Nota operatoria</button>
+    <button class="nav-btn" onclick="showSection('equipo')">Mi equipo</button>
+    <button class="nav-btn" onclick="showSection('historial')">Historial</button>
+  </div>
+
+  <!-- NUEVA CIRUGÍA -->
+  <div class="section active" id="sec-nueva">
+    <div class="card">
+      <div class="card-title">1 · Datos del paciente</div>
+      <div class="tabs-mini">
+        <button class="tab-mini active" onclick="switchPatientTab('foto',this)">Foto de etiqueta</button>
+        <button class="tab-mini" onclick="switchPatientTab('manual',this)">Ingreso manual</button>
+      </div>
+      <div id="tab-foto">
+        <div class="upload-zone" onclick="document.getElementById('etiqueta-input').click()">
+          <input type="file" id="etiqueta-input" accept="image/*" style="display:none" onchange="handleEtiqueta(event)">
+          <div id="upload-placeholder">
+            <div style="font-size:28px;margin-bottom:8px">📷</div>
+            <div style="font-size:13px;font-weight:500">Subir foto de etiqueta</div>
+            <div style="font-size:11px;color:#999;margin-top:4px">Toca para elegir o tomar foto</div>
+          </div>
+          <div id="upload-preview" style="display:none">
+            <img id="preview-img" style="width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:6px">
+            <div style="font-size:12px;color:#666">Toca para cambiar</div>
+          </div>
+          <div id="scanning-overlay" class="scanning-overlay">
+            <div style="font-size:24px">⚙️</div><div>Leyendo etiqueta con IA...</div>
+          </div>
+        </div>
+        <div id="ocr-result" style="display:none;margin-top:12px">
+          <div style="font-size:12px;color:#666;margin-bottom:8px">Datos detectados — podés editar si es necesario:</div>
+          <div class="grid2">
+            <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="foto-nombre" placeholder="Nombre completo"></div>
+            <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="foto-dob"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Edad</label><input type="text" id="foto-edad" placeholder="Ej: 45 años"></div>
+        </div>
+      </div>
+      <div id="tab-manual" style="display:none">
+        <div class="grid2">
+          <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="manual-nombre" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="manual-dob" onchange="calcularEdad()"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Edad</label><input type="text" id="manual-edad" placeholder="Se calcula automáticamente"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2 · Datos de la cirugía</div>
+      <div class="grid2">
+        <div class="form-group">
+          <label class="form-label">Fecha de cirugía</label>
+          <input type="date" id="fecha-cirugia">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Diagnóstico preoperatorio</label>
+          <input type="text" id="diagnostico" placeholder="Diagnóstico">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Procedimiento</label>
+        <select id="procedimiento" onchange="checkOtro('procedimiento','otro-procedimiento')">
+          <option value="">Seleccionar...</option>
+          <option>Plastia inguinal bilateral por laparoscopía</option>
+          <option>Plastia inguinal izquierda por laparoscopía</option>
+          <option>Plastia inguinal derecha por laparoscopía</option>
+          <option>Tiroidectomía</option>
+          <option>Funduplicatura tipo Toupet por laparoscopía</option>
+          <option>Hemorroidectomía</option>
+          <option value="otro">Otro...</option>
+        </select>
+        <input type="text" id="otro-procedimiento" class="otro-input" placeholder="Especificar procedimiento">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Institución</label>
+        <select id="institucion" onchange="checkOtro('institucion','otra-institucion')">
+          <option value="">Seleccionar...</option>
+          <option>Centro Médico ABC Observatorio</option>
+          <option>Centro Médico ABC Santa Fe</option>
+          <option>Star Médica Santa Fe</option>
+          <option>San Ángel Inn Patriotismo</option>
+          <option>San Ángel Inn Universidad</option>
+          <option>San Ángel Inn Chapultepec</option>
+          <option>Centro Quirúrgico Medici</option>
+          <option>Hospital Ángeles Lomas</option>
+          <option value="otro">Otra...</option>
+        </select>
+        <input type="text" id="otra-institucion" class="otro-input" placeholder="Nombre de la institución">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3 · Equipo quirúrgico</div>
+      <div class="equipo-row">
+        <div class="equipo-label">Primer ayudante</div>
+        <div>
+          <select id="ayudante1" onchange="checkOtro('ayudante1','otro-ayudante1')">
+            <option value="">— No participó —</option>
+            <option>Dr. Enrique Stoopen Margain</option>
+            <option>Dr. Natan Sarue Saed</option>
+            <option>Dr. Jonathan Chernitzky Camaño</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-ayudante1" class="otro-input" placeholder="Nombre del ayudante">
+        </div>
+      </div>
+      <div class="equipo-row">
+        <div class="equipo-label">Segundo ayudante</div>
+        <div>
+          <select id="ayudante2" onchange="checkOtro('ayudante2','otro-ayudante2')">
+            <option value="">— No participó —</option>
+            <option>Dr. Enrique Stoopen Margain</option>
+            <option>Dr. Natan Sarue Saed</option>
+            <option>Dr. Jonathan Chernitzky Camaño</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-ayudante2" class="otro-input" placeholder="Nombre del ayudante">
+        </div>
+      </div>
+      <div class="equipo-row">
+        <div class="equipo-label">Anestesiólogo</div>
+        <div>
+          <select id="anestesio" onchange="checkOtro('anestesio','otro-anestesio')">
+            <option value="">— Seleccionar —</option>
+            <option>Dr. Alejandro Jiménez Casillas</option>
+            <option>Dr. Paulo López Reymundo</option>
+            <option>Dra. Giselle Uribe</option>
+            <option>Dra. Andrea Figueroa</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-anestesio" class="otro-input" placeholder="Nombre del anestesiólogo">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn" onclick="limpiarFormulario()">Limpiar</button>
+      <button class="btn btn-primary" onclick="guardarCirugia()">Guardar registro</button>
+    </div>
+
+    <div id="save-confirm" style="display:none" class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:18px">✓</span>
+        <span style="font-weight:600;font-size:14px">Registro guardado correctamente</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-sm" onclick="showSection('nota')">Generar nota operatoria</button>
+        <button class="btn btn-sm btn-primary" id="btn-email" onclick="enviarSecretaria()">Enviar a secretaria</button>
+        <span id="email-status" style="font-size:12px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTA OPERATORIA -->
+  <div class="section" id="sec-nota">
+    <div class="card">
+      <div class="card-title">Nota operatoria por dictado</div>
+      <div style="text-align:center;padding:1rem 0">
+        <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
+        <div style="text-align:center;font-size:12px;color:#666;margin-top:8px" id="mic-status">Presioná para dictar</div>
+      </div>
+      <hr class="divider">
+      <div class="form-group">
+        <label class="form-label">Transcripción / texto libre</label>
+        <textarea id="dictado-texto" rows="5" placeholder="El texto dictado o escrito aparece aquí..."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+        <button class="btn btn-primary" onclick="generarNota()">Estructurar con IA →</button>
+      </div>
+      <div id="nota-resultado" style="display:none">
+        <label class="form-label">Nota operatoria estructurada</label>
+        <div class="ai-box" id="nota-contenido"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+          <button class="btn btn-sm" onclick="copiarNota()">Copiar texto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MI EQUIPO -->
+  <div class="section" id="sec-equipo">
+    <div class="card">
+      <div class="card-title">Agregar integrante</div>
+      <div class="grid2">
+        <div class="form-group"><label class="form-label">Nombre completo</label><input type="text" id="eq-nombre" placeholder="Dr. Nombre Apellido"></div>
+        <div class="form-group">
+          <label class="form-label">Tipo</label>
+          <select id="eq-tipo"><option value="ayudante">Ayudante</option><option value="anestesio">Anestesiólogo</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="eq-email" placeholder="doctor@email.com"></div>
+        <div class="form-group"><label class="form-label">Teléfono (opcional)</label><input type="tel" id="eq-tel" placeholder="+52 55 0000 0000"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="agregarMiembro()">Agregar</button></div>
+    </div>
+    <div class="card"><div class="card-title">Ayudantes</div><div id="lista-ayudantes"></div></div>
+    <div class="card"><div class="card-title">Anestesiólogos</div><div id="lista-anestesio"></div></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="section" id="sec-historial">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <span style="font-weight:600;font-size:14px">Registros guardados</span>
+        <span id="historial-count" style="font-size:12px;color:#999"></span>
+      </div>
+      <div id="historial-lista"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WEBHOOK_URL = 'https://hook.us2.make.com/fjs916el71s3rw2s6gazo3dnr14m8jqy';
+let registros = JSON.parse(localStorage.getItem('registros')||'[]');
+let ultimoRegistro = null;
+let isRecording = false;
+let recognition = null;
+let currentTranscript = '';
+let notaGenerada = '';
+
+function showToast(msg,dur=3000){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+function showSection(s){
+  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('sec-'+s).classList.add('active');
+  ['nueva','nota','equipo','historial'].forEach((sec,i)=>{
+    if(sec===s) document.querySelectorAll('.nav-btn')[i].classList.add('active');
+  });
+  if(s==='equipo') renderEquipo();
+  if(s==='historial') renderHistorial();
+}
+
+function switchPatientTab(tab,btn){
+  document.querySelectorAll('.tab-mini').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-foto').style.display=tab==='foto'?'block':'none';
+  document.getElementById('tab-manual').style.display=tab==='manual'?'block':'none';
+}
+
+function setDefaultDate(){
+  document.getElementById('fecha-cirugia').value=new Date().toISOString().split('T')[0];
+}
+
+function calcularEdad(){
+  const dob=document.getElementById('manual-dob').value;
+  if(!dob) return;
+  const hoy=new Date(),nac=new Date(dob);
+  let edad=hoy.getFullYear()-nac.getFullYear();
+  if(hoy.getMonth()-nac.getMonth()<0||(hoy.getMonth()===nac.getMonth()&&hoy.getDate()<nac.getDate())) edad--;
+  document.getElementById('manual-edad').value=edad+' años';
+}
+
+function checkOtro(selId,inpId){
+  document.getElementById(inpId).style.display=document.getElementById(selId).value==='otro'?'block':'none';
+}
+
+function getVal(selId,otroId){
+  const v=document.getElementById(selId).value;
+  if(!v) return '';
+  if(v==='otro') return document.getElementById(otroId).value.trim();
+  return v;
+}
+
+async function handleEtiqueta(e){
+  const file=e.target.files[0];if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async(ev)=>{
+    document.getElementById('upload-placeholder').style.display='none';
+    document.getElementById('upload-preview').style.display='block';
+    document.getElementById('preview-img').src=ev.target.result;
+    const overlay=document.getElementById('scanning-overlay');
+    overlay.style.display='flex';
+    const base64=ev.target.result.split(',')[1];
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:file.type,data:base64}},
+            {type:'text',text:'Esta es una etiqueta de ingreso hospitalario. Extrae nombre completo, fecha de nacimiento y edad. Responde SOLO en JSON: {"nombre":"","fechaNacimiento":"YYYY-MM-DD","edad":""}. Si no encuentras algún dato usa cadena vacía.'}
+          ]}]})
+      });
+      const data=await res.json();
+      const parsed=JSON.parse(data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+      document.getElementById('foto-nombre').value=parsed.nombre||'';
+      document.getElementById('foto-dob').value=parsed.fechaNacimiento||'';
+      document.getElementById('foto-edad').value=parsed.edad||'';
+      showToast('Etiqueta leída correctamente');
+    }catch(err){
+      showToast('No se pudo leer la etiqueta — ingresá manualmente');
+    }
+    document.getElementById('ocr-result').style.display='block';
+    overlay.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function construirRegistro(){
+  const esFoto=document.querySelector('.tab-mini.active').textContent.includes('Foto');
+  return{
+    paciente:esFoto?document.getElementById('foto-nombre').value:document.getElementById('manual-nombre').value,
+    fechaNacimiento:esFoto?document.getElementById('foto-dob').value:document.getElementById('manual-dob').value,
+    edad:esFoto?document.getElementById('foto-edad').value:document.getElementById('manual-edad').value,
+    fechaCirugia:document.getElementById('fecha-cirugia').value,
+    diagnostico:document.getElementById('diagnostico').value,
+    procedimiento:getVal('procedimiento','otro-procedimiento'),
+    institucion:getVal('institucion','otra-institucion'),
+    primerAyudante:getVal('ayudante1','otro-ayudante1'),
+    segundoAyudante:getVal('ayudante2','otro-ayudante2'),
+    anestesiologo:getVal('anestesio','otro-anestesio'),
+    notaOperatoria:notaGenerada||''
+  };
+}
+
+function guardarCirugia(){
+  const reg=construirRegistro();
+  if(!reg.paciente){showToast('Ingresá el nombre del paciente.');return;}
+  reg.id=Date.now();
+  registros.push(reg);
+  localStorage.setItem('registros',JSON.stringify(registros));
+  ultimoRegistro=reg;
+  document.getElementById('save-confirm').style.display='block';
+  document.getElementById('email-status').textContent='';
+  document.getElementById('save-confirm').scrollIntoView({behavior:'smooth'});
+  showToast('Registro guardado correctamente');
+}
+
+async function enviarSecretaria(){
+  if(!ultimoRegistro){showToast('Primero guardá un registro.');return;}
+  const btn=document.getElementById('btn-email');
+  const status=document.getElementById('email-status');
+  btn.disabled=true;btn.classList.add('btn-loading');btn.textContent='Enviando...';
+  status.textContent='';
+  try{
+    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
+    const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(res.ok||res.status===200){
+      status.innerHTML='<span style="color:#16a34a">✓ Enviado correctamente a tu secretaria</span>';
+      showToast('Email enviado a secretaria');
+    }else{
+      status.innerHTML='<span style="color:#dc2626">Error al enviar. Verificá Make.com</span>';
+    }
+  }catch(err){
+    status.innerHTML='<span style="color:#dc2626">Error de conexión. Intentá de nuevo.</span>';
+  }
+  btn.disabled=false;btn.classList.remove('btn-loading');btn.textContent='Enviar a secretaria';
+}
+
+function limpiarFormulario(){
+  ['foto-nombre','foto-dob','foto-edad','manual-nombre','manual-dob','manual-edad','diagnostico','otro-procedimiento','otra-institucion','otro-ayudante1','otro-ayudante2','otro-anestesio'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['procedimiento','institucion','ayudante1','ayudante2','anestesio'].forEach(id=>{document.getElementById(id).value='';});
+  ['otro-procedimiento','otra-institucion','otro-ayudante1','otro-ayudante2','otro-anestesio'].forEach(id=>{document.getElementById(id).style.display='none';});
+  document.getElementById('upload-placeholder').style.display='block';
+  document.getElementById('upload-preview').style.display='none';
+  document.getElementById('ocr-result').style.display='none';
+  document.getElementById('save-confirm').style.display='none';
+  ultimoRegistro=null;notaGenerada='';currentTranscript='';
+  setDefaultDate();
+}
+
+function copiarNota(){navigator.clipboard.writeText(document.getElementById('nota-contenido').textContent).then(()=>showToast('Nota copiada al portapapeles'));}
+
+function toggleRecording(){if(!isRecording)startRecording();else stopRecording();}
+function startRecording(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('mic-status').textContent='Tu navegador no soporta dictado. Usá Chrome.';return;}
+  recognition=new SR();recognition.lang='es-MX';recognition.continuous=true;recognition.interimResults=true;
+  recognition.onresult=e=>{
+    let interim='',final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}
+    currentTranscript+=final;
+    document.getElementById('dictado-texto').value=currentTranscript+interim;
+  };
+  recognition.onerror=()=>stopRecording();recognition.start();
+  isRecording=true;
+  document.getElementById('mic-btn').classList.add('recording');
+  document.getElementById('mic-btn').textContent='⏹';
+  document.getElementById('mic-status').textContent='Dictando... presioná para detener';
+}
+function stopRecording(){
+  if(recognition)recognition.stop();isRecording=false;
+  document.getElementById('mic-btn').classList.remove('recording');
+  document.getElementById('mic-btn').textContent='🎤';
+  document.getElementById('mic-status').textContent='Dictado detenido.';
+}
+
+async function generarNota(){
+  const texto=document.getElementById('dictado-texto').value.trim();
+  if(!texto){showToast('Primero dictá o escribí el texto.');return;}
+  const btn=event.target;btn.disabled=true;btn.textContent='Generando...';
+  document.getElementById('nota-resultado').style.display='block';
+  document.getElementById('nota-contenido').textContent='Estructurando nota operatoria con IA...';
+  const reg=ultimoRegistro||{};
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+        messages:[{role:'user',content:`Eres un asistente médico especializado en notas operatorias. Estructura el siguiente texto en una nota operatoria formal en español médico.\n\nDatos del registro:\n- Paciente: ${reg.paciente||'No especificado'}\n- Fecha: ${reg.fechaCirugia||'No especificada'}\n- Procedimiento: ${reg.procedimiento||'No especificado'}\n- Institución: ${reg.institucion||'No especificada'}\n- Primer ayudante: ${reg.primerAyudante||'No especificado'}\n- Segundo ayudante: ${reg.segundoAyudante||'No especificado'}\n- Anestesiólogo: ${reg.anestesiologo||'No especificado'}\n\nTexto dictado:\n"${texto}"\n\nGenera la nota con estas secciones (solo las que apliquen): DATOS DEL PACIENTE, FECHA Y HORA, DIAGNÓSTICO PREOPERATORIO, DIAGNÓSTICO POSOPERATORIO, PROCEDIMIENTO REALIZADO, EQUIPO QUIRÚRGICO, DESCRIPCIÓN DE LA TÉCNICA QUIRÚRGICA, HALLAZGOS OPERATORIOS, INCIDENTES Y COMPLICACIONES, ESTADO DEL PACIENTE AL EGRESO DE QUIRÓFANO.\n\nResponde únicamente con la nota estructurada.`}]})
+    });
+    const data=await res.json();
+    notaGenerada=data.content.map(i=>i.text||'').join('\n');
+    document.getElementById('nota-contenido').textContent=notaGenerada;
+    if(ultimoRegistro){ultimoRegistro.notaOperatoria=notaGenerada;localStorage.setItem('registros',JSON.stringify(registros));}
+  }catch(err){document.getElementById('nota-contenido').textContent='Error al conectar con la IA.';}
+  btn.disabled=false;btn.textContent='Estructurar con IA →';
+}
+
+let equipoCatalogo=JSON.parse(localStorage.getItem('equipo')||'null')||{
+  ayudantes:['Dr. Enrique Stoopen Margain','Dr. Natan Sarue Saed','Dr. Jonathan Chernitzky Camaño'],
+  anestesio:['Dr. Alejandro Jiménez Casillas','Dr. Paulo López Reymundo','Dra. Giselle Uribe','Dra. Andrea Figueroa']
+};
+
+function guardarEquipo(){localStorage.setItem('equipo',JSON.stringify(equipoCatalogo));}
+
+function agregarMiembro(){
+  const nombre=document.getElementById('eq-nombre').value.trim();
+  const tipo=document.getElementById('eq-tipo').value;
+  if(!nombre){showToast('Ingresá el nombre.');return;}
+  equipoCatalogo[tipo==='ayudante'?'ayudantes':'anestesio'].push(nombre);
+  guardarEquipo();
+  document.getElementById('eq-nombre').value='';
+  renderEquipo();
+  showToast('Integrante agregado');
+}
+
+function renderEquipo(){
+  ['ayudantes','anestesio'].forEach(tipo=>{
+    const cont=document.getElementById('lista-'+tipo);
+    const lista=equipoCatalogo[tipo];
+    if(!lista.length){cont.innerHTML='<div class="empty">Sin integrantes.</div>';return;}
+    cont.innerHTML=lista.map((nombre,i)=>`
+      <div class="record-row">
+        <div style="width:36px;height:36px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#555;flex-shrink:0">${nombre.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+        <div style="flex:1;font-size:13px;font-weight:500">${nombre}</div>
+        <button class="btn btn-sm btn-danger" onclick="eliminarMiembro(${i},'${tipo}')">Eliminar</button>
+      </div>`).join('');
+  });
+}
+
+function eliminarMiembro(idx,tipo){
+  if(!confirm('¿Eliminar este integrante?')) return;
+  equipoCatalogo[tipo].splice(idx,1);
+  guardarEquipo();renderEquipo();
+}
+
+function renderHistorial(){
+  const cont=document.getElementById('historial-lista');
+  const count=document.getElementById('historial-count');
+  count.textContent=registros.length+' registro'+(registros.length!==1?'s':'');
+  if(!registros.length){cont.innerHTML='<div class="empty">No hay registros guardados todavía.</div>';return;}
+  cont.innerHTML=[...registros].reverse().map(r=>`
+    <div class="record-row">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${r.paciente||'Paciente sin nombre'}</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">${r.procedimiento||''} · ${r.institucion||''} · ${r.fechaCirugia||''}</div>
+        <div style="font-size:11px;color:#999;margin-top:1px">${[r.primerAyudante,r.segundoAyudante,r.anestesiologo].filter(Boolean).join(' · ')}</div>
+      </div>
+      <span class="badge-success">Guardado</span>
+    </div>`).join('');
+}
+
+setDefaultDate();
+renderEquipo();
+</script>
+</body>
+</html>
