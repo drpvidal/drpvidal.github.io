@@ -7,8 +7,9 @@ exports.handler = async (event) => {
 
   try {
     const data = JSON.parse(event.body);
+    console.log('Datos recibidos:', JSON.stringify(data));
 
-    await new Promise((resolve, reject) => {
+    const result = await new Promise((resolve, reject) => {
       const payload = JSON.stringify(data);
       const options = {
         hostname: 'hook.us2.make.com',
@@ -20,10 +21,17 @@ exports.handler = async (event) => {
         }
       };
       const req = https.request(options, (res) => {
-        res.on('data', () => {});
-        res.on('end', resolve);
+        let body = '';
+        res.on('data', (chunk) => body += chunk);
+        res.on('end', () => {
+          console.log('Make respondió:', res.statusCode, body);
+          resolve({ statusCode: res.statusCode, body });
+        });
       });
-      req.on('error', reject);
+      req.on('error', (err) => {
+        console.log('Error Make:', err.message);
+        reject(err);
+      });
       req.write(payload);
       req.end();
     });
@@ -31,9 +39,10 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ status: 'ok' })
+      body: JSON.stringify({ status: 'ok', make: result })
     };
   } catch (err) {
+    console.log('Error:', err.message);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
