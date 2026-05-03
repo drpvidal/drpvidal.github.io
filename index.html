@@ -66,7 +66,6 @@ textarea{resize:vertical}
     <button class="nav-btn" onclick="showSection('historial')">Historial</button>
   </div>
 
-  <!-- NUEVA CIRUGÍA -->
   <div class="section active" id="sec-nueva">
     <div class="card">
       <div class="card-title">1 · Datos del paciente</div>
@@ -222,12 +221,9 @@ textarea{resize:vertical}
     </div>
   </div>
 
-  <!-- NOTA OPERATORIA -->
   <div class="section" id="sec-nota">
     <div class="card">
       <div class="card-title">Nota operatoria</div>
-
-      <!-- Paso 1: selección de nota base -->
       <div id="paso-seleccion">
         <div class="form-group">
           <label class="form-label">Seleccioná el procedimiento base</label>
@@ -269,19 +265,17 @@ textarea{resize:vertical}
           <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="mostrarPasoVariantes()">Usar esta nota base →</button>
         </div>
       </div>
-
-      <!-- Paso 2: variantes y dictado -->
       <div id="paso-variantes" style="display:none">
         <div class="nota-preview" id="procedimiento-seleccionado"></div>
         <hr class="divider">
         <div class="form-group">
           <label class="form-label" style="font-weight:500;color:#1a1a1a">¿Hubo algo diferente en esta cirugía?</label>
-          <div style="font-size:12px;color:#666;margin-bottom:8px">Dictá o escribí solo lo que fue distinto: hallazgos especiales, variantes técnicas, complicaciones, o cualquier detalle adicional. Si todo fue estándar, dejá en blanco.</div>
+          <div style="font-size:12px;color:#666;margin-bottom:8px">Dictá o escribí solo lo que fue distinto.</div>
           <div style="text-align:center;padding:0.75rem 0">
             <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
             <div style="text-align:center;font-size:12px;color:#666;margin-top:8px" id="mic-status">Presioná para dictar</div>
           </div>
-          <textarea id="dictado-texto" rows="4" placeholder="Ej: Se encontró saco herniario de gran tamaño con contenido epiplóico. Se realizó reducción manual..."></textarea>
+          <textarea id="dictado-texto" rows="4" placeholder="Ej: Se encontró saco herniario de gran tamaño..."></textarea>
         </div>
         <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:1rem">
           <button class="btn btn-sm" onclick="volverSeleccion()">← Cambiar nota</button>
@@ -300,7 +294,6 @@ textarea{resize:vertical}
     </div>
   </div>
 
-  <!-- MI EQUIPO -->
   <div class="section" id="sec-equipo">
     <div class="card">
       <div class="card-title">Agregar integrante</div>
@@ -318,7 +311,6 @@ textarea{resize:vertical}
     <div class="card"><div class="card-title">Anestesiólogos</div><div id="lista-anestesio"></div></div>
   </div>
 
-  <!-- HISTORIAL -->
   <div class="section" id="sec-historial">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
@@ -332,43 +324,25 @@ textarea{resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script>
-const WEBHOOK_URL='/api/anthropic';
-const API_KEY='';
-const API_HEADERS={'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+const WEBHOOK_URL='https://script.google.com/macros/s/AKfycbzSwugcffdQzWDFb-BaDnjKMT2g5XPxaNeeDSS84UnizZyVhFLTS2tvUvGa27Bpqd3IQA/exec';
 
 const NOTAS_BASE = {
   'Plastia inguinal bilateral indirecta por laparoscopía': `HERNIA INGUINAL BILATERAL\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe exploran ambas regiones inguinales, confirmando hernia inguinal bilateral. Se inicia la disección en el lado izquierdo, realizando apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nPosteriormente, se realiza el mismo abordaje en el lado contralateral, con apertura del peritoneo y desarrollo del espacio preperitoneal. Se identifican y disecan las estructuras anatómicas, corroborando los orificios directo e indirecto, con hallazgo de defecto herniario indirecto. Se reduce el saco herniario correspondiente y se reseca el lipoma del cordón, respetando las estructuras del cordón espermático. Se continúa la disección hasta exponer el ligamento de Cooper hacia el pubis y se coloca malla Progrip de 16 x 12 cm, cubriendo completamente el orificio miopectíneo.\nUna vez colocadas las mallas, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0, cubriendo por completo las mismas.\nSe verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastia inguinal bilateral directa por laparoscopía': `HERNIA INGUINAL BILATERAL DIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe exploran ambas regiones inguinales, confirmando hernia inguinal bilateral de tipo directo. Se inicia la disección en el lado izquierdo, realizando apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis, respetando en todo momento las estructuras del cordón espermático. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nPosteriormente, se realiza el mismo abordaje en el lado contralateral. Se identifican y disecan las estructuras anatómicas, con hallazgo de defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo completamente el orificio miopectíneo.\nUna vez colocadas las mallas, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastia inguinal derecha indirecta por laparoscopía': `HERNIA INGUINAL DERECHA INDIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal derecha, confirmando hernia inguinal indirecta. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastia inguinal izquierda indirecta por laparoscopía': `HERNIA INGUINAL IZQUIERDA INDIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal izquierda, confirmando hernia inguinal indirecta. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastia inguinal izquierda directa por laparoscopía': `HERNIA INGUINAL IZQUIERDA DIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal izquierda, confirmando hernia inguinal directa. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis, respetando en todo momento las estructuras del cordón espermático. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Colecistectomía laparoscópica': `COLECISTECTOMÍA POR LAPAROSCOPIA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. No se coloca sonda Foley. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios, utilizando dos trocares de 11 mm y dos de 5 mm, distribuidos de manera habitual.\nSe realiza exploración inicial de la cavidad abdominal. Se identifica la vesícula biliar; se toma el fondo vesicular con pinza y se eleva en dirección cefálica, mientras que con otra pinza se tracciona el infundíbulo en sentido lateral e inferior, logrando adecuada exposición del triángulo de Calot.\nSe inicia la disección del triángulo de Calot, liberando tejido fibroareolar y adiposo, identificando de manera progresiva el conducto cístico y la arteria cística. Se continúa la disección hasta obtener visión crítica de seguridad de Strasberg.\nSe procede a la realización de colangiografía transoperatoria mediante canalización del conducto cístico, utilizando catéter tipo Arrow con infusión de medio de contraste; bajo fluoroscopia transoperatoria se obtiene adecuada opacificación de la vía biliar, sin defectos de llenado, sin evidencia de litos y con adecuado paso de contraste hacia duodeno.\nPosteriormente, se colocan dos grapas proximales y una grapa distal tanto en el conducto cístico como en la arteria cística, realizándose sección de ambas estructuras. Se continúa con disección de la vesícula biliar del lecho hepático mediante energía monopolar.\nSe verifica adecuada hemostasia y ausencia de fuga biliar. Se retira la pieza quirúrgica a través del puerto umbilical. Se retiran los trocares bajo visión directa.\nSe realiza cierre de la aponeurosis de los sitios de 11 mm con Monomax 0 y cierre de piel con sutura subcuticular de Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Colecistectomía laparoscópica + ICG + colangiografía transoperatoria': `COLECISTECTOMÍA LAPAROSCÓPICA + VERDE DE INDOCIANINA (ICG) + COLANGIOGRAFÍA TRANSOPERATORIA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. No se coloca sonda Foley. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios, utilizando dos trocares de 11 mm y dos de 5 mm.\nSe realiza exploración inicial de la cavidad abdominal. Se identifica la vesícula biliar y se logra adecuada exposición del triángulo de Calot. Se inicia la disección liberando tejido fibroareolar y adiposo, identificando el conducto cístico y la arteria cística, hasta obtener visión crítica de seguridad de Strasberg.\nDe manera preoperatoria se administraron 2 ml de verde de indocianina diluidos en 10 ml de solución, aproximadamente dos horas previas al procedimiento. Durante el acto quirúrgico, mediante sistema de fluorescencia, se identificaron las estructuras de la vía biliar, facilitando su reconocimiento anatómico y contribuyendo a una disección segura.\nSe procede a la realización de colangiografía transoperatoria mediante canalización del conducto cístico con catéter tipo Arrow; bajo fluoroscopia se obtiene adecuada opacificación de la vía biliar intra y extrahepática, sin defectos de llenado y con adecuado paso de contraste hacia duodeno.\nSe colocan dos grapas proximales y una distal en conducto cístico y arteria cística, realizándose sección de ambas estructuras. Se diseca la vesícula del lecho hepático con energía monopolar. Se verifica hemostasia y ausencia de fuga biliar. Se retira la pieza a través del puerto umbilical.\nSe realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Funduplicatura tipo Toupet por laparoscopía': `FUNDUPLICATURA LAPAROSCÓPICA TIPO TOUPET (270°)\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios. Se sustituye trocar en epigastrio por separador hepático tipo Nathanson, logrando adecuada elevación del lóbulo hepático izquierdo.\nSe identifica la unión esófago-gástrica y se procede a la disección del hiato esofágico, liberando el esófago distal y permitiendo su adecuada movilización intraabdominal con energía ultrasónica. Se identifican y respetan los nervios vagos anterior y posterior. Los vasos cortos gástricos no se seccionan.\nSe realiza apertura de la ventana retroesofágica, permitiendo el paso del fundus gástrico hacia el lado derecho del esófago sin tensión. Se verifica adecuada longitud intraabdominal del esófago.\nSe realiza cierre de pilares diafragmáticos con Ethibond 2-0, colocando al menos dos puntos, logrando hiato adecuado.\nSe confecciona funduplicatura tipo Toupet (270°). Se fija el fundus al pilar derecho con tres puntos de Ethibond 2-0. Se colocan tres puntos esófago-gástricos en cada lado, conformando válvula posterior de 270°, verificando adecuada orientación sin torsión.\nSe revisa hemostasia y correcta posición. Se retira separador hepático. Se retiran trocares bajo visión directa. Se realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Funduplicatura tipo Nissen por laparoscopía': `FUNDUPLICATURA LAPAROSCÓPICA TIPO NISSEN (360°)\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios. Se sustituye trocar en epigastrio por separador hepático tipo Nathanson.\nSe identifica la unión esófago-gástrica y se inicia disección del hiato esofágico con energía ultrasónica, liberando el esófago distal. Se identifican y respetan los nervios vagos anterior y posterior.\nSe realiza liberación completa del fundus gástrico mediante sección de vasos cortos con energía ultrasónica. Se completa apertura de ventana retroesofágica, permitiendo el paso del fundus hacia el lado derecho del esófago. Se verifica adecuada longitud intraabdominal.\nSe realiza cierre de pilares diafragmáticos con Ethibond 2-0, al menos dos puntos, logrando hiato adecuado.\nSe confecciona funduplicatura tipo Nissen (360°), pasando el fundus por detrás del esófago. Se colocan dos puntos de fijación posteriores del fundus al pilar derecho. Se realiza funduplicatura con tres puntos, calibrando con bujía esofágica de 60 Fr, logrando funduplicatura tipo "floppy" sin tensión ni torsión.\nSe revisa hemostasia y correcta posición. Se retira separador hepático. Se retiran trocares bajo visión directa. Se realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Tiroidectomía total con neuromonitoreo': `TIROIDECTOMÍA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante colocación de rodillo interescapular. Se realiza intubación orotraqueal con tubo endotraqueal con electrodos laríngeos para neuromonitoreo intraoperatorio, verificando adecuada posición y señal basal. Se realiza protocolo de asepsia y antisepsia de la región cervical anterior.\nSe realiza incisión cervical transversa tipo Kocher siguiendo pliegue cutáneo natural. Se incide piel y tejido celular subcutáneo hasta identificar y abrir el platisma. Se desarrollan colgajos subplatismales superior e inferior.\nSe identifica la línea alba cervical y se realiza apertura longitudinal entre los músculos pretiroideos, exponiendo la glándula tiroides.\nSe inicia disección del lóbulo tiroideo con movilización medial. Se identifican, coagulan y seccionan los vasos tiroideos superiores con disección cercana a la cápsula para proteger la rama externa del nervio laríngeo superior. Se utiliza energía bipolar avanzada para control hemostático.\nSe continúa disección capsular identificando y preservando las glándulas paratiroides superior e inferior con su vascularización.\nSe identifica el nervio laríngeo recurrente en su trayecto, confirmando señal mediante neuromonitoreo. Se continúa disección respetando el nervio, evitando tracción, compresión o energía térmica cercana. Se realiza liberación progresiva hasta el ligamento de Berry bajo visión directa.\nSe repite el procedimiento en el lado contralateral con identificación y preservación de paratiroides y neuromonitoreo bilateral.\nSe verifica hemostasia del lecho quirúrgico y se confirma integridad funcional de ambos nervios laríngeos recurrentes. Se coloca drenaje si se considera necesario. Se realiza cierre por planos con sutura absorbible y piel con técnica subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Hemitiroidectomía derecha con neuromonitoreo': `HEMITIROIDECTOMÍA DERECHA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante rodillo interescapular. Se realiza intubación con tubo endotraqueal con electrodos laríngeos para neuromonitoreo, verificando señal basal. Se realiza asepsia y antisepsia de región cervical anterior.\nSe realiza incisión tipo Kocher siguiendo pliegue cutáneo natural. Se desarrollan colgajos subplatismales. Se abre la línea alba cervical exponiendo el lóbulo tiroideo derecho.\nSe inicia disección del lóbulo derecho con movilización medial. Se identifican y seccionan los vasos tiroideos superiores con disección capsular para proteger el nervio laríngeo superior. Se preservan las glándulas paratiroides con su vascularización.\nSe identifica el nervio laríngeo recurrente derecho confirmando integridad mediante neuromonitoreo. Se completa la liberación respetando el nervio hasta el ligamento de Berry. Se separa el lóbulo de tráquea e istmo, el cual es seccionado. Se retira la pieza.\nSe verifica hemostasia y se confirma integridad del nervio laríngeo recurrente. Se coloca drenaje si es necesario. Cierre por planos con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Hemitiroidectomía izquierda con neuromonitoreo': `HEMITIROIDECTOMÍA IZQUIERDA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante rodillo interescapular. Se realiza intubación con tubo endotraqueal con electrodos laríngeos para neuromonitoreo, verificando señal basal. Se realiza asepsia y antisepsia de región cervical anterior.\nSe realiza incisión tipo Kocher siguiendo pliegue cutáneo natural. Se desarrollan colgajos subplatismales. Se abre la línea alba cervical exponiendo el lóbulo tiroideo izquierdo.\nSe inicia disección del lóbulo izquierdo con movilización medial. Se identifican y seccionan los vasos tiroideos superiores con disección capsular para proteger el nervio laríngeo superior. Se preservan las glándulas paratiroides con su vascularización.\nSe identifica el nervio laríngeo recurrente izquierdo confirmando integridad mediante neuromonitoreo. Se completa la liberación respetando el nervio hasta el ligamento de Berry. Se separa el lóbulo de tráquea e istmo, el cual es seccionado. Se retira la pieza.\nSe verifica hemostasia y se confirma integridad del nervio laríngeo recurrente. Se coloca drenaje si es necesario. Cierre por planos con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Hemorroidectomía tipo Ferguson 3 paquetes': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica sobre la mucosa y piel. Se continúa con disección cuidadosa respetando el complejo esfinteriano. Se identifica el pedículo vascular, el cual es ligado con catgut crómico 3-0. Se reseca el paquete hemorroidal.\nSe realiza cierre de la herida con técnica cerrada tipo Ferguson, utilizando catgut crómico 3-0 para plano mucoso y 4-0 para cierre cutáneo.\nSe procede de manera similar con los dos paquetes restantes, respetando puentes mucocutáneos adecuados.\nSe verifica hemostasia en todos los sitios. Se coloca Spongostan impregnado con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES CON ENERGÍA BIPOLAR AVANZADA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica. Se continúa con disección utilizando energía bipolar avanzada, permitiendo adecuada hemostasia y disminuyendo sangrado transoperatorio. Se respeta el complejo esfinteriano. El pedículo vascular es sellado con energía bipolar y reforzado con catgut crómico 3-0.\nSe realiza cierre con técnica cerrada tipo Ferguson, catgut crómico 3-0 para mucosa y 4-0 para piel.\nSe procede de manera similar con los dos paquetes restantes utilizando energía bipolar, respetando puentes mucocutáneos.\nSe verifica hemostasia sin evidencia de sangrado activo. Se coloca Spongostan con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastía umbilical abierta con malla': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial umbilical. Se diseca el ombligo preservando su implantación cutánea y se libera el saco herniario.\nSe identifica el contenido herniario, el cual es reducido a cavidad abdominal. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", con puntos cortos y equidistantes para adecuada distribución de tensión.\nSe coloca malla en plano preaponeurótico cubriendo ampliamente el defecto con traslape sobre tejido sano, fijada con puntos separados.\nSe fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastía umbilical abierta con Ventral Patch 6cm': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA TIPO VENTRAL PATCH DE 6 CM\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial. Se diseca el ombligo preservando su implantación cutánea.\nSe identifica y reduce el contenido herniario. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe coloca malla tipo Ventral Patch de 6 cm en plano intraperitoneal, introduciéndola a través del defecto y desplegándola contra la cara interna de la pared abdominal. Se fija mediante sus sistemas de anclaje, asegurando extensión correcta sin pliegues.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", cubriendo la malla en su totalidad. Se fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-
   'Plastía ventral laparoscópica IPOM Plus': `PLASTÍA VENTRAL POR LAPAROSCOPIA TIPO IPOM PLUS\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza acceso a cavidad abdominal mediante puerto de 10 mm en región lateral derecha, estableciendo neumoperitoneo con CO₂ a 15 mmHg. Se introduce óptica de 30°. Bajo visión directa se colocan dos trocares adicionales de 5 mm en región lateral derecha.\nSe realiza exploración inicial. Se liberan adherencias con energía ultrasónica, logrando adecuada exposición de la pared abdominal. Se identifican los defectos herniarios delimitando sus bordes.\nSe realiza cierre del defecto con técnica IPOM Plus, afrontando la aponeurosis con Prolene pasado a través de la pared abdominal mediante incisiones puntiformes con dispositivo tipo Endo Close.\nSe introduce malla intraperitoneal tipo Symbotex de aproximadamente 20 x 15 cm, cubriendo ampliamente los defectos. Se fija con sistema tipo SecureStrap en doble corona de fijación, asegurando distribución uniforme sin pliegues.\nSe verifica hemostasia y correcta posición de la malla. Se desinsufla y retiran trocares bajo visión directa. Cierre de aponeurosis con Monomax 0 y piel con Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`
 };
 
@@ -381,65 +355,17 @@ let notaGenerada='';
 let notaBaseSeleccionada='';
 
 function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
-
-function showSection(s){
-  document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
-  document.getElementById('sec-'+s).classList.add('active');
-  ['nueva','nota','equipo','historial'].forEach((sec,i)=>{if(sec===s)document.querySelectorAll('.nav-btn')[i].classList.add('active');});
-  if(s==='equipo')renderEquipo();
-  if(s==='historial')renderHistorial();
-}
-
-function irANota(){
-  showSection('nota');
-  const proc=ultimoRegistro&&ultimoRegistro.procedimiento;
-  if(proc){
-    const sel=document.getElementById('nota-procedimiento');
-    for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}
-    mostrarNotaBase();
-  }
-}
-
+function showSection(s){document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));document.getElementById('sec-'+s).classList.add('active');['nueva','nota','equipo','historial'].forEach((sec,i)=>{if(sec===s)document.querySelectorAll('.nav-btn')[i].classList.add('active');});if(s==='equipo')renderEquipo();if(s==='historial')renderHistorial();}
+function irANota(){showSection('nota');const proc=ultimoRegistro&&ultimoRegistro.procedimiento;if(proc){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}mostrarNotaBase();}}
 function switchPatientTab(tab,btn){document.querySelectorAll('.tab-mini').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-foto').style.display=tab==='foto'?'block':'none';document.getElementById('tab-manual').style.display=tab==='manual'?'block':'none';}
 function setDefaultDate(){document.getElementById('fecha-cirugia').value=new Date().toISOString().split('T')[0];}
 function calcularEdad(){const dob=document.getElementById('manual-dob').value;if(!dob)return;const hoy=new Date(),nac=new Date(dob);let edad=hoy.getFullYear()-nac.getFullYear();if(hoy.getMonth()-nac.getMonth()<0||(hoy.getMonth()===nac.getMonth()&&hoy.getDate()<nac.getDate()))edad--;document.getElementById('manual-edad').value=edad+' años';}
 function checkOtro(selId,inpId){document.getElementById(inpId).style.display=document.getElementById(selId).value==='otro'?'block':'none';}
 function getVal(selId,otroId){const v=document.getElementById(selId).value;if(!v)return '';if(v==='otro')return document.getElementById(otroId).value.trim();return v;}
-
-function cargarNotaBase(){
-  const proc=document.getElementById('procedimiento').value;
-  if(proc&&NOTAS_BASE[proc]){
-    const sel=document.getElementById('nota-procedimiento');
-    for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}
-  }
-}
-
-function mostrarNotaBase(){
-  const proc=document.getElementById('nota-procedimiento').value;
-  const preview=document.getElementById('nota-base-preview');
-  const texto=document.getElementById('nota-base-texto');
-  if(proc&&NOTAS_BASE[proc]){
-    texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';
-    preview.style.display='block';
-    notaBaseSeleccionada=NOTAS_BASE[proc];
-  }else{preview.style.display='none';}
-}
-
-function mostrarPasoVariantes(){
-  const proc=document.getElementById('nota-procedimiento').value;
-  document.getElementById('paso-seleccion').style.display='none';
-  document.getElementById('paso-variantes').style.display='block';
-  document.getElementById('procedimiento-seleccionado').textContent='📋 Nota base: '+proc;
-  document.getElementById('nota-resultado').style.display='none';
-  document.getElementById('dictado-texto').value='';
-  currentTranscript='';
-}
-
-function volverSeleccion(){
-  document.getElementById('paso-seleccion').style.display='block';
-  document.getElementById('paso-variantes').style.display='none';
-}
+function cargarNotaBase(){const proc=document.getElementById('procedimiento').value;if(proc&&NOTAS_BASE[proc]){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}}}
+function mostrarNotaBase(){const proc=document.getElementById('nota-procedimiento').value;const preview=document.getElementById('nota-base-preview');const texto=document.getElementById('nota-base-texto');if(proc&&NOTAS_BASE[proc]){texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';preview.style.display='block';notaBaseSeleccionada=NOTAS_BASE[proc];}else{preview.style.display='none';}}
+function mostrarPasoVariantes(){const proc=document.getElementById('nota-procedimiento').value;document.getElementById('paso-seleccion').style.display='none';document.getElementById('paso-variantes').style.display='block';document.getElementById('procedimiento-seleccionado').textContent='📋 Nota base: '+proc;document.getElementById('nota-resultado').style.display='none';document.getElementById('dictado-texto').value='';currentTranscript='';}
+function volverSeleccion(){document.getElementById('paso-seleccion').style.display='block';document.getElementById('paso-variantes').style.display='none';}
 
 async function handleEtiqueta(e){
   const file=e.target.files[0];if(!file)return;
@@ -487,7 +413,7 @@ async function enviarSecretaria(){
   btn.disabled=true;btn.textContent='Enviando...';status.textContent='';
   try{
     const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
-    const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'sheets',data:payload})});
+    const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(res.ok||res.status===200){status.innerHTML='<span style="color:#16a34a">✓ Enviado a secretaria</span>';showToast('Enviado correctamente');}
     else{status.innerHTML='<span style="color:#dc2626">Error al enviar</span>';}
   }catch(err){status.innerHTML='<span style="color:#dc2626">Error de conexión</span>';}
@@ -512,16 +438,8 @@ function limpiarFormulario(){
 }
 
 function copiarNota(){navigator.clipboard.writeText(document.getElementById('nota-contenido').textContent).then(()=>showToast('Nota copiada al portapapeles'));}
-
 function toggleRecording(){if(!isRecording)startRecording();else stopRecording();}
-function startRecording(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){document.getElementById('mic-status').textContent='Usá Chrome para el dictado.';return;}
-  recognition=new SR();recognition.lang='es-MX';recognition.continuous=true;recognition.interimResults=true;
-  recognition.onresult=e=>{let interim='',final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}currentTranscript+=final;document.getElementById('dictado-texto').value=currentTranscript+interim;};
-  recognition.onerror=()=>stopRecording();recognition.start();
-  isRecording=true;document.getElementById('mic-btn').classList.add('recording');document.getElementById('mic-btn').textContent='⏹';document.getElementById('mic-status').textContent='Dictando... presioná para detener';
-}
+function startRecording(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById('mic-status').textContent='Usá Chrome para el dictado.';return;}recognition=new SR();recognition.lang='es-MX';recognition.continuous=true;recognition.interimResults=true;recognition.onresult=e=>{let interim='',final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}currentTranscript+=final;document.getElementById('dictado-texto').value=currentTranscript+interim;};recognition.onerror=()=>stopRecording();recognition.start();isRecording=true;document.getElementById('mic-btn').classList.add('recording');document.getElementById('mic-btn').textContent='⏹';document.getElementById('mic-status').textContent='Dictando... presioná para detener';}
 function stopRecording(){if(recognition)recognition.stop();isRecording=false;document.getElementById('mic-btn').classList.remove('recording');document.getElementById('mic-btn').textContent='🎤';document.getElementById('mic-status').textContent='Dictado detenido.';}
 
 async function generarNota(){
@@ -530,25 +448,7 @@ async function generarNota(){
   document.getElementById('nota-resultado').style.display='block';
   document.getElementById('nota-contenido').textContent='Generando nota operatoria personalizada...';
   const reg=ultimoRegistro||{};
-  const prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.
-
-NOTA BASE DEL PROCEDIMIENTO:
-${notaBaseSeleccionada}
-
-DATOS DEL PACIENTE Y CIRUGÍA:
-- Paciente: ${reg.paciente||'No especificado'}
-- Fecha: ${reg.fechaCirugia||new Date().toLocaleDateString('es-MX')}
-- Diagnóstico preoperatorio: ${reg.diagnostico||'No especificado'}
-- Institución: ${reg.institucion||'No especificada'}
-- Cirujano: Dr. Pablo Vidal
-- Primer ayudante: ${reg.primerAyudante||'No especificado'}
-- Segundo ayudante: ${reg.segundoAyudante||'No aplica'}
-- Anestesiólogo: ${reg.anestesiologo||'No especificado'}
-
-${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}
-
-Genera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
-
+  const prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.\n\nNOTA BASE DEL PROCEDIMIENTO:\n${notaBaseSeleccionada}\n\nDATOS DEL PACIENTE Y CIRUGÍA:\n- Paciente: ${reg.paciente||'No especificado'}\n- Fecha: ${reg.fechaCirugia||new Date().toLocaleDateString('es-MX')}\n- Diagnóstico preoperatorio: ${reg.diagnostico||'No especificado'}\n- Institución: ${reg.institucion||'No especificada'}\n- Cirujano: Dr. Pablo Vidal\n- Primer ayudante: ${reg.primerAyudante||'No especificado'}\n- Segundo ayudante: ${reg.segundoAyudante||'No aplica'}\n- Anestesiólogo: ${reg.anestesiologo||'No especificado'}\n\n${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}\n\nGenera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
   try{
     const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
