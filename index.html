@@ -452,7 +452,7 @@ async function handleEtiqueta(e){
     overlay.style.display='flex';
     const base64=ev.target.result.split(',')[1];
     try{
-      const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:base64}},{type:'text',text:'Esta es una etiqueta de ingreso hospitalario. Extrae nombre completo, fecha de nacimiento y edad. Responde SOLO en JSON: {"nombre":"","fechaNacimiento":"YYYY-MM-DD","edad":""}. Si no encuentras algún dato usa cadena vacía.'}]}]})});
+      const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:base64}},{type:'text',text:'Esta es una etiqueta de ingreso hospitalario. Extrae nombre completo, fecha de nacimiento y edad. Responde SOLO en JSON: {"nombre":"","fechaNacimiento":"YYYY-MM-DD","edad":""}. Si no encuentras algún dato usa cadena vacía.'}]}]})});
       const data=await res.json();
       const parsed=JSON.parse(data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
       document.getElementById('foto-nombre').value=parsed.nombre||'';
@@ -550,7 +550,7 @@ ${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nInteg
 Genera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
 
   try{
-    const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     notaGenerada=data.content.map(i=>i.text||'').join('\n');
     document.getElementById('nota-contenido').textContent=notaGenerada;
