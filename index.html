@@ -471,5 +471,143 @@ function renderHistorial(){const cont=document.getElementById('historial-lista')
 setDefaultDate();
 renderEquipo();
 </script>
+
+</html>
+<!-- ============================================================
+INSTRUCCIONES: Hay DOS cosas que agregar en index.html
+
+CAMBIO 1: Busca esta línea exacta:
+  <button class="btn btn-sm btn-primary" onclick="enviarSecretaria()">Enviar a secretaria</button>
+
+Y DESPUÉS de esa línea agrega:
+  <button class="btn btn-sm" onclick="abrirModalAlta()" style="background:#2e7d32;color:#fff;border-color:transparent">📄 Indicaciones de alta</button>
+
+CAMBIO 2: Busca </body> al final del archivo
+Y ANTES de </body> pega todo el bloque de abajo
+============================================================ -->
+
+
+<!-- MODAL INDICACIONES DE ALTA -->
+<div id="modalAlta" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;max-width:400px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;">
+    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:16px;">📄 Indicaciones de Alta</div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label>
+      <input id="altaFecha" type="text" placeholder="ej: 4 de mayo de 2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;">
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha de próxima cita</label>
+      <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+        <button onclick="altaSugerirFecha(7)"  style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">7 días</button>
+        <button onclick="altaSugerirFecha(14)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">14 días</button>
+        <button onclick="altaSugerirFecha(21)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">21 días</button>
+        <button onclick="altaSugerirFecha(30)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">30 días</button>
+      </div>
+      <input id="altaFechaCita" type="text" placeholder="ej: 18/05/2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;">
+    </div>
+
+    <div id="altaInfoPaciente" style="background:#f5f5f0;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:#555;border-left:3px solid #1976d2;"></div>
+
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button onclick="cerrarModalAlta()" style="flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Cancelar</button>
+      <button onclick="enviarAlta()" id="btnEnviarAlta" style="flex:2;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">Generar y enviar</button>
+    </div>
+    <div id="altaStatus" style="margin-top:10px;font-size:12px;text-align:center;"></div>
+  </div>
+</div>
+
+<script>
+function abrirModalAlta() {
+  const hoy = new Date();
+  const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  document.getElementById('altaFecha').value = `${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+  document.getElementById('altaFechaCita').value = '';
+  document.getElementById('altaStatus').textContent = '';
+
+  // Obtener datos del paciente ya capturados
+  const esFoto = document.querySelector('.tab-mini.active') && document.querySelector('.tab-mini.active').textContent.includes('Foto');
+  const nombre = esFoto ? (document.getElementById('foto-nombre').value || '') : (document.getElementById('manual-nombre').value || '');
+  const edad   = esFoto ? (document.getElementById('foto-edad').value || '') : (document.getElementById('manual-edad').value || '');
+  const fn     = esFoto ? (document.getElementById('foto-dob').value || '') : (document.getElementById('manual-dob').value || '');
+  const proc   = document.getElementById('procedimiento').value === 'otro'
+    ? document.getElementById('otro-procedimiento').value
+    : (document.getElementById('procedimiento').value || '');
+
+  document.getElementById('altaInfoPaciente').innerHTML =
+    `<b>Paciente:</b> ${nombre||'—'}<br>` +
+    `<b>Edad:</b> ${edad||'—'} &nbsp;&nbsp; <b>FN:</b> ${fn||'—'}<br>` +
+    `<b>Procedimiento:</b> ${proc||'—'}`;
+
+  // Guardar en variables para usar al enviar
+  window._altaDatos = { nombre, edad, fechaNacimiento: fn, procedimiento: proc };
+
+  document.getElementById('modalAlta').style.display = 'flex';
+}
+
+function cerrarModalAlta() {
+  document.getElementById('modalAlta').style.display = 'none';
+}
+
+function altaSugerirFecha(dias) {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  document.getElementById('altaFechaCita').value = `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+async function enviarAlta() {
+  const fecha     = document.getElementById('altaFecha').value.trim();
+  const fechaCita = document.getElementById('altaFechaCita').value.trim();
+  const statusEl  = document.getElementById('altaStatus');
+  const btn       = document.getElementById('btnEnviarAlta');
+
+  if (!fecha)     { statusEl.textContent = '⚠️ Ingresa la fecha del documento.'; return; }
+  if (!fechaCita) { statusEl.textContent = '⚠️ Ingresa la fecha de la próxima cita.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Generando...';
+  statusEl.textContent = '';
+
+  try {
+    const payload = {
+      fecha,
+      fechaCita,
+      nombre:         window._altaDatos.nombre,
+      edad:           window._altaDatos.edad,
+      fechaNacimiento: window._altaDatos.fechaNacimiento,
+      procedimiento:  window._altaDatos.procedimiento,
+    };
+
+    const res = await fetch('/api/generar-alta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.status === 'ok') {
+      statusEl.style.color = '#2e7d32';
+      statusEl.textContent = '✅ Enviado a drpablovidal@gmail.com';
+      setTimeout(() => cerrarModalAlta(), 2500);
+    } else {
+      throw new Error(data.error || 'Error desconocido');
+    }
+  } catch (err) {
+    statusEl.style.color = '#c62828';
+    statusEl.textContent = '❌ Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Generar y enviar';
+  }
+}
+
+// Cerrar modal al tocar fuera
+document.getElementById('modalAlta').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModalAlta();
+});
+</script>
 </body>
 </html>
