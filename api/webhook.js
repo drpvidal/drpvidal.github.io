@@ -1,34 +1,75 @@
-const https = require('https');
+const { Resend } = require('resend');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const data = JSON.stringify(req.body);
-  const options = {
-    hostname: 'hook.us2.make.com',
-    path: '/fjs916el71s3rw2s6gazo3dnr14m8jqy',
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(data)
-    }
-  };
+  try {
+    const b = req.body;
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await new Promise((resolve, reject) => {
-    const request = https.request(options, (response) => {
-      response.on('data', () => {});
-      response.on('end', resolve);
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#1a1a1a">
+        <h2 style="border-bottom:2px solid #1a1a1a;padding-bottom:8px">
+          Registro Quirúrgico — Dr. Pablo Vidal
+        </h2>
+        <h3 style="color:#555;font-size:14px;text-transform:uppercase;letter-spacing:0.05em">
+          Datos del Paciente y Cirugía
+        </h3>
+        <table cellpadding="7" cellspacing="0" border="1"
+          style="border-collapse:collapse;width:100%;font-size:13px;border-color:#e0e0e0">
+          <tr style="background:#f5f5f0"><td style="width:160px"><b>Paciente</b></td><td>${b.paciente || '—'}</td></tr>
+          <tr><td><b>Fecha de cirugía</b></td><td>${b.fechaCirugia || '—'}</td></tr>
+          <tr style="background:#f5f5f0"><td><b>Edad</b></td><td>${b.edad || '—'}</td></tr>
+          <tr><td><b>Diagnóstico</b></td><td>${b.diagnostico || '—'}</td></tr>
+          <tr style="background:#f5f5f0"><td><b>Procedimiento</b></td><td>${b.procedimiento || '—'}</td></tr>
+          <tr><td><b>Institución</b></td><td>${b.institucion || '—'}</td></tr>
+          <tr style="background:#f5f5f0"><td><b>Cirujano</b></td><td>Dr. Pablo Vidal</td></tr>
+          <tr><td><b>Primer ayudante</b></td><td>${b.primerAyudante || '—'}</td></tr>
+          <tr style="background:#f5f5f0"><td><b>Segundo ayudante</b></td><td>${b.segundoAyudante || '—'}</td></tr>
+          <tr><td><b>Anestesiólogo</b></td><td>${b.anestesiologo || '—'}</td></tr>
+        </table>
+
+        ${b.notaOperatoria && b.notaOperatoria !== 'No generada aún' ? `
+        <h3 style="color:#555;font-size:14px;text-transform:uppercase;letter-spacing:0.05em;margin-top:24px">
+          Nota Operatoria
+        </h3>
+        <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;
+                    padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">
+${b.notaOperatoria}
+        </div>
+        ` : `
+        <p style="margin-top:16px;font-size:12px;color:#999">
+          ⚠️ Nota operatoria no generada al momento del envío.
+        </p>
+        `}
+
+        <p style="font-size:11px;color:#bbb;margin-top:24px;border-top:1px solid #eee;padding-top:8px">
+          Enviado automáticamente desde App Registro Quirúrgico · ${new Date().toLocaleString('es-MX')}
+        </p>
+      </div>
+    `;
+
+    await resend.emails.send({
+      from: 'Registro Quirúrgico <onboarding@resend.dev>',
+      to: ['admon.consultorio110@gmail.com', 'drpablovidal@gmail.com'],
+      subject: `Cirugía: ${b.paciente || 'Paciente'} — ${b.fechaCirugia || new Date().toLocaleDateString('es-MX')}`,
+      html,
     });
-    request.on('error', reject);
-    request.write(data);
-    request.end();
-  });
 
-  res.status(200).json({ status: 'ok' });
+    res.status(200).json({ status: 'ok' });
+
+  } catch (error) {
+    console.error('Error enviando email:', error);
+    res.status(500).json({ error: error.message });
+  }
 };
