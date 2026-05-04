@@ -69,8 +69,17 @@ ${b.notaOperatoria}
     await fetch('https://script.google.com/macros/s/AKfycbz8Af_l-JTBX4FDyVLGC4aogSCza-cP2e1OqK5aFQc6vhPi4x2MCdOS4x2h_1TagGsXqA/exec', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(b)
-    });
+     body: JSON.stringify({
+  paciente: b.paciente,
+  fechaCirugia: b.fechaCirugia,
+  edad: b.edad,
+  diagnostico: b.diagnostico,
+  procedimiento: b.procedimiento,
+  institucion: b.institucion,
+  primerAyudante: b.primerAyudante,
+  segundoAyudante: b.segundoAyudante,
+  anestesiologo: b.anestesiologo
+});
 
     res.status(200).json({ status: 'ok' });
 
