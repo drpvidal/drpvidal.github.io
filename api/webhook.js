@@ -38,8 +38,8 @@ module.exports = async (req, res) => {
     `;
 
     await resend.emails.send({
-      from: 'Registro Quirúrgico <onboarding@resend.dev>',
-      to: ['drpablovidal@gmail.com'],
+    from: 'Registro Quirúrgico <onboarding@resend.dev>',
+to: ['drpablovidal@gmail.com'],
       subject: `Cirugía: ${b.paciente || 'Paciente'} — ${b.fechaCirugia || new Date().toLocaleDateString('es-MX')}`,
       html,
     });
