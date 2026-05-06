@@ -49,7 +49,9 @@ textarea{resize:vertical}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 .nota-base-box{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:#1e40af;margin-bottom:12px;max-height:150px;overflow-y:auto}
+.nota-base-box.libre{background:#fdf4ff;border-color:#e9d5ff;color:#6b21a8}
 .nota-preview{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px;font-size:12px;color:#78350f;margin-top:8px}
+.nota-preview.libre{background:#f5f3ff;border-color:#c4b5fd;color:#4c1d95}
 @media(max-width:480px){.grid2{grid-template-columns:1fr}.equipo-row{grid-template-columns:1fr}.equipo-label{padding-top:0}}
 </style>
 </head>
@@ -131,6 +133,9 @@ textarea{resize:vertical}
           <optgroup label="Hemorroidal">
             <option>Hemorroidectomía tipo Ferguson 3 paquetes</option>
             <option>Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar</option>
+          </optgroup>
+          <optgroup label="Región sacrococcígea">
+            <option>Resección de quiste pilonidal</option>
           </optgroup>
           <optgroup label="Pared abdominal">
             <option>Plastía umbilical abierta con malla</option>
@@ -253,24 +258,30 @@ textarea{resize:vertical}
               <option>Hemorroidectomía tipo Ferguson 3 paquetes</option>
               <option>Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar</option>
             </optgroup>
+            <optgroup label="Región sacrococcígea">
+              <option>Resección de quiste pilonidal</option>
+            </optgroup>
             <optgroup label="Pared abdominal">
               <option>Plastía umbilical abierta con malla</option>
               <option>Plastía umbilical abierta con Ventral Patch 6cm</option>
               <option>Plastía ventral laparoscópica IPOM Plus</option>
             </optgroup>
+            <optgroup label="Otro procedimiento">
+              <option value="libre">✏️ Dictado libre con IA — cualquier procedimiento</option>
+            </optgroup>
           </select>
         </div>
         <div id="nota-base-preview" style="display:none">
           <div class="nota-base-box" id="nota-base-texto"></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="mostrarPasoVariantes()">Usar esta nota base →</button>
+          <button class="btn btn-primary" id="btn-usar-nota" style="width:100%;margin-top:8px" onclick="mostrarPasoVariantes()">Usar esta nota base →</button>
         </div>
       </div>
       <div id="paso-variantes" style="display:none">
         <div class="nota-preview" id="procedimiento-seleccionado"></div>
         <hr class="divider">
         <div class="form-group">
-          <label class="form-label" style="font-weight:500;color:#1a1a1a">¿Hubo algo diferente en esta cirugía?</label>
-          <div style="font-size:12px;color:#666;margin-bottom:8px">Dictá o escribí solo lo que fue distinto.</div>
+          <label class="form-label" style="font-weight:500;color:#1a1a1a" id="dictado-label">¿Hubo algo diferente en esta cirugía?</label>
+          <div style="font-size:12px;color:#666;margin-bottom:8px" id="dictado-hint">Dictá o escribí solo lo que fue distinto.</div>
           <div style="text-align:center;padding:0.75rem 0">
             <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
             <div style="text-align:center;font-size:12px;color:#666;margin-top:8px" id="mic-status">Presioná para dictar</div>
@@ -342,6 +353,7 @@ const NOTAS_BASE = {
   'Hemitiroidectomía izquierda con neuromonitoreo': `HEMITIROIDECTOMÍA IZQUIERDA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante rodillo interescapular. Se realiza intubación con tubo endotraqueal con electrodos laríngeos para neuromonitoreo, verificando señal basal. Se realiza asepsia y antisepsia de región cervical anterior.\nSe realiza incisión tipo Kocher siguiendo pliegue cutáneo natural. Se desarrollan colgajos subplatismales. Se abre la línea alba cervical exponiendo el lóbulo tiroideo izquierdo.\nSe inicia disección del lóbulo izquierdo con movilización medial. Se identifican y seccionan los vasos tiroideos superiores con disección capsular para proteger el nervio laríngeo superior. Se preservan las glándulas paratiroides con su vascularización.\nSe identifica el nervio laríngeo recurrente izquierdo confirmando integridad mediante neuromonitoreo. Se completa la liberación respetando el nervio hasta el ligamento de Berry. Se separa el lóbulo de tráquea e istmo, el cual es seccionado. Se retira la pieza.\nSe verifica hemostasia y se confirma integridad del nervio laríngeo recurrente. Se coloca drenaje si es necesario. Cierre por planos con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
   'Hemorroidectomía tipo Ferguson 3 paquetes': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica sobre la mucosa y piel. Se continúa con disección cuidadosa respetando el complejo esfinteriano. Se identifica el pedículo vascular, el cual es ligado con catgut crómico 3-0. Se reseca el paquete hemorroidal.\nSe realiza cierre de la herida con técnica cerrada tipo Ferguson, utilizando catgut crómico 3-0 para plano mucoso y 4-0 para cierre cutáneo.\nSe procede de manera similar con los dos paquetes restantes, respetando puentes mucocutáneos adecuados.\nSe verifica hemostasia en todos los sitios. Se coloca Spongostan impregnado con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
   'Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES CON ENERGÍA BIPOLAR AVANZADA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica. Se continúa con disección utilizando energía bipolar avanzada, permitiendo adecuada hemostasia y disminuyendo sangrado transoperatorio. Se respeta el complejo esfinteriano. El pedículo vascular es sellado con energía bipolar y reforzado con catgut crómico 3-0.\nSe realiza cierre con técnica cerrada tipo Ferguson, catgut crómico 3-0 para mucosa y 4-0 para piel.\nSe procede de manera similar con los dos paquetes restantes utilizando energía bipolar, respetando puentes mucocutáneos.\nSe verifica hemostasia sin evidencia de sangrado activo. Se coloca Spongostan con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Resección de quiste pilonidal': `RESECCIÓN DE QUISTE PILONIDAL\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición prona bajo anestesia general, con adecuada protección de puntos de presión. Se realiza protocolo de asepsia y antisepsia de la región sacrococcígea y glútea, con colocación de campos estériles.\nSe realiza identificación del quiste pilonidal y sus trayectos sinuosos mediante inspección y exploración cuidadosa. Se delimita la zona de resección con marcador cutáneo, incluyendo los orificios primarios, trayectos y el tejido afectado con márgenes adecuados.\nSe realiza infiltración local con solución de adrenalina diluida para reducir sangrado transoperatorio. Se incide la piel con bisturí siguiendo la marcación previa. Se continúa la resección en bloque del quiste pilonidal con sus trayectos, disecando hasta el tejido sano subyacente y resecando hasta el nivel de la fascia presacra. Se retira la pieza en bloque, verificando márgenes libres.\nSe verifica hemostasia meticulosa del lecho quirúrgico con electrocauterio. El espécimen se envía a estudio histopatológico.\nSe realiza cierre por planos: tejido celular subcutáneo con puntos separados de Vicryl 2-0 y cierre de piel con puntos separados de Nylon 3-0, logrando adecuada aproximación de bordes sin tensión. Se coloca apósito compresivo estéril.\nSe verifica hemostasia final y se da por terminado el procedimiento quirúrgico.`,
   'Plastía umbilical abierta con malla': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial umbilical. Se diseca el ombligo preservando su implantación cutánea y se libera el saco herniario.\nSe identifica el contenido herniario, el cual es reducido a cavidad abdominal. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", con puntos cortos y equidistantes para adecuada distribución de tensión.\nSe coloca malla en plano preaponeurótico cubriendo ampliamente el defecto con traslape sobre tejido sano, fijada con puntos separados.\nSe fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
   'Plastía umbilical abierta con Ventral Patch 6cm': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA TIPO VENTRAL PATCH DE 6 CM\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial. Se diseca el ombligo preservando su implantación cutánea.\nSe identifica y reduce el contenido herniario. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe coloca malla tipo Ventral Patch de 6 cm en plano intraperitoneal, introduciéndola a través del defecto y desplegándola contra la cara interna de la pared abdominal. Se fija mediante sus sistemas de anclaje, asegurando extensión correcta sin pliegues.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", cubriendo la malla en su totalidad. Se fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
   'Plastía ventral laparoscópica IPOM Plus': `PLASTÍA VENTRAL POR LAPAROSCOPIA TIPO IPOM PLUS\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza acceso a cavidad abdominal mediante puerto de 10 mm en región lateral derecha, estableciendo neumoperitoneo con CO₂ a 15 mmHg. Se introduce óptica de 30°. Bajo visión directa se colocan dos trocares adicionales de 5 mm en región lateral derecha.\nSe realiza exploración inicial. Se liberan adherencias con energía ultrasónica, logrando adecuada exposición de la pared abdominal. Se identifican los defectos herniarios delimitando sus bordes.\nSe realiza cierre del defecto con técnica IPOM Plus, afrontando la aponeurosis con Prolene pasado a través de la pared abdominal mediante incisiones puntiformes con dispositivo tipo Endo Close.\nSe introduce malla intraperitoneal tipo Symbotex de aproximadamente 20 x 15 cm, cubriendo ampliamente los defectos. Se fija con sistema tipo SecureStrap en doble corona de fijación, asegurando distribución uniforme sin pliegues.\nSe verifica hemostasia y correcta posición de la malla. Se desinsufla y retiran trocares bajo visión directa. Cierre de aponeurosis con Monomax 0 y piel con Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`
@@ -354,6 +366,7 @@ let recognition=null;
 let currentTranscript='';
 let notaGenerada='';
 let notaBaseSeleccionada='';
+let modoLibre=false;
 
 function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
 function showSection(s){document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));document.getElementById('sec-'+s).classList.add('active');['nueva','nota','equipo','historial'].forEach((sec,i)=>{if(sec===s)document.querySelectorAll('.nav-btn')[i].classList.add('active');});if(s==='equipo')renderEquipo();if(s==='historial')renderHistorial();}
@@ -364,8 +377,58 @@ function calcularEdad(){const dob=document.getElementById('manual-dob').value;if
 function checkOtro(selId,inpId){document.getElementById(inpId).style.display=document.getElementById(selId).value==='otro'?'block':'none';}
 function getVal(selId,otroId){const v=document.getElementById(selId).value;if(!v)return '';if(v==='otro')return document.getElementById(otroId).value.trim();return v;}
 function cargarNotaBase(){const proc=document.getElementById('procedimiento').value;if(proc&&NOTAS_BASE[proc]){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}}}
-function mostrarNotaBase(){const proc=document.getElementById('nota-procedimiento').value;const preview=document.getElementById('nota-base-preview');const texto=document.getElementById('nota-base-texto');if(proc&&NOTAS_BASE[proc]){texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';preview.style.display='block';notaBaseSeleccionada=NOTAS_BASE[proc];}else{preview.style.display='none';}}
-function mostrarPasoVariantes(){const proc=document.getElementById('nota-procedimiento').value;document.getElementById('paso-seleccion').style.display='none';document.getElementById('paso-variantes').style.display='block';document.getElementById('procedimiento-seleccionado').textContent='📋 Nota base: '+proc;document.getElementById('nota-resultado').style.display='none';document.getElementById('dictado-texto').value='';currentTranscript='';}
+
+function mostrarNotaBase(){
+  const proc=document.getElementById('nota-procedimiento').value;
+  const preview=document.getElementById('nota-base-preview');
+  const texto=document.getElementById('nota-base-texto');
+  const btn=document.getElementById('btn-usar-nota');
+  if(proc==='libre'){
+    texto.className='nota-base-box libre';
+    texto.textContent='Modo libre: dictá o escribí el procedimiento completo y la IA generará la nota operatoria desde cero. Podés ser tan breve o detallado como quieras.';
+    btn.textContent='Usar modo libre →';
+    preview.style.display='block';
+    notaBaseSeleccionada='';
+    modoLibre=true;
+  } else if(proc&&NOTAS_BASE[proc]){
+    texto.className='nota-base-box';
+    texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';
+    btn.textContent='Usar esta nota base →';
+    preview.style.display='block';
+    notaBaseSeleccionada=NOTAS_BASE[proc];
+    modoLibre=false;
+  } else {
+    preview.style.display='none';
+    modoLibre=false;
+  }
+}
+
+function mostrarPasoVariantes(){
+  const proc=document.getElementById('nota-procedimiento').value;
+  document.getElementById('paso-seleccion').style.display='none';
+  document.getElementById('paso-variantes').style.display='block';
+  const badge=document.getElementById('procedimiento-seleccionado');
+  const label=document.getElementById('dictado-label');
+  const hint=document.getElementById('dictado-hint');
+  const textarea=document.getElementById('dictado-texto');
+  if(proc==='libre'){
+    badge.className='nota-preview libre';
+    badge.textContent='✏️ Modo libre — la IA generará la nota desde tu dictado';
+    label.textContent='Dictá el procedimiento completo';
+    hint.textContent='Describí la cirugía con los detalles que recuerdes. La IA redactará la nota en formato formal.';
+    textarea.placeholder='Ej: Paciente en prono, resección de quiste pilonidal con cierre primario, sin complicaciones...';
+  } else {
+    badge.className='nota-preview';
+    badge.textContent='📋 Nota base: '+proc;
+    label.textContent='¿Hubo algo diferente en esta cirugía?';
+    hint.textContent='Dictá o escribí solo lo que fue distinto. Si todo fue estándar, podés dejarlo vacío.';
+    textarea.placeholder='Ej: Se encontró saco herniario de gran tamaño...';
+  }
+  document.getElementById('nota-resultado').style.display='none';
+  document.getElementById('dictado-texto').value='';
+  currentTranscript='';
+}
+
 function volverSeleccion(){document.getElementById('paso-seleccion').style.display='block';document.getElementById('paso-variantes').style.display='none';}
 
 async function handleEtiqueta(e){
@@ -449,7 +512,48 @@ async function generarNota(){
   document.getElementById('nota-resultado').style.display='block';
   document.getElementById('nota-contenido').textContent='Generando nota operatoria personalizada...';
   const reg=ultimoRegistro||{};
-  const prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.\n\nNOTA BASE DEL PROCEDIMIENTO:\n${notaBaseSeleccionada}\n\nDATOS DEL PACIENTE Y CIRUGÍA:\n- Paciente: ${reg.paciente||'No especificado'}\n- Fecha: ${reg.fechaCirugia||new Date().toLocaleDateString('es-MX')}\n- Diagnóstico preoperatorio: ${reg.diagnostico||'No especificado'}\n- Institución: ${reg.institucion||'No especificada'}\n- Cirujano: Dr. Pablo Vidal\n- Primer ayudante: ${reg.primerAyudante||'No especificado'}\n- Segundo ayudante: ${reg.segundoAyudante||'No aplica'}\n- Anestesiólogo: ${reg.anestesiologo||'No especificado'}\n\n${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}\n\nGenera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
+
+  const datosEquipo = `- Paciente: ${reg.paciente||'No especificado'}
+- Fecha: ${reg.fechaCirugia||new Date().toLocaleDateString('es-MX')}
+- Diagnóstico preoperatorio: ${reg.diagnostico||'No especificado'}
+- Institución: ${reg.institucion||'No especificada'}
+- Cirujano: Dr. Pablo Vidal
+- Primer ayudante: ${reg.primerAyudante||'No especificado'}
+- Segundo ayudante: ${reg.segundoAyudante||'No aplica'}
+- Anestesiólogo: ${reg.anestesiologo||'No especificado'}`;
+
+  let prompt;
+  if(modoLibre){
+    if(!extras){showToast('Dictá el procedimiento antes de generar.');btn.disabled=false;btn.textContent='Generar nota completa con IA →';return;}
+    prompt=`Eres un asistente médico especializado en notas operatorias quirúrgicas en español.
+
+El cirujano ha dictado el siguiente procedimiento:
+${extras}
+
+DATOS DEL PACIENTE Y CIRUGÍA:
+${datosEquipo}
+
+Redacta una nota operatoria quirúrgica completa y formal en español médico. Sigue esta estructura:
+1. Encabezado con nombre del paciente, edad, fecha y diagnóstico preoperatorio
+2. Equipo quirúrgico
+3. Técnica quirúrgica detallada (expande el dictado con terminología médica apropiada, manteniendo todos los detalles mencionados)
+4. Cierre con verificación de hemostasia y fin del procedimiento
+
+Responde ÚNICAMENTE con la nota operatoria, sin explicaciones adicionales.`;
+  } else {
+    prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.
+
+NOTA BASE DEL PROCEDIMIENTO:
+${notaBaseSeleccionada}
+
+DATOS DEL PACIENTE Y CIRUGÍA:
+${datosEquipo}
+
+${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}
+
+Genera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
+  }
+
   try{
     const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
@@ -471,20 +575,6 @@ function renderHistorial(){const cont=document.getElementById('historial-lista')
 setDefaultDate();
 renderEquipo();
 </script>
-
-</html>
-<!-- ============================================================
-INSTRUCCIONES: Hay DOS cosas que agregar en index.html
-
-CAMBIO 1: Busca esta línea exacta:
-  <button class="btn btn-sm btn-primary" onclick="enviarSecretaria()">Enviar a secretaria</button>
-
-Y DESPUÉS de esa línea agrega:
-  <button class="btn btn-sm" onclick="abrirModalAlta()" style="background:#2e7d32;color:#fff;border-color:transparent">📄 Indicaciones de alta</button>
-
-CAMBIO 2: Busca </body> al final del archivo
-Y ANTES de </body> pega todo el bloque de abajo
-============================================================ -->
 
 
 <!-- MODAL INDICACIONES DE ALTA -->
@@ -526,7 +616,6 @@ function abrirModalAlta() {
   document.getElementById('altaFechaCita').value = '';
   document.getElementById('altaStatus').textContent = '';
 
-  // Obtener datos del paciente ya capturados
   const esFoto = document.querySelector('.tab-mini.active') && document.querySelector('.tab-mini.active').textContent.includes('Foto');
   const nombre = esFoto ? (document.getElementById('foto-nombre').value || '') : (document.getElementById('manual-nombre').value || '');
   const edad   = esFoto ? (document.getElementById('foto-edad').value || '') : (document.getElementById('manual-edad').value || '');
@@ -540,9 +629,7 @@ function abrirModalAlta() {
     `<b>Edad:</b> ${edad||'—'} &nbsp;&nbsp; <b>FN:</b> ${fn||'—'}<br>` +
     `<b>Procedimiento:</b> ${proc||'—'}`;
 
-  // Guardar en variables para usar al enviar
   window._altaDatos = { nombre, edad, fechaNacimiento: fn, procedimiento: proc };
-
   document.getElementById('modalAlta').style.display = 'flex';
 }
 
@@ -604,7 +691,6 @@ async function enviarAlta() {
   }
 }
 
-// Cerrar modal al tocar fuera
 document.getElementById('modalAlta').addEventListener('click', function(e) {
   if (e.target === this) cerrarModalAlta();
 });
