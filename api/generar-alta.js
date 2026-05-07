@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 1200,
-          messages: [{ role: 'user', content: 'Eres un asistente médico cirujano. El médico quiere agregar una hoja de indicaciones específicas para este paciente postoperado de: ' + (procedimiento || '') + '.\n\nEl médico indicó los temas a incluir:\n' + indicacionesEspeciales + '\n\nGenera una página completa de indicaciones médicas postoperatorias específicas, redactadas de forma clara y profesional para el paciente. Usa un título apropiado en mayúsculas. Organiza por temas con sus puntos. Responde SOLO con el texto de las indicaciones, sin explicaciones. Formato:\nTÍTULO\n\nTema 1:\n- Indicación\n- Indicación\n\nTema 2:\n- Indicación' }]
+          messages: [{ role: 'user', content: 'Eres un asistente médico cirujano. El médico quiere agregar una hoja de indicaciones específicas para este paciente postoperado de: ' + (procedimiento || '') + '.\n\nEl médico indicó los temas a incluir:\n' + indicacionesEspeciales + '\n\nGenera una página de indicaciones postoperatorias específicas. REGLAS DE FORMATO OBLIGATORIAS:\n- El título va en MAYÚSCULAS en la primera línea\n- Los subtítulos de sección terminan con dos puntos, ejemplo: Cuidados de la herida:\n- Cada punto empieza con guión: - texto\n- NO uses #, ##, **, *, ni ningún formato Markdown\n- Responde SOLO con las indicaciones, sin explicaciones adicionales' }]
         })
       });
       const aiData2 = await aiRes2.json();
@@ -183,16 +183,28 @@ module.exports = async (req, res) => {
     // ── Hoja especial generada por IA ─────────────────────────────────────────
     function buildHojaEspecial(texto) {
       const pp = [];
-      const lineas = texto.split('\n');
+      // Limpiar markdown que la IA pueda haber generado
+      const limpio = texto
+        .replace(/^#{1,3}\s*/gm, '')
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .trim();
+      const lineas = limpio.split('\n');
+      let primero = true;
       for (const linea of lineas) {
         const trimmed = linea.trim();
-        if (!trimmed) { pp.push(new Paragraph({ children: [t('')], ...sp(80) })); continue; }
-        if (/^[A-ZÁÉÍÓÚÑ\s]{10,}$/.test(trimmed)) {
-          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL })], alignment: AlignmentType.CENTER, ...sp(160) }));
-        } else if (/^[A-Za-záéíóúñÁÉÍÓÚÑ].*:$/.test(trimmed)) {
-          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(60, 100) }));
-        } else if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-          pp.push(new Paragraph({ children: [t('• ' + trimmed.replace(/^[-•]\s*/, ''))], indent: { left: 360 }, ...sp(40) }));
+        if (!trimmed) { pp.push(new Paragraph({ children: [t('')], ...sp(60) })); continue; }
+        // Título principal: primera línea o toda en mayúsculas
+        if (primero || /^[A-ZÁÉÍÓÚÑ\s\-]{10,}$/.test(trimmed)) {
+          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL })], alignment: AlignmentType.CENTER, ...sp(200, primero?0:160) }));
+          primero = false;
+        // Subtítulo de sección: termina en :
+        } else if (/^[A-Za-záéíóúñÁÉÍÓÚÑ].{2,}:$/.test(trimmed)) {
+          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(80, 140) }));
+        // Punto de lista
+        } else if (/^[-•]/.test(trimmed)) {
+          pp.push(new Paragraph({ children: [t('• ' + trimmed.replace(/^[-•]\s*/, ''))], indent: { left: 360 }, ...sp(60) }));
+        // Texto normal
         } else {
           pp.push(new Paragraph({ children: [t(trimmed)], ...sp(80) }));
         }
