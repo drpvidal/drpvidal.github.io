@@ -93,7 +93,8 @@ textarea{min-height:65px;resize:vertical;}
     <img style="width:100%;display:block;" src="https://raw.githubusercontent.com/drpvidal/drpvidal.github.io/main/assets/footer.jpg"/>
   </div>
   <div class="ob">
-    <button class="bc" onclick="compartir()">Compartir receta</button>
+    <button class="bc" onclick="generarPDF()">Descargar PDF</button>
+    <button class="bc" style="background:#2a7d4f" onclick="compartir()">Compartir texto</button>
     <button class="bv" onclick="cerrar()">&#8592; Editar</button>
   </div>
 </div>
@@ -150,6 +151,18 @@ function compartir(){
   else navigator.clipboard.writeText(txt).then(function(){toast('Copiado');});
 }
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+
+function generarPDF() {
+  var papel = document.querySelector('.papel');
+  toast('Generando PDF...');
+  html2canvas(papel, {scale:2, useCORS:true, backgroundColor:'#ffffff'}).then(function(canvas) {
+    var img = canvas.toDataURL('image/jpeg', 0.95);
+    var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'pt', format:[595, canvas.height/canvas.width*595]});
+    pdf.addImage(img, 'JPEG', 0, 0, 595, canvas.height/canvas.width*595);
+    pdf.save('Receta_' + (_r.nombre||'Dr_Vidal') + '.pdf');
+    toast('PDF guardado');
+  });
+}
 </script>
 </body>
 </html>
