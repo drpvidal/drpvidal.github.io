@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recetario Dr. Vidal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #e8e0d4; }
+.app-header { background: #1a3a2a; padding: 13px 18px; position: sticky; top: 0; z-index: 100; }
+.app-header .t { font-size: 1rem; font-weight: 700; color: #7ecba1; }
+.app-header .s { font-size: 0.58rem; color: #7aaa8a; letter-spacing: 0.08em; text-transform: uppercase; }
+.main { padding: 14px; max-width: 460px; margin: 0 auto; }
+.card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.ct { font-size: 0.67rem; font-weight: 700; color: #1a5c38; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 7px; border-bottom: 2px solid #2a7d4f; }
+.fg { margin-bottom: 11px; }
+label { display: block; font-size: 0.67rem; font-weight: 700; color: #888; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; }
+input, textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #ddd; border-radius: 8px; font-family: Arial, sans-serif; font-size: 0.92rem; color: #111; background: #fff; -webkit-appearance: none; }
+input:focus, textarea:focus { outline: none; border-color: #2a7d4f; }
+textarea { min-height: 70px; resize: vertical; }
+.fr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.eb { display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: #f0f7f3; border: 1.5px solid #2a7d4f; border-radius: 8px; min-height: 44px; }
+.eb .n { font-size: 1.15rem; font-weight: 700; color: #1a5c38; }
+.eb .u { font-size: 0.76rem; color: #888; }
+.btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 13px; border: none; border-radius: 10px; font-family: Arial, sans-serif; font-weight: 700; cursor: pointer; font-size: 0.95rem; margin-bottom: 8px; }
+.btn-gen { background: #1a3a2a; color: #7ecba1; font-size: 1rem; }
+.ia-box { position: relative; }
+.ia-box textarea { padding-right: 44px; }
+.btn-ia { position: absolute; right: 8px; bottom: 8px; background: #1a3a2a; color: #7ecba1; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; }
+.ia-result { background: #f0f7f3; border: 1.5px solid #2a7d4f; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 0.85rem; line-height: 1.5; display: none; }
+.ia-result.show { display: block; }
+.ia-spinner { text-align: center; color: #2a7d4f; font-size: 0.8rem; padding: 8px; display: none; }
+.ia-spinner.show { display: block; }
+.ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200; overflow-y: auto; padding: 14px 10px 50px; }
+.ov.active { display: block; }
+.preview-wrapper { max-width: 380px; margin: 0 auto; border-radius: 4px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.preview-paper { background: #fff; }
+.preview-paper img.hdr { width: 100%; display: block; }
+.preview-body { padding: 4% 7% 3%; font-family: Arial, sans-serif; font-size: 2.6vw; color: #111; line-height: 1.45; }
+@media (min-width: 400px) { .preview-body { font-size: 10.4px; } }
+.pv-fecha { text-align: right; margin-bottom: 2.5%; }
+.pv-nombre { margin-bottom: 0.5%; font-weight: 700; color: #1a5278; }
+.pv-edad { margin-bottom: 2%; }
+.pv-med-nombre { font-weight: 700; color: #1a5278; margin-bottom: 1%; }
+.pv-med-ind { margin-bottom: 1%; white-space: pre-wrap; }
+.pv-med-block { margin-bottom: 2.5%; }
+.pv-firma { text-align: right; padding: 2% 7% 1%; }
+.pv-firma img { width: 35%; }
+.ob { max-width: 380px; margin: 12px auto 0; display: flex; flex-direction: column; gap: 8px; }
+.btn-pdf { background: #1a3a2a; color: #7ecba1; border: none; padding: 14px; border-radius: 10px; font-family: Arial, sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-wp { background: #25D366; color: #fff; border: none; padding: 14px; border-radius: 10px; font-family: Arial, sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center; }
+.btn-back { background: none; color: #fff; border: 1.5px solid rgba(255,255,255,0.35); padding: 11px; border-radius: 10px; font-family: Arial, sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; text-align: center; }
+.toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a3a2a; color: #7ecba1; padding: 9px 20px; border-radius: 20px; font-family: Arial, sans-serif; font-size: 0.82rem; font-weight: 700; z-index: 999; transition: transform 0.3s; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.mi { background: #f8f8f8; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 14px 12px 10px; margin-bottom: 10px; position: relative; }
+.mn { position: absolute; top: -10px; left: 12px; background: #2a7d4f; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 10px; border-radius: 10px; }
+.mi .fg { margin-top: 8px; }
+.brm { background: none; border: 1px solid #ffcdd2; color: #c0392b; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; margin-top: 6px; }
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+.tab { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; background: #fff; font-family: Arial, sans-serif; font-size: 0.78rem; font-weight: 700; color: #888; cursor: pointer; text-align: center; }
+.tab.active { border-color: #2a7d4f; background: #f0f7f3; color: #1a5c38; }
+.btn-add { background: #f0f7f3; border: 1.5px dashed #2a7d4f; color: #1a5c38; padding: 10px; font-size: 0.82rem; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="t">Dr. Pablo Vidal</div>
+  <div class="s">Recetario Digital</div>
+</header>
+<main class="main">
+  <div class="card">
+    <div class="ct">Paciente</div>
+    <div class="fg"><label>Nombre completo</label><input type="text" id="nombre" autocapitalize="characters" autocomplete="off" placeholder="MARIA LOPEZ PEREZ" /></div>
+    <div class="fr">
+      <div class="fg"><label>Fecha de nacimiento</label><input type="date" id="fn" /></div>
+      <div class="fg"><label>Edad</label><div class="eb"><span class="n" id="edn">-</span><span class="u">anos</span></div></div>
+    </div>
+    <div class="fg"><label>Fecha de la receta</label><input type="date" id="fecha" /></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-antibio" onclick="setTab('antibio')">Antibiotico</button>
+    <button class="tab" id="tab-general" onclick="setTab('general')">Receta General (IA)</button>
+  </div>
+  <div id="panel-antibio">
+    <div class="card">
+      <div class="ct">Medicamento</div>
+      <div class="mi">
+        <div class="mn">1.-</div>
+        <div class="fg" style="margin-top:8px"><label>Nombre y presentacion</label><input type="text" id="med-nombre" placeholder="Ej. AMOXICILINA 875mg tabletas" /></div>
+        <div class="fg"><label>Indicaciones</label><textarea id="med-ind" placeholder="Ej. Tomar 1 tableta cada 12 horas por 7 dias via oral."></textarea></div>
+        <div class="fg"><label>Cantidad a surtir</label><input type="text" id="med-cant" placeholder="Ej. Favor de surtir una caja con 14 tabletas." /></div>
+      </div>
+    </div>
+  </div>
+  <div id="panel-general" style="display:none">
+    <div class="card">
+      <div class="ct">Medicamento (IA)</div>
+      <div class="fg">
+        <label>Dicta el medicamento</label>
+        <div class="ia-box">
+          <textarea id="ia-input" placeholder="Ej: amoxicilina con clavulanico 875 una tableta cada 12 horas por 7 dias, surtir 14 tabletas"></textarea>
+          <button class="btn-ia" onclick="formatearIA()">*</button>
+        </div>
+        <div class="ia-spinner" id="ia-spinner">Formateando...</div>
+        <div class="ia-result" id="ia-result"></div>
+      </div>
+      <div id="meds-extra"></div>
+      <button class="btn btn-add" onclick="addMedExtra()">+ Agregar otro medicamento</button>
+    </div>
+  </div>
+  <button class="btn btn-gen" onclick="generar()">Generar Receta</button>
+</main>
+<div class="ov" id="ov">
+  <div class="preview-wrapper">
+    <div class="preview-paper">
+      <img class="hdr" src="https://raw.githubusercontent.com/drpvidal/drpvidal.github.io/main/assets/header.png" />
+      <div class="preview-body">
+        <div class="pv-fecha" id="pv-fecha"></div>
+        <div class="pv-nombre" id="pv-nombre"></div>
+        <div class="pv-edad" id="pv-edad"></div>
+        <div id="pv-meds"></div>
+      </div>
+      <div class="pv-firma"><img src="https://raw.githubusercontent.com/drpvidal/drpvidal.github.io/main/assets/firma.png" /></div>
+    </div>
+  </div>
+  <div class="ob">
+    <button class="btn-pdf" onclick="descargarPDF()">Descargar PDF</button>
+    <button class="btn-wp" onclick="compartirTexto()">Compartir texto</button>
+    <button class="btn-back" onclick="cerrar()">Editar</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+var MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var tabActual='antibio';
+var datosMeds=[];
+var medExtraCount=0;
+
+function hoy(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+document.getElementById('fecha').value=hoy();
+
+document.getElementById('fn').addEventListener('change',function(){
+  var fn=this.value;
+  if(!fn){document.getElementById('edn').textContent='-';return;}
+  var p=fn.split('-');
+  var h=new Date(),n=new Date(+p[0],+p[1]-1,+p[2]);
+  var a=h.getFullYear()-n.getFullYear();
+  var m=h.getMonth()-n.getMonth();
+  if(m<0||(m===0&&h.getDate()<n.getDate()))a--;
+  document.getElementById('edn').textContent=a;
+});
+
+function setTab(tab){
+  tabActual=tab;
+  document.getElementById('tab-antibio').classList.toggle('active',tab==='antibio');
+  document.getElementById('tab-general').classList.toggle('active',tab==='general');
+  document.getElementById('panel-antibio').style.display=tab==='antibio'?'':'none';
+  document.getElementById('panel-general').style.display=tab==='general'?'':'none';
+}
+
+function addMedExtra(){
+  medExtraCount++;
+  var id=medExtraCount;
+  var c=document.getElementById('meds-extra');
+  var d=document.createElement('div');
+  d.className='mi';d.id='mex'+id;
+  d.innerHTML='<div class="mn">'+(id+1)+'.-</div><div class="fg" style="margin-top:8px"><label>Medicamento</label><div class="ia-box"><textarea id="ia-input-'+id+'" placeholder="Dicta el medicamento..."></textarea><button class="btn-ia" onclick="formatearIAExtra('+id+')">*</button></div><div class="ia-spinner" id="ia-spin-'+id+'">Formateando...</div><div class="ia-result" id="ia-res-'+id+'"></div></div><button class="brm" onclick="document.getElementById('mex'+id+'').remove()">X Quitar</button>';
+  c.appendChild(d);
+}
+
+async function llamarIA(texto){
+  var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:300,messages:[{role:'user',content:'Eres asistente de un medico. Formatea este medicamento en JSON exacto sin markdown: {"nombre":"NOMBRE EN MAYUSCULAS presentacion","indicaciones":"indicacion completa.","cantidad":"Favor de surtir..."}. Medicamento: '+texto}]})});
+  var data=await r.json();
+  var txt=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+  return JSON.parse(txt);
+}
+
+async function formatearIA(){
+  var txt=document.getElementById('ia-input').value.trim();
+  if(!txt){showToast('Escribe el medicamento');return;}
+  document.getElementById('ia-spinner').classList.add('show');
+  document.getElementById('ia-result').classList.remove('show');
+  try{
+    var res=await llamarIA(txt);
+    document.getElementById('ia-result').innerHTML='<b style="color:#1a5278">'+res.nombre+'</b><br>'+res.indicaciones+'<br>('+res.cantidad+')';
+    document.getElementById('ia-result').classList.add('show');
+    document.getElementById('ia-result').dataset.json=JSON.stringify(res);
+  }catch(e){showToast('Error al formatear');}
+  document.getElementById('ia-spinner').classList.remove('show');
+}
+
+async function formatearIAExtra(id){
+  var txt=document.getElementById('ia-input-'+id).value.trim();
+  if(!txt)return;
+  document.getElementById('ia-spin-'+id).classList.add('show');
+  try{
+    var res=await llamarIA(txt);
+    var el=document.getElementById('ia-res-'+id);
+    el.innerHTML='<b style="color:#1a5278">'+res.nombre+'</b><br>'+res.indicaciones+'<br>('+res.cantidad+')';
+    el.classList.add('show');
+    el.dataset.json=JSON.stringify(res);
+  }catch(e){showToast('Error al formatear');}
+  document.getElementById('ia-spin-'+id).classList.remove('show');
+}
+
+function fLarga(s){if(!s)return'';var p=s.split('-');return parseInt(p[2])+' de '+MES[parseInt(p[1])-1]+' de '+p[0];}
+function fCorta(s){if(!s)return'';var p=s.split('-');return parseInt(p[2])+'/'+parseInt(p[1])+'/'+p[0];}
+
+function recolectarMeds(){
+  var meds=[];
+  if(tabActual==='antibio'){
+    var nom=document.getElementById('med-nombre').value.trim();
+    var ind=document.getElementById('med-ind').value.trim();
+    var cant=document.getElementById('med-cant').value.trim();
+    if(nom)meds.push({nombre:nom.toUpperCase(),indicaciones:ind,cantidad:cant});
+  }else{
+    var res0=document.getElementById('ia-result');
+    if(res0.dataset.json)meds.push(JSON.parse(res0.dataset.json));
+    document.querySelectorAll('[id^="ia-res-"]').forEach(function(el){if(el.dataset.json)meds.push(JSON.parse(el.dataset.json));});
+  }
+  return meds;
+}
+
+function generar(){
+  var nombre=document.getElementById('nombre').value.trim().toUpperCase();
+  var fn=document.getElementById('fn').value;
+  var fecha=document.getElementById('fecha').value;
+  var edad=document.getElementById('edn').textContent;
+  if(!nombre){showToast('Ingresa el nombre del paciente');return;}
+  if(!fn){showToast('Ingresa la fecha de nacimiento');return;}
+  datosMeds=recolectarMeds();
+  if(!datosMeds.length){showToast('Agrega al menos un medicamento');return;}
+  document.getElementById('pv-fecha').textContent='CDMX a '+fLarga(fecha);
+  document.getElementById('pv-nombre').textContent='Nombre: '+nombre;
+  document.getElementById('pv-edad').textContent='Edad: '+edad+' anos          FN: '+fCorta(fn);
+  var html='';
+  datosMeds.forEach(function(m,i){html+='<div class="pv-med-block"><div class="pv-med-nombre">'+(i+1)+'.- '+m.nombre+'</div>'+(m.indicaciones?'<div class="pv-med-ind">'+m.indicaciones+'</div>':'')+(m.cantidad?'<div>('+m.cantidad.replace(/^\(|\)$/g,'')+')</div>':'')+'</div>';});
+  document.getElementById('pv-meds').innerHTML=html;
+  window._receta={nombre:nombre,fn:fn,fecha:fecha,edad:edad,meds:datosMeds};
+  document.getElementById('ov').classList.add('active');
+  document.getElementById('ov').scrollTop=0;
+}
+
+function descargarPDF(){
+  showToast('Generando PDF...');
+  var r=window._receta;
+  if(!r)return;
+  var jsPDF=window.jspdf.jsPDF;
+  var PDF_W=595.28,PDF_H=476.60;
+  var SX=PDF_W/2528,SY=PDF_H/2024;
+  var LMARGIN=186*SX,RIGHT_EDGE=2399*SX;
+  var LINE=16,GAP=6;
+  function yPos(iy){return PDF_H-(iy-72-180)*SY;}
+  var pdf=new jsPDF({orientation:'landscape',unit:'pt',format:[PDF_W,PDF_H]});
+  var hdrImg=document.querySelector('img.hdr');
+  pdf.addImage(hdrImg,'PNG',0,0,PDF_W,PDF_H);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(12);pdf.setTextColor(0,0,0);
+  pdf.text('CDMX a '+fLarga(r.fecha),RIGHT_EDGE,yPos(783),{align:'right'});
+  pdf.setFont('helvetica','bold');pdf.setTextColor(26,82,120);
+  pdf.text('Nombre: '+r.nombre,LMARGIN,yPos(931));
+  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
+  pdf.text('Edad: '+r.edad+' anos          FN: '+fCorta(r.fn),LMARGIN,yPos(985));
+  var medY=yPos(1060);
+  r.meds.forEach(function(m,i){
+    pdf.setFont('helvetica','bold');pdf.setTextColor(26,82,120);
+    pdf.text((i+1)+'.- '+m.nombre,LMARGIN,medY);medY-=(LINE+GAP);
+    if(m.indicaciones){pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text(m.indicaciones,LMARGIN+15,medY);medY-=(LINE+GAP);}
+    if(m.cantidad){var cant=m.cantidad.replace(/^\(|\)$/g,'');pdf.text('('+cant+')',LMARGIN+15,medY);medY-=(LINE+GAP+4);}
+  });
+  var firmaImg=document.querySelector('.pv-firma img');
+  pdf.addImage(firmaImg,'PNG',281.3,115.5,200,73.3);
+  pdf.save('Receta_'+r.nombre.replace(/ /g,'_')+'.pdf');
+  showToast('PDF descargado');
+}
+
+function compartirTexto(){
+  var r=window._receta;
+  if(!r)return;
+  var lineas=['RECETA MEDICA','Dr. Pablo Vidal Gonzalez','CDMX a '+fLarga(r.fecha),'','Nombre: '+r.nombre,'Edad: '+r.edad+' anos   FN: '+fCorta(r.fn),''];
+  r.meds.forEach(function(m,i){lineas.push((i+1)+'.- '+m.nombre);if(m.indicaciones)lineas.push(m.indicaciones);if(m.cantidad)lineas.push('('+m.cantidad.replace(/^\(|\)$/g,'')+')');;lineas.push('');});
+  var txt=lineas.join('
+');
+  if(navigator.share){navigator.share({title:'Receta - '+r.nombre,text:txt});}
+  else{navigator.clipboard.writeText(txt).then(function(){showToast('Copiado');});}
+}
+
+function cerrar(){document.getElementById('ov').classList.remove('active');}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
+</script>
+</body>
+</html>
