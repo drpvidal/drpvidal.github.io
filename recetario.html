@@ -160,10 +160,18 @@ function generarPDF() {
     var ph = canvas.height/canvas.width*595;
     var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'pt', format:[595, ph]});
     pdf.addImage(img, 'JPEG', 0, 0, 595, ph);
-    var blob = pdf.output('blob');
-    var url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    toast('PDF abierto - guarda desde el visor');
+    var nombre = (_r.nombre || 'Receta').replace(/ /g,'_');
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      var blob = pdf.output('datauristring');
+      var link = document.createElement('a');
+      link.href = blob;
+      link.download = 'Receta_' + nombre + '.pdf';
+      link.click();
+    } else {
+      pdf.save('Receta_' + nombre + '.pdf');
+    }
+    toast('PDF descargado');
   });
 }
 </script>
