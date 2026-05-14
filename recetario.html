@@ -279,8 +279,7 @@ function compartirTexto(){
   if(!r)return;
   var lineas=['RECETA MEDICA','Dr. Pablo Vidal Gonzalez','CDMX a '+fLarga(r.fecha),'','Nombre: '+r.nombre,'Edad: '+r.edad+' anos   FN: '+fCorta(r.fn),''];
   r.meds.forEach(function(m,i){lineas.push((i+1)+'.- '+m.nombre);if(m.indicaciones)lineas.push(m.indicaciones);if(m.cantidad)lineas.push('('+m.cantidad.replace(/^\(|\)$/g,'')+')');;lineas.push('');});
-  var txt=lineas.join('
-');
+  var txt=lineas.join('\n');
   if(navigator.share){navigator.share({title:'Receta - '+r.nombre,text:txt});}
   else{navigator.clipboard.writeText(txt).then(function(){showToast('Copiado');});}
 }
