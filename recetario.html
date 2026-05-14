@@ -165,7 +165,7 @@ function addMedExtra(){
   var c=document.getElementById('meds-extra');
   var d=document.createElement('div');
   d.className='mi';d.id='mex'+id;
-  d.innerHTML='<div class="mn">'+(id+1)+'.-</div><div class="fg" style="margin-top:8px"><label>Medicamento</label><div class="ia-box"><textarea id="ia-input-'+id+'" placeholder="Dicta el medicamento..."></textarea><button class="btn-ia" onclick="formatearIAExtra('+id+')">*</button></div><div class="ia-spinner" id="ia-spin-'+id+'">Formateando...</div><div class="ia-result" id="ia-res-'+id+'"></div></div><button class="brm" onclick="document.getElementById('mex'+id+'').remove()">X Quitar</button>';
+  d.innerHTML='<div class="mn">'+(id+1)+'.-</div><div class="fg" style="margin-top:8px"><label>Medicamento</label><div class="ia-box"><textarea id="ia-input-'+id+'" placeholder="Dicta el medicamento..."></textarea><button class="btn-ia" onclick="formatearIAExtra('+id+')">*</button></div><div class="ia-spinner" id="ia-spin-'+id+'">Formateando...</div><div class="ia-result" id="ia-res-'+id+'"></div></div><button class="brm" onclick="remMed2(this)">X Quitar</button>';
   c.appendChild(d);
 }
 
@@ -286,6 +286,7 @@ function compartirTexto(){
 }
 
 function cerrar(){document.getElementById('ov').classList.remove('active');}
+function remMed2(btn){btn.closest(".mi").remove();}
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 </script>
 </body>
