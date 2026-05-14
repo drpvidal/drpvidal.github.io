@@ -157,10 +157,13 @@ function generarPDF() {
   toast('Generando PDF...');
   html2canvas(papel, {scale:2, useCORS:true, backgroundColor:'#ffffff'}).then(function(canvas) {
     var img = canvas.toDataURL('image/jpeg', 0.95);
-    var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'pt', format:[595, canvas.height/canvas.width*595]});
-    pdf.addImage(img, 'JPEG', 0, 0, 595, canvas.height/canvas.width*595);
-    pdf.save('Receta_' + (_r.nombre||'Dr_Vidal') + '.pdf');
-    toast('PDF guardado');
+    var ph = canvas.height/canvas.width*595;
+    var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'pt', format:[595, ph]});
+    pdf.addImage(img, 'JPEG', 0, 0, 595, ph);
+    var blob = pdf.output('blob');
+    var url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    toast('PDF abierto - guarda desde el visor');
   });
 }
 </script>
