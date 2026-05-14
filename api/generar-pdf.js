@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
   }
 
   // Firma
-  doc.image(frmPath, 310, 360, { width: 170 });
+  doc.image(frmPath, 310, 330, { width: 170 });
 
   // Footer
   doc.image(ftrPath, 0, 418, { width: 595 });
