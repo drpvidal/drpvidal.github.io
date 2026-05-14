@@ -145,8 +145,7 @@ Edad: '+_r.edad+' anos   FN: '+fC(_r.fn)+'
 ';
   if(_r.mi)txt+=_r.mi+'
 ';
-  if(_r.mc)txt+='('+_r.mc.replace(/^\(|\)$/g,'')+')
-';
+  if(_r.mc)txt+='('+_r.mc.replace(/^\(|\)$/g,'')+')'+'\n';
   if(navigator.share)navigator.share({title:'Receta - '+_r.nombre,text:txt});
   else navigator.clipboard.writeText(txt).then(function(){toast('Copiado');});
 }
