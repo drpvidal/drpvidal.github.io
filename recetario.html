@@ -153,37 +153,37 @@ function compartir(){
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 
 function generarPDF() {
+  if (!_r.nombre) { toast('Genera la receta primero'); return; }
   toast('Generando PDF...');
-  var nombre = (_r.nombre || 'Receta').replace(/ /g,'_');
-  var pdf = new jspdf.jsPDF({orientation:'portrait', unit:'pt', format:[595, 495]});
-  var hdrEl = document.querySelector('img.mb');
-  var ftrEl = document.querySelector('.papel img:last-child');
-  var frmEl = document.querySelector('.firma-area img');
-  pdf.addImage(hdrEl, 'JPEG', 0, 0, 595, 115);
-  pdf.setFont('helvetica','normal');
-  pdf.setFontSize(10);
-  pdf.setTextColor(0,0,0);
-  pdf.text(document.getElementById('rf').textContent, 297, 140, {align:'center'});
-  pdf.setFont('helvetica','bold');
-  pdf.setTextColor(26,82,120);
-  pdf.text(document.getElementById('rn').textContent, 44, 160);
-  pdf.setFont('helvetica','normal');
-  pdf.setTextColor(0,0,0);
-  pdf.text(document.getElementById('re').textContent, 44, 175);
-  var y = 195;
-  document.querySelectorAll('.rmed-bloque').forEach(function(med) {
-    var nom=med.querySelector('.rmed-nombre');
-    var ind=med.querySelector('.rmed-ind');
-    var cant=med.querySelector('.rmed-cant');
-    if(nom){pdf.setFont('helvetica','bold');pdf.setTextColor(26,82,120);pdf.text(nom.textContent,44,y);y+=14;}
-    if(ind){pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);var lines=pdf.splitTextToSize(ind.textContent,500);pdf.text(lines,44,y);y+=lines.length*13;}
-    if(cant){pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text(cant.textContent,44,y);y+=14;}
-    y+=6;
-  });
-  pdf.addImage(frmEl, 'PNG', 300, 370, 180, 66);
-  pdf.addImage(ftrEl, 'JPEG', 0, 418, 595, 77);
-  pdf.save('Receta_'+nombre+'.pdf');
-  toast('PDF descargado');
+  fetch('/api/generar-pdf', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      nombre: _r.nombre,
+      edad: _r.edad,
+      fn: document.getElementById('rfn') ? document.getElementById('rfn').textContent : _r.fn,
+      fecha: document.getElementById('rf').textContent.replace('CDMX a ',''),
+      medNombre: _r.mn,
+      medInd: _r.mi,
+      medCant: _r.mc
+    })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Error ' + res.status);
+    return res.blob();
+  })
+  .then(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Receta_' + _r.nombre.replace(/ /g,'_') + '.pdf';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('PDF descargado');
+  })
+  .catch(function(e) { toast('Error: ' + e.message); });
 }
 </script>
 </body>
