@@ -96,7 +96,7 @@ module.exports = async (req, res) => {
     });
 
     // Avanzar cursor al final del texto
-    yTop += bodyLines.length * LINE_H + 30;
+    yTop += bodyLines.length * LINE_H + 8;
 
     // FIRMA — pegada justo debajo del texto, alineada a la derecha
     page.drawImage(firmaImg, {
