@@ -16,7 +16,7 @@ body{font-family:Arial,sans-serif;background:#e8e0d4;min-height:100vh;}
 .fg{margin-bottom:11px;}
 label{display:block;font-size:0.67rem;font-weight:700;color:#888;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
 input,textarea{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:0.92rem;color:#111;-webkit-appearance:none;}
-input:focus,textarea:focus{outline:none;border-color:#2a7d4f;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:#2a7d4f;}select{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:0.92rem;color:#111;-webkit-appearance:none;background:#fff;}
 textarea{min-height:65px;resize:vertical;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .eb{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#f0f7f3;border:1.5px solid #2a7d4f;border-radius:8px;min-height:44px;}
@@ -66,6 +66,21 @@ textarea{min-height:65px;resize:vertical;}
   </div>
   <div class="card">
     <div class="ct">Medicamento</div>
+    <div class="fg">
+      <label>Seleccionar antibiotico</label>
+      <select id="antibio-select" onchange="seleccionarAntibio()">
+        <option value="">-- Elegir de la lista --</option>
+        <option value="1">Biomics (Cefixima) 400mg</option>
+        <option value="2">Elquine (Levofloxacino) 500mg</option>
+        <option value="3">Bactrim F (Sulfametoxazol/Trimetoprim)</option>
+        <option value="4">Macrocit (Azitromicina) 500mg</option>
+        <option value="5">Augmentin (Amoxicilina/Clavulanico) 875mg</option>
+        <option value="6">Flagyl (Metronidazol) 500mg</option>
+        <option value="7">Ciproflox (Ciprofloxacino) 500mg</option>
+        <option value="8">Invanz (Ertapenem) 1g</option>
+        <option value="0">Otro (llenar manualmente)</option>
+      </select>
+    </div>
     <div class="fg"><label>Nombre y presentacion</label>
       <input type="text" id="mn" placeholder="Ej. AMOXICILINA 875mg tabletas" autocomplete="off"/>
     </div>
@@ -150,6 +165,66 @@ function compartir(){
   if(navigator.share)navigator.share({title:'Receta - '+_r.nombre,text:txt});
   else navigator.clipboard.writeText(txt).then(function(){toast('Copiado');});
 }
+
+var ANTIBIOS = {
+  '1': {
+    nombre: 'BIOMICS (CEFIXIMA) 400 MG CAPSULAS',
+    ind: 'Tomar 1 capsula por via oral cada 24 horas durante 6 dias.',
+    cant: 'Favor de surtir una caja con 6 capsulas.'
+  },
+  '2': {
+    nombre: 'ELQUINE (LEVOFLOXACINO) 500 MG TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 24 horas durante 7 dias.',
+    cant: 'Favor de surtir una caja con 7 tabletas.'
+  },
+  '3': {
+    nombre: 'BACTRIM F (SULFAMETOXAZOL 800 MG / TRIMETOPRIM 160 MG) TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',
+    cant: 'Favor de surtir una caja con 14 tabletas.'
+  },
+  '4': {
+    nombre: 'MACROCIT (AZITROMICINA) 500 MG TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 24 horas durante 3 dias.',
+    cant: 'Favor de surtir una caja con 3 tabletas.'
+  },
+  '5': {
+    nombre: 'AUGMENTIN (AMOXICILINA / ACIDO CLAVULANICO) 875 MG / 125 MG TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',
+    cant: 'Favor de surtir una caja con 14 tabletas.'
+  },
+  '6': {
+    nombre: 'FLAGYL (METRONIDAZOL) 500 MG TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 8 horas durante 7 dias.',
+    cant: 'Favor de surtir una caja con 21 tabletas.'
+  },
+  '7': {
+    nombre: 'CIPROFLOX (CIPROFLOXACINO) 500 MG TABLETAS',
+    ind: 'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',
+    cant: 'Favor de surtir una caja con 14 tabletas.'
+  },
+  '8': {
+    nombre: 'INVANZ (ERTAPENEM) 1 G FRASCO AMPULA',
+    ind: 'Aplicar 1 g por via intramuscular profunda cada 24 horas durante 3 a 7 dias. Diluir el contenido del frasco ampula con 3.2 mL de lidocaina simple al 1% sin epinefrina antes de su aplicacion.',
+    cant: 'Favor de surtir una caja con 1 frasco ampula con 1 g de ertapenem y una ampolleta de lidocaina simple al 1% sin epinefrina.'
+  }
+};
+
+function seleccionarAntibio() {
+  var val = document.getElementById('antibio-select').value;
+  if (val === '' || val === '0') {
+    document.getElementById('mn').value = '';
+    document.getElementById('mi').value = '';
+    document.getElementById('mc').value = '';
+    return;
+  }
+  var a = ANTIBIOS[val];
+  if (a) {
+    document.getElementById('mn').value = a.nombre;
+    document.getElementById('mi').value = a.ind;
+    document.getElementById('mc').value = a.cant;
+  }
+}
+
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 
 function generarPDF() {
