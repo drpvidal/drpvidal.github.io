@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     const FIRMA_W = PW * 0.28;
     const FIRMA_H = FIRMA_W * firmaImg.height / firmaImg.width;
     // Firma fija: su borde inferior queda 16px encima del footer
-    const FIRMA_Y = FTR_H + 16;
+    const FIRMA_Y = FTR_H + 60;
     page.drawImage(firmaImg, {
       x: PW - MX - FIRMA_W,
       y: FIRMA_Y,
