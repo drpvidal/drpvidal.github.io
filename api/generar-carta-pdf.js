@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
     const PH = 842;
     const HDR_H = Math.round(PW * 175 / 900);
     const FTR_H = Math.round(PW * 145 / 900);
-    const MX = PW * 0.06;
+    const MX = PW * 0.05;
     const TW = PW - MX * 2;
 
     const pdfDoc = await PDFDocument.create();
