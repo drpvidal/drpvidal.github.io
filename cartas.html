@@ -87,7 +87,7 @@ textarea{min-height:100px;resize:vertical;}
     <div class="fg">
       <label>Dicta o escribe libremente</label>
       <textarea id="dictado" placeholder="Ej: paciente estuvo bajo mi cuidado del 10 al 14 de mayo por apendicitis aguda, necesita reposo absoluto por 7 dias..."></textarea>
-      <button class="btn-ia" onclick="formatearCarta()">✨ Generar carta con IA</button>
+      <div style="display:flex;gap:8px;margin-top:6px;"><button class="btn-ia" style="flex:1" onclick="formatearCarta()">✨ Generar con IA</button><button class="btn-ia" style="flex:1;background:#1a3a2a;" onclick="usarDirecto()">📄 Usar texto directo</button></div>
       <div class="spinner" id="spinner">Generando carta...</div>
       <div class="ia-result" id="ia-result"></div>
     </div>
@@ -208,6 +208,14 @@ function generarPDF(compartir){
     else{var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=nombre;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('PDF descargado');}
   })
   .catch(function(e){toast('Error: '+e.message);});
+}
+function usarDirecto(){
+  var dictado=document.getElementById("dictado").value.trim();
+  if(!dictado){toast("Escribe el texto de la carta");return;}
+  if(!catSeleccionada){toast("Selecciona el tipo de documento");return;}
+  document.getElementById("ia-result").textContent=dictado;
+  document.getElementById("ia-result").classList.add("show");
+  toast("Texto listo — revisa y presiona Vista Previa");
 }
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2600);}
 </script>
