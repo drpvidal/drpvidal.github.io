@@ -1,53 +1,26 @@
 const PDFDocument = require('pdfkit');
 const path = require('path');
 
-function renderTexto(doc, texto, x, y, maxWidth) {
-  // Divide el texto en segmentos normales y en negritas (**texto**)
-  var parrafos = texto.split('\n');
-  parrafos.forEach(function(parrafo) {
-    if (!parrafo.trim()) { y += 8; return; }
-    var partes = parrafo.split(/\*\*([^*]+)\*\*/g);
-    var lineX = x;
-    var segmentos = [];
-    partes.forEach(function(parte, idx) {
-      segmentos.push({ texto: parte, bold: idx % 2 === 1 });
-    });
-    // Calcular altura total del parrafo para saber si cabe
-    var textoPlano = partes.join('');
-    var h = doc.fontSize(10).heightOfString(textoPlano, { width: maxWidth, lineGap: 3 });
-    segmentos.forEach(function(seg) {
-      if (!seg.texto) return;
-      doc.font(seg.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor('#111111');
-      doc.text(seg.texto, lineX, y, {
-        width: maxWidth,
-        continued: false,
-        lineGap: 3
-      });
-      if (seg.bold) {
-        // Para bold inline necesitamos manejar manualmente
-      }
-    });
-    // Renderizado simple parrafo a parrafo
-    y += h + 4;
-  });
-  return y;
-}
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
+
   const { nombre, fn, fecha, titulo, texto } = req.body;
   const hdrPath = path.join(__dirname, '../assets/header.jpg');
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
   const PW = 595, PH = 842;
-  const MX = 50, textWidth = PW - MX * 2;
-  const HDR_H = 128, FTR_H = 100, FIRMA_H = 90;
-  const BODY_TOP = 148, BODY_BOTTOM = PH - FTR_H - FIRMA_H - 10;
+  const MX = 50, TW = PW - MX * 2;
+  const HDR_BOT = 128;
+  const FTR_H = 100;
+  const FIRMA_SPACE = 110;
+  const BODY_TOP_P1 = 178;
+  const BODY_TOP_PN = HDR_BOT + 20;
+  const BODY_BOT = PH - FTR_H - FIRMA_SPACE - 10;
 
   const doc = new PDFDocument({ size: [PW, PH], margin: 0, autoFirstPage: false });
   const chunks = [];
@@ -59,89 +32,86 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  function nuevaPagina(esPrimera) {
-    doc.addPage({ size: [PW, PH], margin: 0 });
-    doc.image(hdrPath, 0, 0, { width: PW });
-    if (esPrimera) {
-      doc.font('Helvetica').fontSize(10).fillColor('#111111');
-      doc.text('CDMX a ' + (fecha || ''), 180, 130, { align: 'right', width: 370 });
-      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
-      doc.text(titulo || '', MX, BODY_TOP, { align: 'center', width: textWidth });
-      return BODY_TOP + 30;
-    } else {
-      return HDR_H + 20;
-    }
+  // Parsear texto: dividir en segmentos bold/normal
+  function parsear(linea) {
+    var partes = linea.split(/\*\*([^*]+)\*\*/g);
+    return partes.map(function(s, i){ return { t: s, b: i%2===1 }; }).filter(function(s){ return s.t; });
   }
 
-  function cerrarPagina(y, esUltima) {
-    if (esUltima) {
-      doc.image(frmPath, 310, y + 20, { width: 170 });
-    }
-    doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
+  // Calcular altura de una linea (texto plano)
+  function altoLinea(txt) {
+    return doc.font('Helvetica').fontSize(10).heightOfString(txt, { width: TW, lineGap: 2 });
   }
 
-  // Parsear texto en bloques con formato
-  var parrafos = (texto || '').split('\n');
+  // Construir bloques a renderizar
+  var lineas = (texto||'').split('\n');
   var bloques = [];
-  parrafos.forEach(function(p) {
-    if (!p.trim()) { bloques.push({ tipo: 'espacio' }); return; }
-    var partes = p.split(/\*\*([^*]+)\*\*/g);
-    var segs = partes.map(function(s, i) {
-      return { texto: s, bold: i % 2 === 1 };
-    }).filter(function(s) { return s.texto; });
-    bloques.push({ tipo: 'parrafo', segs: segs });
+  lineas.forEach(function(l) {
+    if (!l.trim()) { bloques.push({ vacio: true }); return; }
+    var segs = parsear(l);
+    var plain = segs.map(function(s){ return s.t; }).join('');
+    bloques.push({ segs: segs, plain: plain, h: altoLinea(plain) + 4 });
   });
 
-  // Calcular altura de cada bloque
-  function alturaBloque(bloque) {
-    if (bloque.tipo === 'espacio') return 8;
-    var textoPlano = bloque.segs.map(function(s){ return s.texto; }).join('');
-    return doc.font('Helvetica').fontSize(10).heightOfString(textoPlano, { width: textWidth, lineGap: 3 }) + 4;
-  }
+  var paginas = [];
+  var paginaActual = [];
+  var yUsado = BODY_TOP_P1;
+  var esPrimera = true;
 
-  var y = nuevaPagina(true);
-  var pagina = 1;
-  var totalBloques = bloques.length;
-
-  for (var i = 0; i < totalBloques; i++) {
-    var bloque = bloques[i];
-    var h = alturaBloque(bloque);
-
-    // Ver si cabe en esta pagina
-    var espacioRestante = BODY_BOTTOM - y;
-    if (h > espacioRestante) {
-      // Cerrar pagina actual sin firma
-      cerrarPagina(y, false);
-      y = nuevaPagina(false);
-      pagina++;
+  bloques.forEach(function(bloque) {
+    var h = bloque.vacio ? 8 : bloque.h;
+    var limite = esPrimera ? BODY_BOT : BODY_BOT;
+    if (yUsado + h > limite) {
+      paginas.push({ bloques: paginaActual, primera: esPrimera });
+      paginaActual = [];
+      esPrimera = false;
+      yUsado = BODY_TOP_PN;
     }
+    paginaActual.push(bloque);
+    yUsado += h;
+  });
+  paginas.push({ bloques: paginaActual, primera: esPrimera });
 
-    if (bloque.tipo === 'espacio') {
-      y += 8;
-      continue;
-    }
+  paginas.forEach(function(pag, pi) {
+    var esUltima = pi === paginas.length - 1;
+    doc.addPage({ size: [PW, PH], margin: 0 });
+    doc.image(hdrPath, 0, 0, { width: PW });
 
-    // Renderizar parrafo con segmentos bold/normal inline
-    var textoPlano = bloque.segs.map(function(s){ return s.texto; }).join('');
-    if (bloque.segs.length === 1 && !bloque.segs[0].bold) {
-      doc.font('Helvetica').fontSize(10).fillColor('#111111');
-      doc.text(textoPlano, MX, y, { width: textWidth, lineGap: 3 });
+    var y;
+    if (pag.primera) {
+      doc.font('Helvetica').fontSize(10).fillColor('#111');
+      doc.text('CDMX a ' + (fecha||''), 180, 130, { align: 'right', width: 370 });
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
+      doc.text(titulo||'', MX, HDR_BOT + 10, { align: 'center', width: TW });
+      y = BODY_TOP_P1;
     } else {
-      // Renderizar con negrita inline usando continued
-      var last = bloque.segs.length - 1;
-      bloque.segs.forEach(function(seg, si) {
-        doc.font(seg.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor('#111111');
-        doc.text(seg.texto, si === 0 ? MX : undefined, si === 0 ? y : undefined, {
-          width: textWidth,
-          lineGap: 3,
-          continued: si < last
-        });
-      });
+      y = BODY_TOP_PN;
     }
-    y += h;
-  }
 
-  // Cerrar ultima pagina con firma
-  cerrarPagina(y, true);
+    pag.bloques.forEach(function(bloque) {
+      if (bloque.vacio) { y += 8; return; }
+      if (bloque.segs.length === 1 && !bloque.segs[0].b) {
+        doc.font('Helvetica').fontSize(10).fillColor('#111');
+        doc.text(bloque.segs[0].t, MX, y, { width: TW, lineGap: 2 });
+      } else {
+        var last = bloque.segs.length - 1;
+        bloque.segs.forEach(function(seg, si) {
+          doc.font(seg.b ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor('#111');
+          doc.text(seg.t,
+            si === 0 ? MX : undefined,
+            si === 0 ? y : undefined,
+            { width: TW, lineGap: 2, continued: si < last }
+          );
+        });
+      }
+      y += bloque.h;
+    });
+
+    if (esUltima) {
+      doc.image(frmPath, 310, y + 15, { width: 170 });
+    }
+    doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
+  });
+
   doc.end();
 };

@@ -23,7 +23,7 @@ textarea{min-height:100px;resize:vertical;}
 .eb .n{font-size:1.1rem;font-weight:700;color:#1a5c38;}
 .eb .u{font-size:0.76rem;color:#888;}
 .cats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
-.cat-btn{padding:10px 8px;border:1.5px solid #ddd;border-radius:8px;background:#fff;font-family:Arial,sans-serif;font-size:0.78rem;font-weight:700;color:#555;cursor:pointer;text-align:center;transition:all 0.15s;}
+.cat-btn{padding:10px 8px;border:1.5px solid #ddd;border-radius:8px;background:#fff;font-family:Arial,sans-serif;font-size:0.78rem;font-weight:700;color:#555;cursor:pointer;text-align:center;}
 .cat-btn.selected{border-color:#2a7d4f;background:#f0f7f3;color:#1a5c38;}
 .btn{display:flex;align-items:center;justify-content:center;width:100%;padding:13px;border:none;border-radius:10px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;font-size:0.95rem;margin-bottom:8px;}
 .btn-gen{background:#1a3a2a;color:#7ecba1;}
@@ -38,10 +38,10 @@ textarea{min-height:100px;resize:vertical;}
 .papel img.mb{width:100%;display:block;}
 .cuerpo{padding:4% 8%;font-size:1.8vw;color:#111;line-height:1.7;}
 @media(min-width:440px){.cuerpo{font-size:8px;}}
-.rfecha{text-align:right;margin-bottom:4%;}
+.rfecha{text-align:right;margin-bottom:3%;}
 .rtitulo{font-weight:700;color:#1a5278;font-size:2vw;margin-bottom:3%;text-align:center;}
 @media(min-width:440px){.rtitulo{font-size:9px;}}
-.rcuerpo{white-space:pre-wrap;margin-bottom:4%;}
+.rcuerpo{white-space:pre-wrap;margin-bottom:3%;}
 .firma-area{text-align:right;padding:1% 7% 1.5%;}
 .firma-area img{width:28%;}
 .ob{max-width:420px;margin:10px auto 0;display:flex;flex-direction:column;gap:8px;}
@@ -60,7 +60,7 @@ textarea{min-height:100px;resize:vertical;}
 <main class="main">
   <div class="card">
     <div class="ct">Tipo de documento</div>
-    <div class="cats" id="cats">
+    <div class="cats">
       <button class="cat-btn" data-cat="incapacidad">🏥 Incapacidad Laboral</button>
       <button class="cat-btn" data-cat="escolar">🎓 Justificante Escolar</button>
       <button class="cat-btn" data-cat="salud">✅ Carta de Salud</button>
@@ -94,7 +94,6 @@ textarea{min-height:100px;resize:vertical;}
   </div>
   <button class="btn btn-gen" onclick="previsualizarCarta()">Vista Previa</button>
 </main>
-
 <div class="ov" id="ov">
   <div class="papel">
     <img class="mb" src="https://raw.githubusercontent.com/drpvidal/drpvidal.github.io/main/assets/header.jpg"/>
@@ -115,42 +114,41 @@ textarea{min-height:100px;resize:vertical;}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
 var MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-var catSeleccionada = '';
-var _doc = {};
+var catSeleccionada='';
+var _doc={};
 
-var TITULOS = {
-  incapacidad: 'CONSTANCIA DE INCAPACIDAD LABORAL',
-  escolar:     'JUSTIFICANTE MÉDICO ESCOLAR',
-  salud:       'CARTA DE SALUD',
-  referencia:  'CARTA DE REFERENCIA MÉDICA',
-  viaje:       'CARTA MÉDICA PARA VIAJE',
-  libre:       'CARTA MÉDICA'
+var TITULOS={
+  incapacidad:'CONSTANCIA DE INCAPACIDAD LABORAL',
+  escolar:'JUSTIFICANTE MEDICO ESCOLAR',
+  salud:'CARTA DE SALUD',
+  referencia:'CARTA DE REFERENCIA MEDICA',
+  viaje:'CARTA MEDICA PARA VIAJE',
+  libre:'CARTA MEDICA'
 };
 
-var PROMPTS = {
-  incapacidad: 'Redacta una constancia de incapacidad laboral breve, tecnica y directa en español. Maximo 3 parrafos cortos. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Estructura: 1) A quien corresponda + presentacion del paciente, 2) Diagnostico y periodo de incapacidad, 3) Recomendacion de reposo y fecha de reincorporacion. Sin adornos ni frases largas. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.',
-  escolar:     'Redacta un justificante medico escolar formal en español. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Usa tono medico formal. Incluye: a quien corresponda, datos del paciente, motivo de ausencia, fechas y recomendacion de reincorporacion. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.',
-  salud:       'Redacta una carta de salud o aptitud fisica formal en español. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Certifica el estado de salud del paciente. Incluye: a quien corresponda, datos del paciente, certificacion de salud y hallazgos relevantes. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.',
-  referencia:  'Redacta una carta de referencia medica formal en español. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Incluye: estimado colega, datos del paciente, motivo de referencia, antecedentes relevantes y solicitud de valoracion. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.',
-  viaje:       'Redacta una carta medica para viaje formal en español. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Certifica que el paciente esta apto o tiene condiciones medicas relevantes para el viaje. Incluye: a quien corresponda, datos del paciente, condicion medica, medicamentos si aplica y recomendaciones. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.',
-  libre:       'Redacta una carta medica formal y profesional en español. El medico es el Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Usa tono medico formal. Incluye saludo, cuerpo bien estructurado y cierre. NO incluyas fecha, titulo, firma ni datos del medico al final. Devuelve solo el cuerpo del texto.'
+var PROMPTS={
+  incapacidad:'Redacta una constancia de incapacidad laboral breve y tecnica en espanol. Maximo 3 parrafos cortos. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Estructura: parrafo 1: A quien corresponda + nombre y datos del paciente. Parrafo 2: diagnostico y periodo de incapacidad. Parrafo 3: una sola recomendacion de reposo y fecha de reincorporacion. MUY IMPORTANTE: NO uses asteriscos, no uses markdown, no uses simbolos especiales. Para titulos de seccion escribe el texto en MAYUSCULAS directamente. Devuelve solo texto plano sin formato especial.',
+  escolar:'Redacta un justificante medico escolar breve en espanol. Maximo 3 parrafos. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Incluye: a quien corresponda, datos del paciente, motivo de ausencia y fechas. MUY IMPORTANTE: NO uses asteriscos, no uses markdown, no uses simbolos de formato. Solo texto plano. Devuelve solo el cuerpo del texto.',
+  salud:'Redacta una carta de salud o aptitud fisica breve en espanol. Maximo 3 parrafos. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Incluye: a quien corresponda, datos del paciente y certificacion de salud. MUY IMPORTANTE: NO uses asteriscos ni markdown. Solo texto plano. Devuelve solo el cuerpo del texto.',
+  referencia:'Redacta una carta de referencia medica concisa en espanol. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Incluye: estimado colega, datos del paciente, motivo de referencia y solicitud de valoracion. MUY IMPORTANTE: NO uses asteriscos ni markdown. Solo texto plano. Devuelve solo el cuerpo del texto.',
+  viaje:'Redacta una carta medica para viaje concisa en espanol. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. Certifica condicion del paciente para viaje, medicamentos si aplica y recomendaciones. MUY IMPORTANTE: NO uses asteriscos ni markdown. Solo texto plano. Devuelve solo el cuerpo del texto.',
+  libre:'Redacta una carta medica formal en espanol. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. MUY IMPORTANTE: NO uses asteriscos ni markdown. Solo texto plano. Devuelve solo el cuerpo del texto.'
 };
 
-document.querySelectorAll('.cat-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('selected'); });
+document.querySelectorAll('.cat-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('selected');});
     btn.classList.add('selected');
-    catSeleccionada = btn.dataset.cat;
+    catSeleccionada=btn.dataset.cat;
   });
 });
 
 function hoy(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-document.getElementById('fecha').value = hoy();
-document.getElementById('fn').addEventListener('change', function(){
-  var fn=this.value; if(!fn){document.getElementById('edn').textContent='-';return;}
+document.getElementById('fecha').value=hoy();
+document.getElementById('fn').addEventListener('change',function(){
+  var fn=this.value;if(!fn){document.getElementById('edn').textContent='-';return;}
   var p=fn.split('-'),h=new Date(),nac=new Date(+p[0],+p[1]-1,+p[2]);
   var a=h.getFullYear()-nac.getFullYear(),m=h.getMonth()-nac.getMonth();
   if(m<0||(m===0&&h.getDate()<nac.getDate()))a--;
@@ -169,10 +167,7 @@ async function formatearCarta(){
   if(!dictado){toast('Escribe o dicta el contenido');return;}
   document.getElementById('spinner').classList.add('show');
   document.getElementById('ia-result').classList.remove('show');
-  var prompt = PROMPTS[catSeleccionada]
-    + '\n\nDatos del paciente: ' + nombre
-    + ', ' + edad + ' anos, FN: ' + fC(fn)
-    + '\n\nInformacion dictada por el medico: ' + dictado;
+  var prompt=PROMPTS[catSeleccionada]+'\n\nDatos: '+nombre+', '+edad+' anos, FN: '+fC(fn)+'\n\nDictado del medico: '+dictado;
   try{
     var res=await fetch('/api/formatear-carta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:prompt})});
     var data=await res.json();
