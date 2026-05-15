@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     const FIRMA_W = PW * 0.28;
     const FIRMA_H = FIRMA_W * firmaImg.height / firmaImg.width;
     // Firma fija: su borde inferior queda 16px encima del footer
-    const FIRMA_Y = FTR_H + 60;
+    const FIRMA_Y = FTR_H + 90;
     page.drawImage(firmaImg, {
       x: PW - MX - FIRMA_W,
       y: FIRMA_Y,
@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
       size: FECHA_SIZE, font: fontR,
       color: rgb(0.15, 0.15, 0.15),
     });
-    yTop += FECHA_SIZE * 1.7 + 14;
+    yTop += FECHA_SIZE * 1.7 + 22;
 
     // TITULO — centrado, azul
     const TITULO_SIZE = 11;
@@ -90,7 +90,7 @@ module.exports = async (req, res) => {
       size: TITULO_SIZE, font: fontB,
       color: rgb(0.10, 0.32, 0.47),
     });
-    yTop += TITULO_SIZE * 1.7 + 14;
+    yTop += TITULO_SIZE * 1.7 + 22;
 
     // CUERPO
     const bodyLines = wrap(texto, fontR, BODY_SIZE, TW);
