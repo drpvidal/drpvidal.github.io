@@ -13,18 +13,23 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
+  const media = tamano === 'media';
   const PW = 595;
-  // Media carta o carta completa - SIEMPRE FIJO
-  const PH = (tamano === 'media') ? 421 : 842;
+  const PH = media ? 421 : 842;
   const MX = 50, TW = PW - MX * 2;
-  const FTR_H = (tamano === 'media') ? 50 : 100;
-  const HDR_BOT = (tamano === 'media') ? 64 : 128;
-  const BODY_TOP = (tamano === 'media') ? 90 : 182;
-  const FIRMA_MIN_GAP = 20;
-  const FIRMA_W = 170;
-  const FIRMA_H_IMG = 60;
-  // Limite del cuerpo: deja espacio para firma + footer
-  const BODY_BOT = PH - FTR_H - FIRMA_H_IMG - FIRMA_MIN_GAP - 5;
+
+  // Header y footer proporcionales
+  const HDR_H = media ? 60 : 120;
+  const FTR_H = media ? 48 : 96;
+  const FS = media ? 9 : 10;
+
+  // Posiciones
+  const FECHA_Y = media ? 46 : 128;
+  const TITULO_Y = media ? HDR_H + 4 : HDR_H + 8;
+  const BODY_TOP = media ? HDR_H + 22 : HDR_H + 28;
+  const FIRMA_H_IMG = media ? 50 : 80;
+  const FIRMA_W = media ? 120 : 160;
+  const BODY_BOT = PH - FTR_H - FIRMA_H_IMG - 8;
 
   // Limpiar texto
   var norm = function(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); };
@@ -42,28 +47,36 @@ module.exports = async (req, res) => {
     if(!cortar) lineasLimpias.push(l);
   });
 
-  // Medir alturas
+  // Detectar si una linea debe ir en negrita
+  function esBold(l) {
+    var t = norm(l.trim());
+    if(t==='') return false;
+    if(t.endsWith(':') && t.length < 40) return true;
+    if(t==='A QUIEN CORRESPONDA:') return true;
+    return false;
+  }
+
+  // Medir y construir bloques
   var docMed = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   docMed.addPage();
-  var fs10 = (tamano==='media') ? 9 : 10;
-  docMed.font('Helvetica').fontSize(fs10);
   var bloques = [];
   lineasLimpias.forEach(function(l){
-    if(!l.trim()){bloques.push({vacio:true,h:5});return;}
+    if(!l.trim()){bloques.push({vacio:true,h:media?4:6});return;}
+    var bold = esBold(l);
+    docMed.font(bold?'Helvetica-Bold':'Helvetica').fontSize(FS);
     var h = docMed.heightOfString(l,{width:TW,lineGap:2});
-    bloques.push({texto:l,h:h+4});
+    bloques.push({texto:l,bold:bold,h:h+(media?3:5)});
   });
   docMed.end();
 
-  // Paginar en hojas FIJAS
+  // Paginar
   var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
-  bloques.forEach(function(bloque){
-    if(yAcum+bloque.h > BODY_BOT){
+  bloques.forEach(function(b){
+    if(yAcum+b.h>BODY_BOT){
       paginas.push({bloques:actual,primera:primera});
       actual=[]; primera=false; yAcum=BODY_TOP;
     }
-    actual.push(bloque);
-    yAcum+=bloque.h;
+    actual.push(b); yAcum+=b.h;
   });
   if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
 
@@ -82,35 +95,34 @@ module.exports = async (req, res) => {
     var esUltima = pi===paginas.length-1;
     doc.addPage({size:[PW,PH],margin:0});
 
-    // Header escalado
-    doc.image(hdrPath,0,0,{width:PW,height:HDR_BOT});
-    // Footer siempre al fondo fijo
-    doc.image(ftrPath,0,PH-FTR_H,{width:PW,height:FTR_H});
+    // Header y footer proporcionales al tamaño
+    doc.image(hdrPath, 0, 0, {width:PW, height:HDR_H});
+    doc.image(ftrPath, 0, PH-FTR_H, {width:PW, height:FTR_H});
 
     var y = BODY_TOP;
     if(pag.primera){
-      doc.font('Helvetica').fontSize(fs10).fillColor('#111');
-      var fechaY = (tamano==='media') ? 52 : 130;
-      doc.text('CDMX a '+(fecha||''), 180, fechaY,{align:'right',width:370});
-      doc.font('Helvetica-Bold').fontSize(tamano==='media'?9:11).fillColor('#1a5278');
-      doc.text(titulo||'', MX, HDR_BOT+8,{align:'center',width:TW});
+      // Fecha alineada a la derecha, sin tocar el header
+      doc.font('Helvetica').fontSize(FS).fillColor('#111');
+      doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
+      // Titulo centrado
+      doc.font('Helvetica-Bold').fontSize(media?9:11).fillColor('#1a5278');
+      doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
       y = BODY_TOP;
     }
 
     var yFinal = y;
-    pag.bloques.forEach(function(bloque){
-      if(bloque.vacio){yFinal+=bloque.h;return;}
-      if(yFinal+bloque.h<=BODY_BOT){
-        doc.font('Helvetica').fontSize(fs10).fillColor('#111');
-        doc.text(bloque.texto,MX,yFinal,{width:TW,lineGap:2});
+    pag.bloques.forEach(function(b){
+      if(b.vacio){yFinal+=b.h;return;}
+      if(yFinal+b.h<=BODY_BOT){
+        doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(FS).fillColor('#111');
+        doc.text(b.texto, MX, yFinal, {width:TW, lineGap:2});
       }
-      yFinal+=bloque.h;
+      yFinal+=b.h;
     });
 
-    // Firma pegada al texto, nunca fuera de la pagina
     if(esUltima){
       var firmaY = Math.min(yFinal+10, PH-FTR_H-FIRMA_H_IMG-5);
-      doc.image(frmPath,310,firmaY,{width:FIRMA_W});
+      doc.image(frmPath, 310, firmaY, {width:FIRMA_W});
     }
   });
 
