@@ -80,7 +80,7 @@ textarea{min-height:100px;resize:vertical;}
         <div class="eb"><span class="n" id="edn">-</span><span class="u">años</span></div>
       </div>
     </div>
-    <div class="fg"><label>Fecha del documento</label><input type="date" id="fecha"/><div style="font-size:0.7rem;color:#2a7d4f;margin-top:4px;cursor:pointer;" onclick="document.getElementById('fecha').value=hoy()">↺ Usar fecha de hoy</div></div>
+    <div class="fg"><label>Tamaño del documento</label><div style="display:flex;gap:8px;margin-bottom:11px;"><button id="btn-carta" class="cat-btn selected" onclick="setTamano('carta')" style="flex:1">📄 Carta</button><button id="btn-media" class="cat-btn" onclick="setTamano('media')" style="flex:1">📋 Media carta</button></div></div><div class="fg"><label>Fecha del documento</label><input type="date" id="fecha"/><div style="font-size:0.7rem;color:#2a7d4f;margin-top:4px;cursor:pointer;" onclick="document.getElementById('fecha').value=hoy()">↺ Usar fecha de hoy</div></div>
   </div>
   <div class="card">
     <div class="ct">Contenido</div>
@@ -116,7 +116,7 @@ textarea{min-height:100px;resize:vertical;}
 <div class="toast" id="toast"></div>
 <script>
 var MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-var catSeleccionada='';
+var catSeleccionada=""; var tamanoDoc="carta";
 var _doc={};
 
 var TITULOS={
@@ -189,7 +189,7 @@ function previsualizarCarta(){
   document.getElementById('rf').textContent='CDMX a '+fL(fecha);
   document.getElementById('rt').textContent=TITULOS[catSeleccionada];
   document.getElementById('rc').textContent=texto;
-  _doc={nombre:nombre,fn:fn,fecha:fL(fecha),edad:edad,titulo:TITULOS[catSeleccionada],texto:texto};
+  _doc={nombre:nombre,fn:fn,fecha:fL(fecha),edad:edad,titulo:TITULOS[catSeleccionada],texto:texto,tamano:tamanoDoc};
   document.getElementById('ov').classList.add('active');
   document.getElementById('ov').scrollTop=0;
 }
@@ -208,6 +208,11 @@ function generarPDF(compartir){
     else{var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download=nombre;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast('PDF descargado');}
   })
   .catch(function(e){toast('Error: '+e.message);});
+}
+function setTamano(t){
+  tamanoDoc=t;
+  document.getElementById("btn-carta").classList.toggle("selected",t==="carta");
+  document.getElementById("btn-media").classList.toggle("selected",t==="media");
 }
 function usarDirecto(){
   var dictado=document.getElementById("dictado").value.trim();
