@@ -1,4 +1,5 @@
-const PDFDocument = require('pdfkit');
+const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
+const fs = require('fs');
 const path = require('path');
 
 module.exports = async (req, res) => {
@@ -8,106 +9,116 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { nombre, fecha, titulo, texto, tamano } = req.body;
-  const hdrPath = path.join(__dirname, '../assets/header.jpg');
-  const ftrPath = path.join(__dirname, '../assets/footer.jpg');
-  const frmPath = path.join(__dirname, '../assets/firma.png');
+  try {
+    const { nombre, fecha, titulo, texto, tamano } = req.body;
 
-  const PW = 595, PH = 842;
-  const HDR_H = 116, FTR_H = 96;
-  const MX = 50, TW = PW - MX * 2;
-  const media = tamano === 'media';
-  const FECHA_Y  = 102;
-  const TITULO_Y = HDR_H + 8;
-  const BODY_TOP = HDR_H + 28;
-  const FIRMA_H  = 70;
-  const BODY_BOT = media ? Math.floor(PH/2) - FTR_H - FIRMA_H
-                         : PH - FTR_H - FIRMA_H;
+    const PW = 595;
+    const PH = tamano === 'media' ? 421 : 842;
+    const HDR_H = Math.round(595 * 175 / 900);
+    const FTR_H = Math.round(595 * 145 / 900);
+    const MX = 50;
+    const FIRMA_H = 70;
+    const BODY_BOT = PH - FTR_H - FIRMA_H;
+    const TW = PW - MX * 2;
 
-  var norm = function(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); };
-  var lineas = (texto||'').split('\n');
-  var limpias = [];
-  var cortar = false;
-  lineas.forEach(function(l){
-    var t = norm(l.trim());
-    if(t==='ATENTAMENTE'||t.startsWith('DR. PABLO')||t.startsWith('DR PABLO')||
-       t.startsWith('CIRUJANO GENERAL')||t.startsWith('CEDULA')||
-       t.startsWith('CIUDAD DE MEXICO')||t.startsWith('CDMX,')||
-       t==='CONSTANCIA DE INCAPACIDAD LABORAL'||t==='JUSTIFICANTE MEDICO ESCOLAR'||
-       t==='CARTA DE SALUD'||t==='CARTA DE REFERENCIA MEDICA'||
-       t==='CARTA MEDICA PARA VIAJE'||t==='CARTA MEDICA') cortar=true;
-    if(!cortar) limpias.push(l);
-  });
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([PW, PH]);
 
-  function esBold(l){
-    var t = norm(l.trim());
-    if(!t) return false;
-    if(t==='A QUIEN CORRESPONDA:') return true;
-    if(t.endsWith(':') && t.length < 40) return true;
-    return false;
-  }
+    const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-  var docMed = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
-  docMed.addPage();
-  var bloques = [];
-  limpias.forEach(function(l){
-    if(!l.trim()){bloques.push({vacio:true,h:5});return;}
-    var bold=esBold(l);
-    docMed.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
-    var h=docMed.heightOfString(l,{width:TW,lineGap:2})+5;
-    bloques.push({texto:l,bold:bold,h:h});
-  });
-  docMed.end();
+    const assetsDir = path.join(__dirname, '..', 'assets');
+    const hdrImg = await pdfDoc.embedJpg(fs.readFileSync(path.join(assetsDir, 'header.jpg')));
+    const ftrImg = await pdfDoc.embedJpg(fs.readFileSync(path.join(assetsDir, 'footer.jpg')));
 
-  var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
-  bloques.forEach(function(b){
-    if(yAcum+b.h>BODY_BOT){
-      paginas.push({bloques:actual,primera:primera});
-      actual=[]; primera=false; yAcum=BODY_TOP;
-    }
-    actual.push(b); yAcum+=b.h;
-  });
-  if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
+    page.drawImage(hdrImg, { x: 0, y: PH - HDR_H, width: PW, height: HDR_H });
+    page.drawImage(ftrImg, { x: 0, y: 0, width: PW, height: FTR_H });
 
-  var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false,bufferPages:true});
-  var chunks=[];
-  doc.on('data',function(c){chunks.push(c);});
-  doc.on('end',function(){
-    res.setHeader('Content-Type','application/pdf');
-    res.setHeader('Content-Disposition',
-      'attachment; filename="Carta_'+(nombre||'DrVidal').replace(/ /g,'_')+'.pdf"');
-    res.send(Buffer.concat(chunks));
-  });
-
-  paginas.forEach(function(pag,pi){
-    var esUltima=pi===paginas.length-1;
-    doc.addPage({size:[PW,PH],margin:0});
-    doc.image(hdrPath,0,0,{width:PW,height:HDR_H});
-    doc.image(ftrPath,0,media?Math.floor(PH/2)-FTR_H:PH-FTR_H,{width:PW,height:FTR_H});
-
-    var yF=BODY_TOP;
-    if(pag.primera){
-      doc.font('Helvetica').fontSize(10).fillColor('#111');
-      doc.text('CDMX a '+(fecha||''),MX,FECHA_Y,{align:'right',width:TW});
-      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
-      doc.text(titulo||'',MX,TITULO_Y,{align:'center',width:TW});
-    }
-
-    pag.bloques.forEach(function(b){
-      if(b.vacio){yF+=b.h;return;}
-      if(yF+b.h>BODY_BOT) return;
-      doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
-      doc.text(b.texto,MX,yF,{width:TW,lineGap:2});
-      yF+=b.h;
+    page.drawText(fecha || '', {
+      x: MX, y: PH - HDR_H + 4, size: 9, font: fontRegular, color: rgb(0.2, 0.2, 0.2)
     });
 
-    if(esUltima){
-      var firmaMax=media?Math.floor(PH/2)-FTR_H-5:PH-FTR_H-5;
-      var firmaY=Math.min(yF+10,firmaMax-FIRMA_H);
-      doc.image(frmPath,310,firmaY,{width:150});
-    }
-  });
+    const tituloText = (titulo || '').toUpperCase();
+    const tituloSize = 11;
+    const tituloW = fontBold.widthOfTextAtSize(tituloText, tituloSize);
+    page.drawText(tituloText, {
+      x: (PW - tituloW) / 2, y: PH - HDR_H - tituloSize - 6,
+      size: tituloSize, font: fontBold, color: rgb(0, 0, 0)
+    });
 
-  doc.flushPages();
-  doc.end();
+    const nombreSize = 10;
+    const NOMBRE_Y = PH - HDR_H - tituloSize - 6 - nombreSize - 8;
+    page.drawText('Paciente: ' + (nombre || ''), {
+      x: MX, y: NOMBRE_Y, size: nombreSize, font: fontRegular, color: rgb(0.1, 0.1, 0.1)
+    });
+
+    const REAL_BODY_TOP_PX = PH - NOMBRE_Y + nombreSize + 8;
+    const REAL_BODY_H = BODY_BOT - (PH - NOMBRE_Y + nombreSize + 8);
+
+    function wrapText(text, font, size, maxWidth) {
+      const lines = [];
+      for (const para of text.split('\n')) {
+        if (!para.trim()) { lines.push(''); continue; }
+        let current = '';
+        for (const word of para.split(' ')) {
+          const test = current ? current + ' ' + word : word;
+          if (font.widthOfTextAtSize(test, size) <= maxWidth) { current = test; }
+          else { if (current) lines.push(current); current = word; }
+        }
+        if (current) lines.push(current);
+      }
+      return lines;
+    }
+
+    const LINE_GAP = 4;
+    let bodySize = 11;
+    let lines = [];
+    while (bodySize >= 9) {
+      lines = wrapText(texto || '', fontRegular, bodySize, TW);
+      if (lines.length * (bodySize + LINE_GAP) <= REAL_BODY_H) break;
+      bodySize -= 0.5;
+    }
+    if (bodySize < 9) {
+      bodySize = 9;
+      lines = wrapText(texto || '', fontRegular, bodySize, TW);
+      const maxLines = Math.floor(REAL_BODY_H / (bodySize + LINE_GAP));
+      if (lines.length > maxLines) lines = lines.slice(0, maxLines);
+    }
+
+    const BODY_START_Y = NOMBRE_Y - nombreSize - 8;
+    lines.forEach((line, i) => {
+      page.drawText(line, {
+        x: MX, y: BODY_START_Y - i * (bodySize + LINE_GAP),
+        size: bodySize, font: fontRegular, color: rgb(0.05, 0.05, 0.05)
+      });
+    });
+
+    const firmaLines = [
+      'Dr. Pablo Vidal González',
+      'Cirujano General y Gastrointestinal',
+      'Cédula Profesional: 3629683  |  Especialidad: 5328117',
+    ];
+    const firmaSize = 9;
+    const FIRMA_TOP_Y = FTR_H + FIRMA_H - 10;
+    firmaLines.forEach((fl, i) => {
+      const fw = (i === 0 ? fontBold : fontRegular).widthOfTextAtSize(fl, firmaSize);
+      page.drawText(fl, {
+        x: (PW - fw) / 2,
+        y: FIRMA_TOP_Y - i * (firmaSize + 3),
+        size: firmaSize,
+        font: i === 0 ? fontBold : fontRegular,
+        color: rgb(0.1, 0.1, 0.1)
+      });
+    });
+
+    const pdfBytes = await pdfDoc.save();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="carta-medica.pdf"');
+    res.setHeader('Content-Length', pdfBytes.length);
+    res.status(200).end(Buffer.from(pdfBytes));
+
+  } catch (err) {
+    console.error('Error generando PDF:', err);
+    res.status(500).json({ error: 'Error generando PDF', detail: err.message });
+  }
 };
