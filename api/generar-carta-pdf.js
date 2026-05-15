@@ -14,9 +14,10 @@ module.exports = async (req, res) => {
 
     const PW = 595;
     const PH = 842;
-    const HDR_H = Math.round(PW * 175 / 900); // 116
-    const FTR_H = Math.round(PW * 145 / 900); // 96
-    const MX = PW * 0.08; // margen horizontal ~47px
+    const HDR_H = Math.round(PW * 175 / 900);
+    const FTR_H = Math.round(PW * 145 / 900);
+    const MX = PW * 0.06;
+    const TW = PW - MX * 2;
 
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([PW, PH]);
@@ -32,25 +33,12 @@ module.exports = async (req, res) => {
     page.drawImage(hdrImg, { x: 0, y: PH - HDR_H, width: PW, height: HDR_H });
     page.drawImage(ftrImg, { x: 0, y: 0, width: PW, height: FTR_H });
 
-    // Firma anclada encima del footer
-    const firmaBytes = fs.readFileSync(path.join(assets, 'firma.png'));
-    const firmaImg = await pdfDoc.embedPng(firmaBytes);
+    // Firma — se carga ahora, se dibuja despues del texto
+    const firmaImg = await pdfDoc.embedPng(fs.readFileSync(path.join(assets, 'firma.png')));
     const FIRMA_W = PW * 0.28;
     const FIRMA_H = FIRMA_W * firmaImg.height / firmaImg.width;
-    // Firma fija: su borde inferior queda 16px encima del footer
-    const FIRMA_Y = FTR_H + 90;
-    page.drawImage(firmaImg, {
-      x: PW - MX - FIRMA_W,
-      y: FIRMA_Y,
-      width: FIRMA_W,
-      height: FIRMA_H,
-    });
 
-    // --- Texto: empieza debajo del header ---
-    const TW = PW - MX * 2;
-    const BODY_SIZE = 10;
-    const LINE_H = BODY_SIZE * 1.7;
-
+    // Funcion wrap
     function wrap(text, font, size, maxW) {
       const lines = [];
       for (const para of (text || '').split('\n')) {
@@ -66,11 +54,15 @@ module.exports = async (req, res) => {
       return lines;
     }
 
-    // Cursor desde arriba (yTop = distancia desde top de pagina)
-    let yTop = HDR_H + 20; // 20px de respiro debajo del header
+    const FECHA_SIZE = 9;
+    const TITULO_SIZE = 11;
+    const BODY_SIZE = 10;
+    const LINE_H = BODY_SIZE * 1.9;
+
+    // Cursor desde arriba
+    let yTop = HDR_H + 35;
 
     // FECHA — derecha
-    const FECHA_SIZE = 9;
     const fechaW = fontR.widthOfTextAtSize(fecha || '', FECHA_SIZE);
     page.drawText(fecha || '', {
       x: PW - MX - fechaW,
@@ -78,10 +70,9 @@ module.exports = async (req, res) => {
       size: FECHA_SIZE, font: fontR,
       color: rgb(0.15, 0.15, 0.15),
     });
-    yTop += FECHA_SIZE * 1.7 + 22;
+    yTop += FECHA_SIZE * 1.9 + 22;
 
     // TITULO — centrado, azul
-    const TITULO_SIZE = 11;
     const tituloText = (titulo || '').toUpperCase();
     const tituloW = fontB.widthOfTextAtSize(tituloText, TITULO_SIZE);
     page.drawText(tituloText, {
@@ -90,18 +81,29 @@ module.exports = async (req, res) => {
       size: TITULO_SIZE, font: fontB,
       color: rgb(0.10, 0.32, 0.47),
     });
-    yTop += TITULO_SIZE * 1.7 + 22;
+    yTop += TITULO_SIZE * 1.9 + 22;
 
     // CUERPO
     const bodyLines = wrap(texto, fontR, BODY_SIZE, TW);
     bodyLines.forEach((line, i) => {
-      if (!line) return; // linea vacia = salto de parrafo, ya esta en LINE_H
+      if (!line) return;
       page.drawText(line, {
         x: MX,
         y: PH - yTop - (i * LINE_H) - BODY_SIZE,
         size: BODY_SIZE, font: fontR,
         color: rgb(0.07, 0.07, 0.07),
       });
+    });
+
+    // Avanzar cursor al final del texto
+    yTop += bodyLines.length * LINE_H + 30;
+
+    // FIRMA — pegada justo debajo del texto, alineada a la derecha
+    page.drawImage(firmaImg, {
+      x: PW - MX - FIRMA_W,
+      y: PH - yTop - FIRMA_H,
+      width: FIRMA_W,
+      height: FIRMA_H,
     });
 
     const pdfBytes = await pdfDoc.save();
