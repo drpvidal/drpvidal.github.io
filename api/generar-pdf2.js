@@ -10,7 +10,19 @@ module.exports = async (req, res) => {
   const hdrPath = path.join(__dirname, '../assets/header.jpg');
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
-  const doc = new PDFDocument({ size: [595, 842], margin: 0 });
+
+  // Calcular altura dinamica
+  const lineH = 14;
+  let estimado = 184;
+  (meds || []).forEach(med => {
+    estimado += lineH + 4;
+    if (med.i) estimado += Math.ceil(med.i.length / 80) * lineH + 12;
+  });
+  const firmaY = estimado + 20;
+  const footerY = firmaY + 90;
+  const pageH = Math.max(footerY + 100, 500);
+
+  const doc = new PDFDocument({ size: [595, pageH], margin: 0 });
   const chunks = [];
   doc.on('data', chunk => chunks.push(chunk));
   doc.on('end', () => {
@@ -36,8 +48,7 @@ module.exports = async (req, res) => {
       y += doc.heightOfString(med.i, { width: 507 }) + 12;
     }
   });
-  const firmaY = y + 20;
-  doc.image(frmPath, 310, firmaY, { width: 170 });
-  doc.image(ftrPath, 0, 742, { width: 595 });
+  doc.image(frmPath, 310, y + 20, { width: 170 });
+  doc.image(ftrPath, 0, y + 110, { width: 595 });
   doc.end();
 };
