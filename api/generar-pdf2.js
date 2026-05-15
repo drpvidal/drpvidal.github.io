@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       y += doc.heightOfString(med.i, { width: 507 }) + 12;
     }
   });
-  const firmaY = Math.max(y + 30, 580);
+  const firmaY = y + 20;
   doc.image(frmPath, 310, firmaY, { width: 170 });
   doc.image(ftrPath, 0, 742, { width: 595 });
   doc.end();
