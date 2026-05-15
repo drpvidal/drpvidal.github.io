@@ -206,9 +206,8 @@ async function formatearIA(){
   document.getElementById('ia-spinner').classList.add('show');
   document.getElementById('ia-result').classList.remove('show');
   try{
-    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:'Eres asistente de un medico. Devuelve SOLO JSON sin markdown: {"nombre":"NOMBRE MAYUSCULAS presentacion","indicaciones":"indicacion completa."} Solo nombre e indicaciones, sin campo cantidad ni surtir. Medicamento: '+txt}]})});
-    var data=await res.json();
-    var parsed=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim());
+    var res=await fetch("/api/formatear-med",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({texto:txt})});
+    var parsed=await res.json();
     var el=document.getElementById('ia-result');
     el.innerHTML='<b style="color:#1a5278">'+parsed.nombre+'</b><br>'+parsed.indicaciones;
     el.dataset.json=JSON.stringify(parsed);
