@@ -8,21 +8,31 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { nombre, fn, fecha, titulo, texto } = req.body;
+  const { nombre, fecha, titulo, texto } = req.body;
   const hdrPath = path.join(__dirname, '../assets/header.jpg');
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
-  // Tamaño carta fijo siempre
   const PW = 595, PH = 842;
   const MX = 50, TW = PW - MX * 2;
   const FTR_H = 100;
   const HDR_BOT = 128;
-  const BODY_TOP_P1 = 178;
-  const BODY_TOP_PN = HDR_BOT + 20;
-  // Espacio para firma + footer en ultima pagina
-  const FIRMA_RESERVA = 110;
-  const BODY_BOT = PH - FTR_H - FIRMA_RESERVA;
+  const FIRMA_H = 95;
+  // Limite del cuerpo: deja espacio para firma+footer en ultima pagina
+  const BODY_BOT = PH - FTR_H - FIRMA_H - 5;
+  const BODY_TOP_P1 = 182;
+  const BODY_TOP_PN = HDR_BOT + 18;
+
+  // Limpiar texto: quitar titulo duplicado, quitar firma al final
+  var textoLimpio = (texto || '')
+    .replace(/CONSTANCIA DE INCAPACIDAD LABORAL\s*/gi, '')
+    .replace(/JUSTIFICANTE MEDICO ESCOLAR\s*/gi, '')
+    .replace(/CARTA DE SALUD\s*/gi, '')
+    .replace(/CARTA DE REFERENCIA MEDICA\s*/gi, '')
+    .replace(/CARTA MEDICA PARA VIAJE\s*/gi, '')
+    .replace(/CARTA MEDICA\s*/gi, '')
+    .replace(/Atentamente[\s\S]*$/i, '')
+    .trim();
 
   const doc = new PDFDocument({ size: [PW, PH], margin: 0, autoFirstPage: false });
   const chunks = [];
@@ -34,28 +44,28 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  // Dividir texto en lineas y calcular altura real de cada una
+  // Calcular altura real de cada linea con pdfkit
   doc.font('Helvetica').fontSize(10);
-  var lineas = (texto||'').split('\n');
+  var lineas = textoLimpio.split('\n');
   var bloques = [];
   lineas.forEach(function(l) {
     if (!l.trim()) {
-      bloques.push({ vacio: true, h: 7 });
+      bloques.push({ vacio: true, h: 6 });
     } else {
       var h = doc.heightOfString(l, { width: TW, lineGap: 2 });
       bloques.push({ texto: l, h: h + 5 });
     }
   });
 
-  // Paginar: distribuir bloques en paginas de tamaño fijo
+  // Paginar en hojas de tamaño FIJO
   var paginas = [];
   var actual = [];
   var yAcum = BODY_TOP_P1;
   var primera = true;
 
   bloques.forEach(function(bloque) {
-    var limite = BODY_BOT;
-    if (yAcum + bloque.h > limite) {
+    var tope = BODY_BOT;
+    if (yAcum + bloque.h > tope) {
       paginas.push({ bloques: actual, primera: primera });
       actual = [];
       primera = false;
@@ -64,16 +74,14 @@ module.exports = async (req, res) => {
     actual.push(bloque);
     yAcum += bloque.h;
   });
-  if (actual.length) paginas.push({ bloques: actual, primera: primera });
+  if (actual.length || !paginas.length) paginas.push({ bloques: actual, primera: primera });
 
-  // Renderizar cada pagina
+  // Dibujar paginas
   paginas.forEach(function(pag, pi) {
     var esUltima = pi === paginas.length - 1;
     doc.addPage({ size: [PW, PH], margin: 0 });
 
-    // Header siempre
     doc.image(hdrPath, 0, 0, { width: PW });
-    // Footer siempre al fondo fijo
     doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
 
     var y;
@@ -94,9 +102,8 @@ module.exports = async (req, res) => {
       y += bloque.h;
     });
 
-    // Firma solo en ultima pagina, antes del footer
     if (esUltima) {
-      var firmaY = Math.min(y + 15, PH - FTR_H - 95);
+      var firmaY = PH - FTR_H - FIRMA_H;
       doc.image(frmPath, 310, firmaY, { width: 170 });
     }
   });
