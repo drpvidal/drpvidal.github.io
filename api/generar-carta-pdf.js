@@ -13,16 +13,22 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
+  // TAMAÑO FIJO SIEMPRE - nunca cambia
   const PW = 595, PH = 842;
   const HDR_H = 116, FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
   const media = tamano === 'media';
-  const FECHA_Y  = 128;
-  const TITULO_Y = HDR_H + 10;
-  const BODY_TOP = HDR_H + 32;
-  const BODY_BOT = media ? (PH/2) - FTR_H - 80 : PH - FTR_H - 85;
 
-  var norm = function(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); };
+  const FECHA_Y  = 128;
+  const TITULO_Y = HDR_H + 12;
+  const BODY_TOP = HDR_H + 35;
+  // Limite estricto - firma ocupa 75px, footer 96px
+  const BODY_BOT = media ? (PH/2) - FTR_H - 80
+                         : PH - FTR_H - 80;
+
+  var norm = function(s){
+    return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  };
 
   // Limpiar texto
   var lineasRaw = (texto||'').split('\n');
@@ -39,7 +45,6 @@ module.exports = async (req, res) => {
     if(!cortar) lineasLimpias.push(l);
   });
 
-  // Negrita solo para lineas completas — sin inline mixing
   function esBold(l) {
     var t = norm(l.trim());
     if(!t) return false;
@@ -48,18 +53,35 @@ module.exports = async (req, res) => {
     return false;
   }
 
-  // Medir y construir bloques simples
+  // Medir alturas reales con PDFKit
   var tmp = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   tmp.addPage();
   var bloques = [];
   lineasLimpias.forEach(function(l){
-    if(!l.trim()){bloques.push({vacio:true,h:7});return;}
+    if(!l.trim()){bloques.push({vacio:true,h:6});return;}
     var bold = esBold(l);
     tmp.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
-    var h = tmp.heightOfString(l,{width:TW,lineGap:3});
-    bloques.push({texto:l, bold:bold, h:h+6});
+    var h = tmp.heightOfString(l,{width:TW,lineGap:2});
+    bloques.push({texto:l,bold:bold,h:h+5});
   });
   tmp.end();
+
+  // Calcular altura total del contenido
+  var alturaTotal = bloques.reduce(function(s,b){return s+b.h;},0);
+  var espacioDisponible = BODY_BOT - BODY_TOP;
+
+  // Si el contenido es mas largo que el espacio, reducir lineGap y espacios
+  var ajuste = 1;
+  if(alturaTotal > espacioDisponible){
+    ajuste = espacioDisponible / alturaTotal;
+    // Reducir alturas proporcionalmente
+    bloques.forEach(function(b){
+      b.h = Math.floor(b.h * ajuste);
+    });
+  }
+  var lineGap = Math.max(0, Math.floor(2 * ajuste));
+  var espacioVacio = Math.max(3, Math.floor(6 * ajuste));
+  bloques.forEach(function(b){ if(b.vacio) b.h = espacioVacio; });
 
   // Paginar
   var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
@@ -72,7 +94,7 @@ module.exports = async (req, res) => {
   });
   if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
 
-  // PDF
+  // PDF siempre 595x842
   var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
@@ -101,14 +123,14 @@ module.exports = async (req, res) => {
       if(b.vacio){yFinal+=b.h;return;}
       if(yFinal+b.h > BODY_BOT) return;
       doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
-      doc.text(b.texto, MX, yFinal, {width:TW, lineGap:3});
+      doc.text(b.texto, MX, yFinal, {width:TW, lineGap:lineGap});
       yFinal+=b.h;
     });
 
     if(esUltima){
-      var firmaLimite = media ? PH/2-FTR_H-75 : PH-FTR_H-75;
+      var firmaLimite = media ? PH/2-FTR_H-70 : PH-FTR_H-70;
       var firmaY = Math.min(yFinal+15, firmaLimite);
-      doc.image(frmPath, 310, firmaY, {width:160});
+      doc.image(frmPath, 310, firmaY, {width:155});
     }
   });
 
