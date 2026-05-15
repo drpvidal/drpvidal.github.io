@@ -1,0 +1,36 @@
+const PDFDocument = require('pdfkit');
+const path = require('path');
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).end();
+  const { nombre, edad, fn, fecha, titulo, texto } = req.body;
+  const hdrPath = path.join(__dirname, '../assets/header.jpg');
+  const ftrPath = path.join(__dirname, '../assets/footer.jpg');
+  const frmPath = path.join(__dirname, '../assets/firma.png');
+  const width = 595;
+  const marginX = 50;
+  const textWidth = width - marginX * 2;
+  const doc = new PDFDocument({ size: [width, 842], margin: 0, bufferPages: true });
+  const chunks = [];
+  doc.on('data', chunk => chunks.push(chunk));
+  doc.on('end', () => {
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="Carta_${(nombre||'DrVidal').replace(/ /g,'_')}.pdf"`);
+    res.send(Buffer.concat(chunks));
+  });
+  doc.image(hdrPath, 0, 0, { width });
+  doc.font('Helvetica').fontSize(10).fillColor('#111111');
+  doc.text('CDMX a ' + (fecha || ''), 180, 130, { align: 'right', width: 370 });
+  doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
+  doc.text(titulo || '', marginX, 150, { align: 'center', width: textWidth });
+  let y = 175;
+  doc.font('Helvetica').fontSize(10).fillColor('#111111');
+  doc.text(texto || '', marginX, y, { width: textWidth, lineGap: 3 });
+  y += doc.heightOfString(texto || '', { width: textWidth, lineGap: 3 }) + 25;
+  doc.image(frmPath, 310, y, { width: 170 });
+  doc.image(ftrPath, 0, y + 90, { width });
+  doc.end();
+};
