@@ -1,6 +1,5 @@
 const PDFDocument = require('pdfkit');
 const path = require('path');
-const fs = require('fs');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -14,35 +13,11 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
-  // Header: 900x175px -> en 595px de ancho -> alto = 595*175/900 = 115.97px
-  // Footer: 900x145px -> en 595px de ancho -> alto = 595*
-cat > ~/drpvidal.github.io/api/generar-carta-pdf.js << 'EOF'
-const PDFDocument = require('pdfkit');
-const path = require('path');
-const fs = require('fs');
-
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).end();
-
-  const { nombre, fecha, titulo, texto, tamano } = req.body;
-  const hdrPath = path.join(__dirname, '../assets/header.jpg');
-  const ftrPath = path.join(__dirname, '../assets/footer.jpg');
-  const frmPath = path.join(__dirname, '../assets/firma.png');
-
-  // Header: 900x175px -> en 595px de ancho -> alto = 595*175/900 = 115.97px
-  // Footer: 900x145px -> en 595px de ancho -> alto = 595*145/900 = 95.81px
   const PW = 595, PH = 842;
-  const HDR_H = Math.round(595*175/900); // 116
-  const FTR_H = Math.round(595*145/900); // 96
+  const HDR_H = 116, FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
   const media = tamano === 'media';
-
-  // Posiciones bien calculadas
-  const FECHA_Y  = HDR_H - 14;  // justo dentro del espacio blanco del header
+  const FECHA_Y  = 102;
   const TITULO_Y = HDR_H + 8;
   const BODY_TOP = HDR_H + 28;
   const FIRMA_H  = 70;
@@ -72,27 +47,21 @@ module.exports = async (req, res) => {
     return false;
   }
 
-  // Medir altura total del texto
   var docMed = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   docMed.addPage();
-  var alturaTotal = 0;
-  var bloquesMed = [];
+  var bloques = [];
   limpias.forEach(function(l){
-    if(!l.trim()){alturaTotal+=5;bloquesMed.push({vacio:true,h:5});return;}
+    if(!l.trim()){bloques.push({vacio:true,h:5});return;}
     var bold=esBold(l);
     docMed.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
     var h=docMed.heightOfString(l,{width:TW,lineGap:2})+5;
-    alturaTotal+=h;
-    bloquesMed.push({texto:l,bold:bold,h:h});
+    bloques.push({texto:l,bold:bold,h:h});
   });
   docMed.end();
 
-  var espacio = BODY_BOT - BODY_TOP;
-
-  // Si no cabe, paginar en segunda hoja
   var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
-  bloquesMed.forEach(function(b){
-    if(yAcum+b.h > BODY_BOT){
+  bloques.forEach(function(b){
+    if(yAcum+b.h>BODY_BOT){
       paginas.push({bloques:actual,primera:primera});
       actual=[]; primera=false; yAcum=BODY_TOP;
     }
@@ -100,14 +69,7 @@ module.exports = async (req, res) => {
   });
   if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
 
-  // PDF con tamaño FIJO - usar opciones de pdfkit para deshabilitar autosize
-  var doc = new PDFDocument({
-    size:[PW,PH],
-    margin:0,
-    autoFirstPage:false,
-    bufferPages:true,
-    compress:false
-  });
+  var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false,bufferPages:true});
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
   doc.on('end',function(){
@@ -119,15 +81,11 @@ module.exports = async (req, res) => {
 
   paginas.forEach(function(pag,pi){
     var esUltima=pi===paginas.length-1;
-    // addPage con size explícito fuerza tamaño fijo
-    doc.addPage({size:[PW,PH],margin:0,layout:'portrait'});
-
-    // Dibujar header a altura exacta calculada
+    doc.addPage({size:[PW,PH],margin:0});
     doc.image(hdrPath,0,0,{width:PW,height:HDR_H});
-    // Footer pegado al fondo fijo
     doc.image(ftrPath,0,media?Math.floor(PH/2)-FTR_H:PH-FTR_H,{width:PW,height:FTR_H});
 
-    var y=BODY_TOP;
+    var yF=BODY_TOP;
     if(pag.primera){
       doc.font('Helvetica').fontSize(10).fillColor('#111');
       doc.text('CDMX a '+(fecha||''),MX,FECHA_Y,{align:'right',width:TW});
@@ -135,7 +93,6 @@ module.exports = async (req, res) => {
       doc.text(titulo||'',MX,TITULO_Y,{align:'center',width:TW});
     }
 
-    var yF=y;
     pag.bloques.forEach(function(b){
       if(b.vacio){yF+=b.h;return;}
       if(yF+b.h>BODY_BOT) return;
