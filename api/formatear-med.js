@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
   const { texto } = req.body;
   const body = JSON.stringify({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-5',
     max_tokens: 400,
     messages: [{
       role: 'user',
@@ -36,6 +36,9 @@ module.exports = async (req, res) => {
     r.end();
   });
   const parsed = JSON.parse(result);
+  if (!parsed.content || !parsed.content[0]) {
+    return res.status(500).json({ error: 'API error', detail: parsed });
+  }
   const texto_resp = parsed.content[0].text.trim().replace(/```json|```/g,'').trim();
   res.json(JSON.parse(texto_resp));
 };
