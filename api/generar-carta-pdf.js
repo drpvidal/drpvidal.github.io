@@ -10,17 +10,14 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
 
   try {
-    const { fecha, titulo, texto, tamano } = req.body;
+    const { fecha, titulo, texto } = req.body;
 
-    // Dimensiones fijas
     const PW = 595;
-    const PH = tamano === 'media' ? 421 : 842;
+    const PH = 842;
     const HDR_H = Math.round(PW * 175 / 900); // 116
     const FTR_H = Math.round(PW * 145 / 900); // 96
-    const MX = PW * 0.08;  // 8% margen igual que el CSS (padding:4% 8%)
-    const TW = PW - MX * 2;
+    const MX = PW * 0.08; // margen horizontal ~47px
 
-    // Crear doc con pagina de tamano fijo
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([PW, PH]);
 
@@ -29,33 +26,31 @@ module.exports = async (req, res) => {
 
     const assets = path.join(__dirname, '..', 'assets');
 
-    // Header
+    // Header y footer
     const hdrImg = await pdfDoc.embedJpg(fs.readFileSync(path.join(assets, 'header.jpg')));
-    page.drawImage(hdrImg, { x: 0, y: PH - HDR_H, width: PW, height: HDR_H });
-
-    // Footer
     const ftrImg = await pdfDoc.embedJpg(fs.readFileSync(path.join(assets, 'footer.jpg')));
+    page.drawImage(hdrImg, { x: 0, y: PH - HDR_H, width: PW, height: HDR_H });
     page.drawImage(ftrImg, { x: 0, y: 0, width: PW, height: FTR_H });
 
-    // Firma (PNG con transparencia)
+    // Firma anclada encima del footer
     const firmaBytes = fs.readFileSync(path.join(assets, 'firma.png'));
     const firmaImg = await pdfDoc.embedPng(firmaBytes);
-    // 28% del ancho total, alineada a la derecha con margen derecho igual a MX
     const FIRMA_W = PW * 0.28;
     const FIRMA_H = FIRMA_W * firmaImg.height / firmaImg.width;
+    // Firma fija: su borde inferior queda 16px encima del footer
+    const FIRMA_Y = FTR_H + 16;
+    page.drawImage(firmaImg, {
+      x: PW - MX - FIRMA_W,
+      y: FIRMA_Y,
+      width: FIRMA_W,
+      height: FIRMA_H,
+    });
 
-    // Area de texto disponible entre header y footer
-    const AREA_TOP = HDR_H + 8;           // donde empieza el contenido
-    const AREA_BOT = PH - FTR_H - 8;     // donde termina (encima del footer)
-    const AREA_H = AREA_BOT - AREA_TOP;
+    // --- Texto: empieza debajo del header ---
+    const TW = PW - MX * 2;
+    const BODY_SIZE = 10;
+    const LINE_H = BODY_SIZE * 1.7;
 
-    // Tamanio de fuentes base
-    const FECHA_SIZE  = 9;
-    const TITULO_SIZE = 10;
-    const BODY_SIZE_START = 10;
-    const LINE_H_FACTOR = 1.6; // equivale a line-height:1.7 del CSS
-
-    // Funcion wrap
     function wrap(text, font, size, maxW) {
       const lines = [];
       for (const para of (text || '').split('\n')) {
@@ -71,97 +66,44 @@ module.exports = async (req, res) => {
       return lines;
     }
 
-    // Calcular layout completo con un body size dado
-    // Retorna null si no cabe, o el layout si cabe
-    function tryLayout(bodySize) {
-      const fechaH  = FECHA_SIZE * LINE_H_FACTOR;
-      const tituloH = TITULO_SIZE * LINE_H_FACTOR;
-      const gap     = 6; // espacio entre bloques
-      const firmaAreaH = FIRMA_H + gap;
+    // Cursor desde arriba (yTop = distancia desde top de pagina)
+    let yTop = HDR_H + 20; // 20px de respiro debajo del header
 
-      const bodyLines = wrap(texto, fontR, bodySize, TW);
-      const bodyH = bodyLines.length * bodySize * LINE_H_FACTOR;
-
-      const totalH = fechaH + gap + tituloH + gap + bodyH + gap + firmaAreaH;
-
-      if (totalH > AREA_H) return null;
-      return { bodyLines, bodySize, fechaH, tituloH, gap, firmaAreaH, bodyH };
-    }
-
-    // Intentar desde 10pt bajando a 9pt en pasos de 0.5
-    let layout = null;
-    for (let s = BODY_SIZE_START; s >= 9; s -= 0.5) {
-      layout = tryLayout(s);
-      if (layout) break;
-    }
-    // Safety net: forzar 9pt y truncar
-    if (!layout) {
-      const bodySize = 9;
-      const fechaH  = FECHA_SIZE * LINE_H_FACTOR;
-      const tituloH = TITULO_SIZE * LINE_H_FACTOR;
-      const gap = 6;
-      const firmaAreaH = FIRMA_H + gap;
-      const availForBody = AREA_H - fechaH - tituloH - firmaAreaH - gap * 3;
-      const maxLines = Math.floor(availForBody / (bodySize * LINE_H_FACTOR));
-      let bodyLines = wrap(texto, fontR, bodySize, TW);
-      if (bodyLines.length > maxLines) bodyLines = bodyLines.slice(0, maxLines);
-      layout = { bodyLines, bodySize, fechaH, tituloH, gap, firmaAreaH };
-    }
-
-    // --- Dibujar desde arriba hacia abajo ---
-    // pdf-lib: y=0 es abajo, y=PH es arriba
-    // Convertir: yPDF = PH - yDesdeArriba
-
-    let cursor = AREA_TOP; // cursor en coordenadas "desde arriba"
-
-    // FECHA — alineada a la derecha
-    const fechaText = fecha || '';
-    const fechaW = fontR.widthOfTextAtSize(fechaText, FECHA_SIZE);
-    page.drawText(fechaText, {
+    // FECHA — derecha
+    const FECHA_SIZE = 9;
+    const fechaW = fontR.widthOfTextAtSize(fecha || '', FECHA_SIZE);
+    page.drawText(fecha || '', {
       x: PW - MX - fechaW,
-      y: PH - cursor - FECHA_SIZE,
-      size: FECHA_SIZE,
-      font: fontR,
+      y: PH - yTop - FECHA_SIZE,
+      size: FECHA_SIZE, font: fontR,
       color: rgb(0.15, 0.15, 0.15),
     });
-    cursor += layout.fechaH + layout.gap;
+    yTop += FECHA_SIZE * 1.7 + 14;
 
-    // TITULO — centrado, azul oscuro
+    // TITULO — centrado, azul
+    const TITULO_SIZE = 11;
     const tituloText = (titulo || '').toUpperCase();
     const tituloW = fontB.widthOfTextAtSize(tituloText, TITULO_SIZE);
     page.drawText(tituloText, {
       x: (PW - tituloW) / 2,
-      y: PH - cursor - TITULO_SIZE,
-      size: TITULO_SIZE,
-      font: fontB,
-      color: rgb(0.10, 0.32, 0.47), // #1a5278
+      y: PH - yTop - TITULO_SIZE,
+      size: TITULO_SIZE, font: fontB,
+      color: rgb(0.10, 0.32, 0.47),
     });
-    cursor += layout.tituloH + layout.gap;
+    yTop += TITULO_SIZE * 1.7 + 14;
 
     // CUERPO
-    for (let i = 0; i < layout.bodyLines.length; i++) {
-      const line = layout.bodyLines[i];
-      if (line) {
-        page.drawText(line, {
-          x: MX,
-          y: PH - cursor - (i + 1) * layout.bodySize * LINE_H_FACTOR + layout.bodySize * LINE_H_FACTOR - layout.bodySize,
-          size: layout.bodySize,
-          font: fontR,
-          color: rgb(0.07, 0.07, 0.07),
-        });
-      }
-    }
-    cursor += layout.bodyLines.length * layout.bodySize * LINE_H_FACTOR + layout.gap;
-
-    // FIRMA — alineada a la derecha
-    page.drawImage(firmaImg, {
-      x: PW - MX - FIRMA_W,
-      y: PH - cursor - FIRMA_H,
-      width: FIRMA_W,
-      height: FIRMA_H,
+    const bodyLines = wrap(texto, fontR, BODY_SIZE, TW);
+    bodyLines.forEach((line, i) => {
+      if (!line) return; // linea vacia = salto de parrafo, ya esta en LINE_H
+      page.drawText(line, {
+        x: MX,
+        y: PH - yTop - (i * LINE_H) - BODY_SIZE,
+        size: BODY_SIZE, font: fontR,
+        color: rgb(0.07, 0.07, 0.07),
+      });
     });
 
-    // Serializar
     const pdfBytes = await pdfDoc.save();
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="carta-medica.pdf"');
