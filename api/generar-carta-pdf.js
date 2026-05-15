@@ -17,12 +17,13 @@ module.exports = async (req, res) => {
   const HDR_H = 116, FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
   const media = tamano === 'media';
-  const FECHA_Y  = 128;
-  const TITULO_Y = HDR_H + 12;
-  const BODY_TOP = HDR_H + 35;
-  const FIRMA_RESERVA = 80;
-  const BODY_BOT = media ? (PH/2) - FTR_H - FIRMA_RESERVA
-                         : PH - FTR_H - FIRMA_RESERVA;
+
+  // Posiciones bien separadas - fecha arriba, titulo abajo del header
+  const FECHA_Y  = 120;   // dentro del header area, a la derecha
+  const TITULO_Y = 140;   // debajo de la fecha, centrado
+  const BODY_TOP = 165;   // cuerpo empieza aqui
+  const BODY_BOT = media ? (PH/2) - FTR_H - 75
+                         : PH - FTR_H - 75;
 
   var norm = function(s){
     return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -51,16 +52,55 @@ module.exports = async (req, res) => {
     return false;
   }
 
-  // Usar doc real para medir — no doc temporal
-  // Estrategia: generar con autoFirstPage:false y addPage manual con size fijo
-  var doc = new PDFDocument({
-    size: [PW, PH],
-    margin: 0,
-    autoFirstPage: false,
-    // CRITICO: deshabilitar el autosize
-    bufferPages: true
+  // Pre-calcular bloques y alturas
+  var docMed = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
+  docMed.addPage();
+  var bloques = [];
+  lineasLimpias.forEach(function(l){
+    if(!l.trim()){bloques.push({vacio:true,h:6});return;}
+    var bold = esBold(l);
+    docMed.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
+    var h = docMed.heightOfString(l,{width:TW,lineGap:2});
+    bloques.push({texto:l,bold:bold,h:h+5});
   });
+  docMed.end();
 
+  // Calcular si cabe en una pagina
+  var espacioDisponible = BODY_BOT - BODY_TOP;
+  var alturaTotal = bloques.reduce(function(s,b){return s+b.h;},0);
+
+  // Si no cabe, comprimir espacios vacios y reducir gaps
+  if(alturaTotal > espacioDisponible){
+    // Eliminar lineas vacias extras
+    bloques = bloques.filter(function(b,i){
+      if(!b.vacio) return true;
+      // Solo mantener un vacio entre parrafos
+      var prev = bloques[i-1];
+      return prev && !prev.vacio;
+    });
+    // Recalcular
+    alturaTotal = bloques.reduce(function(s,b){return s+b.h;},0);
+    // Si aun no cabe, reducir h de vacios
+    if(alturaTotal > espacioDisponible){
+      bloques.forEach(function(b){if(b.vacio)b.h=3;});
+    }
+  }
+
+  // Paginar en hojas de 842px fijo
+  var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
+  bloques.forEach(function(b){
+    if(yAcum+b.h > BODY_BOT){
+      paginas.push({bloques:actual,primera:primera});
+      actual=[]; primera=false; yAcum=BODY_TOP;
+    }
+    actual.push(b); yAcum+=b.h;
+  });
+  if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
+
+  // Generar PDF con paginas de 595x842 fijas
+  var doc = new PDFDocument({
+    size:[PW,PH], margin:0, autoFirstPage:false, bufferPages:true
+  });
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
   doc.on('end',function(){
@@ -70,47 +110,52 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  // Primera pagina
-  doc.addPage({size:[PW,PH], margin:0});
-  doc.image(hdrPath, 0, 0, {width:PW});
-  doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
+  paginas.forEach(function(pag,pi){
+    var esUltima = pi===paginas.length-1;
+    // Forzar tamaño fijo en cada pagina
+    doc.addPage({size:[PW,PH],margin:0});
 
-  // Fecha y titulo
-  doc.font('Helvetica').fontSize(10).fillColor('#111');
-  doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
-  doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
-  doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
+    // Header siempre arriba
+    doc.image(hdrPath, 0, 0, {width:PW});
+    // Footer siempre al fondo fijo
+    doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
 
-  var y = BODY_TOP;
-  var paginaActual = 0;
+    var yFinal = BODY_TOP;
 
-  lineasLimpias.forEach(function(l){
-    if(!l.trim()){
-      y += 6;
-      return;
-    }
-    var bold = esBold(l);
-    doc.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
-    var h = doc.heightOfString(l, {width:TW, lineGap:2}) + 5;
-
-    // Si no cabe, nueva pagina FIJA
-    if(y + h > BODY_BOT){
-      paginaActual++;
-      doc.addPage({size:[PW,PH], margin:0});
-      doc.image(hdrPath, 0, 0, {width:PW});
-      doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
-      y = BODY_TOP;
+    if(pag.primera){
+      // Fecha a la derecha, dentro del espacio del header
+      doc.font('Helvetica').fontSize(10).fillColor('#111');
+      doc.text('CDMX a '+(fecha||''), MX, FECHA_Y,
+        {align:'right', width:TW, lineBreak:false});
+      // Titulo centrado, una linea abajo
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
+      doc.text(titulo||'', MX, TITULO_Y,
+        {align:'center', width:TW, lineBreak:false});
+      yFinal = BODY_TOP;
     }
 
-    doc.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
-    doc.text(l, MX, y, {width:TW, lineGap:2});
-    y += h;
+    pag.bloques.forEach(function(b){
+      if(b.vacio){yFinal+=b.h;return;}
+      // Solo dibujar si esta dentro del area del cuerpo
+      if(yFinal >= BODY_BOT) return;
+      doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
+      doc.text(b.texto, MX, yFinal, {width:TW, lineGap:2, lineBreak:true});
+      yFinal += b.h;
+    });
+
+    // Firma en ultima pagina, pegada al texto pero sobre el footer
+    if(esUltima){
+      var firmaMax = media ? PH/2-FTR_H-70 : PH-FTR_H-70;
+      var firmaY = Math.min(yFinal+12, firmaMax);
+      doc.image(frmPath, 310, firmaY, {width:155});
+    }
   });
 
-  // Firma en ultima pagina
-  var firmaLimite = media ? PH/2-FTR_H-70 : PH-FTR_H-70;
-  var firmaY = Math.min(y+15, firmaLimite);
-  doc.image(frmPath, 310, firmaY, {width:155});
-
+  // Flush forzado con bufferPages
+  var range = doc.bufferedPageRange();
+  for(var i=0; i<range.count; i++){
+    doc.switchToPage(range.start+i);
+  }
+  doc.flushPages();
   doc.end();
 };
