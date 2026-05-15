@@ -13,27 +13,22 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
-  // SIEMPRE carta completa 595x842
-  // Media carta = misma hoja pero contenido escalado al 50%
+  // Dimensiones exactas calculadas
+  // header 900x175 -> width 595 -> height = 595*175/900 = 115.8 ~ 116
+  // footer 900x145 -> width 595 -> height = 595*145/900 = 95.9 ~ 96
   const PW = 595, PH = 842;
-  const media = tamano === 'media';
-  const scale = media ? 0.5 : 1;
-
+  const HDR_H = 116;
+  const FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
-  const HDR_H = 120;   // altura real del header en carta completa
-  const FTR_H = 96;    // altura real del footer en carta completa
-  const FS = 10;
+  const media = tamano === 'media';
 
-  // Para carta: posiciones normales
-  // Para media carta: todo en la mitad superior, escalado
-  const FECHA_Y  = media ? 60  : 128;
-  const TITULO_Y = media ? HDR_H*scale + 4 : HDR_H + 8;
-  const BODY_TOP = media ? HDR_H*scale + 20 : HDR_H + 28;
-  const FIRMA_W  = media ? 100 : 160;
-  const FIRMA_H_IMG = media ? 45 : 75;
-  // Limite inferior del cuerpo segun tamano
-  const CUERPO_BOT = media ? (PH/2) - FTR_H*scale - FIRMA_H_IMG - 5
-                            : PH - FTR_H - FIRMA_H_IMG - 10;
+  // Carta completa: cuerpo entre header y footer
+  // Media carta: misma hoja, todo en mitad superior
+  const FECHA_Y   = 130;
+  const TITULO_Y  = HDR_H + 12;
+  const BODY_TOP  = HDR_H + 34;
+  const BODY_BOT  = media ? (PH/2) - FTR_H - 80
+                           : PH - FTR_H - 85;
 
   // Limpiar texto
   var norm = function(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); };
@@ -51,33 +46,32 @@ module.exports = async (req, res) => {
     if(!cortar) lineasLimpias.push(l);
   });
 
-  // Detectar negritas
+  // Negritas
   function esBold(l) {
     var t = norm(l.trim());
     if(!t) return false;
     if(t==='A QUIEN CORRESPONDA:') return true;
-    if(t.match(/^(DIAGNOSTICO|RECOMENDACIONES|PERIODO|MOTIVO|OBJETIVO|ESTIMADO COLEGA)/) && t.endsWith(':')) return true;
-    if(t.endsWith(':') && t.length < 35) return true;
+    if(t.endsWith(':') && t.length < 40) return true;
     return false;
   }
 
   // Medir bloques
-  var docMed = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
-  docMed.addPage();
+  var tmp = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
+  tmp.addPage();
   var bloques = [];
   lineasLimpias.forEach(function(l){
-    if(!l.trim()){bloques.push({vacio:true,h:media?4:7});return;}
+    if(!l.trim()){bloques.push({vacio:true,h:7});return;}
     var bold = esBold(l);
-    docMed.font(bold?'Helvetica-Bold':'Helvetica').fontSize(FS*scale);
-    var h = docMed.heightOfString(l,{width:TW,lineGap:2});
-    bloques.push({texto:l,bold:bold,h:h+(media?3:5)});
+    tmp.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
+    var h = tmp.heightOfString(l,{width:TW,lineGap:3});
+    bloques.push({texto:l,bold:bold,h:h+6});
   });
-  docMed.end();
+  tmp.end();
 
-  // Paginar
+  // Paginar — NUNCA pasa de BODY_BOT
   var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
   bloques.forEach(function(b){
-    if(yAcum+b.h>CUERPO_BOT){
+    if(yAcum+b.h > BODY_BOT){
       paginas.push({bloques:actual,primera:primera});
       actual=[]; primera=false; yAcum=BODY_TOP;
     }
@@ -85,7 +79,7 @@ module.exports = async (req, res) => {
   });
   if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
 
-  // Generar PDF - SIEMPRE 595x842
+  // PDF — siempre 595x842
   var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
@@ -101,22 +95,22 @@ module.exports = async (req, res) => {
     doc.addPage({size:[PW,PH],margin:0});
 
     if(media){
-      // Media carta: header y footer escalados, en la mitad superior
-      doc.image(hdrPath, 0, 0, {width:PW, height:HDR_H*scale});
-      doc.image(ftrPath, 0, PH/2 - FTR_H*scale, {width:PW, height:FTR_H*scale});
-      // Linea divisoria opcional
-      doc.moveTo(0, PH/2).lineTo(PW, PH/2).strokeColor('#ccc').lineWidth(0.5).stroke();
+      // Media carta: header y footer en mitad superior
+      doc.image(hdrPath, 0, 0, {width:PW});
+      doc.image(ftrPath, 0, PH/2-FTR_H, {width:PW});
     } else {
-      // Carta completa: header y footer a ancho completo
+      // Carta completa
       doc.image(hdrPath, 0, 0, {width:PW});
       doc.image(ftrPath, 0, PH-FTR_H, {width:PW});
     }
 
     var y = BODY_TOP;
     if(pag.primera){
-      doc.font('Helvetica').fontSize(FS*scale).fillColor('#111');
+      // Fecha en su lugar correcto, a la derecha, BAJO el header
+      doc.font('Helvetica').fontSize(10).fillColor('#111');
       doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
-      doc.font('Helvetica-Bold').fontSize((media?9:11)*scale).fillColor('#1a5278');
+      // Titulo centrado
+      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
       doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
       y = BODY_TOP;
     }
@@ -124,17 +118,18 @@ module.exports = async (req, res) => {
     var yFinal = y;
     pag.bloques.forEach(function(b){
       if(b.vacio){yFinal+=b.h;return;}
-      if(yFinal+b.h<=CUERPO_BOT){
-        doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(FS*scale).fillColor('#111');
-        doc.text(b.texto, MX, yFinal, {width:TW, lineGap:2});
+      if(yFinal+b.h <= BODY_BOT){
+        doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
+        doc.text(b.texto, MX, yFinal, {width:TW, lineGap:3});
       }
       yFinal+=b.h;
     });
 
+    // Firma pegada al texto pero nunca encima del footer
     if(esUltima){
-      var firmaBot = media ? PH/2 - FTR_H*scale - 5 : PH - FTR_H - 5;
-      var firmaY = Math.min(yFinal+8, firmaBot - FIRMA_H_IMG);
-      doc.image(frmPath, 310, firmaY, {width:FIRMA_W});
+      var firmaLimite = media ? PH/2-FTR_H-80 : PH-FTR_H-80;
+      var firmaY = Math.min(yFinal+15, firmaLimite);
+      doc.image(frmPath, 310, firmaY, {width:160});
     }
   });
 
