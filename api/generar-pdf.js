@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
-  const doc = new PDFDocument({ size: [595, 530], margin: 0 });
+  const doc = new PDFDocument({ size: [595, 570], margin: 0 });
   const chunks = [];
   doc.on('data', chunk => chunks.push(chunk));
   doc.on('end', () => {
@@ -61,7 +61,7 @@ module.exports = async (req, res) => {
   doc.image(frmPath, 310, 330, { width: 170 });
 
   // Footer
-  doc.image(ftrPath, 0, 450, { width: 595 });
+  doc.image(ftrPath, 0, 465, { width: 595 });
 
   doc.end();
 };
