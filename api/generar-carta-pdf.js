@@ -18,20 +18,34 @@ module.exports = async (req, res) => {
   const FTR_H = 100;
   const HDR_BOT = 128;
   const FIRMA_H = 95;
-  // Limite del cuerpo: deja espacio para firma+footer en ultima pagina
   const BODY_BOT = PH - FTR_H - FIRMA_H - 5;
   const BODY_TOP_P1 = 182;
   const BODY_TOP_PN = HDR_BOT + 18;
 
-  // Limpiar texto: quitar titulo duplicado, quitar firma al final
+  // Limpiar agresivamente el texto
   var textoLimpio = (texto || '')
-    .replace(/CONSTANCIA DE INCAPACIDAD LABORAL\s*/gi, '')
-    .replace(/JUSTIFICANTE MEDICO ESCOLAR\s*/gi, '')
-    .replace(/CARTA DE SALUD\s*/gi, '')
-    .replace(/CARTA DE REFERENCIA MEDICA\s*/gi, '')
-    .replace(/CARTA MEDICA PARA VIAJE\s*/gi, '')
-    .replace(/CARTA MEDICA\s*/gi, '')
-    .replace(/Atentamente[\s\S]*$/i, '')
+    .split('\n')
+    .filter(function(l) {
+      var t = l.trim().toUpperCase();
+      // Quitar lineas que sean el titulo
+      if (t === 'CONSTANCIA DE INCAPACIDAD LABORAL') return false;
+      if (t === 'JUSTIFICANTE MEDICO ESCOLAR') return false;
+      if (t === 'CARTA DE SALUD') return false;
+      if (t === 'CARTA DE REFERENCIA MEDICA') return false;
+      if (t === 'CARTA MEDICA PARA VIAJE') return false;
+      if (t === 'CARTA MEDICA') return false;
+      // Quitar firma al final
+      if (t === 'ATENTAMENTE') return false;
+      if (t.startsWith('DR. PABLO VIDAL')) return false;
+      if (t.startsWith('CIRUJANO GENERAL')) return false;
+      if (t.startsWith('CEDULA PROFESIONAL')) return false;
+      if (t.startsWith('CIUDAD DE MEXICO')) return false;
+      if (t.startsWith('CDMX,')) return false;
+      if (t.startsWith('FECHA DE EXPEDICION')) return false;
+      return true;
+    })
+    .join('\n')
+    // Quitar lineas vacías al inicio y al final
     .trim();
 
   const doc = new PDFDocument({ size: [PW, PH], margin: 0, autoFirstPage: false });
@@ -44,7 +58,6 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  // Calcular altura real de cada linea con pdfkit
   doc.font('Helvetica').fontSize(10);
   var lineas = textoLimpio.split('\n');
   var bloques = [];
@@ -57,15 +70,14 @@ module.exports = async (req, res) => {
     }
   });
 
-  // Paginar en hojas de tamaño FIJO
+  // Paginar en hojas de tamaño FIJO 595x842
   var paginas = [];
   var actual = [];
   var yAcum = BODY_TOP_P1;
   var primera = true;
 
   bloques.forEach(function(bloque) {
-    var tope = BODY_BOT;
-    if (yAcum + bloque.h > tope) {
+    if (yAcum + bloque.h > BODY_BOT) {
       paginas.push({ bloques: actual, primera: primera });
       actual = [];
       primera = false;
@@ -76,11 +88,9 @@ module.exports = async (req, res) => {
   });
   if (actual.length || !paginas.length) paginas.push({ bloques: actual, primera: primera });
 
-  // Dibujar paginas
   paginas.forEach(function(pag, pi) {
     var esUltima = pi === paginas.length - 1;
     doc.addPage({ size: [PW, PH], margin: 0 });
-
     doc.image(hdrPath, 0, 0, { width: PW });
     doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
 
@@ -103,8 +113,7 @@ module.exports = async (req, res) => {
     });
 
     if (esUltima) {
-      var firmaY = PH - FTR_H - FIRMA_H;
-      doc.image(frmPath, 310, firmaY, { width: 170 });
+      doc.image(frmPath, 310, PH - FTR_H - FIRMA_H, { width: 170 });
     }
   });
 
