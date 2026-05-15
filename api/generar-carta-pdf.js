@@ -13,18 +13,16 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
-  // TAMAÑO FIJO SIEMPRE - nunca cambia
   const PW = 595, PH = 842;
   const HDR_H = 116, FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
   const media = tamano === 'media';
-
   const FECHA_Y  = 128;
   const TITULO_Y = HDR_H + 12;
   const BODY_TOP = HDR_H + 35;
-  // Limite estricto - firma ocupa 75px, footer 96px
-  const BODY_BOT = media ? (PH/2) - FTR_H - 80
-                         : PH - FTR_H - 80;
+  const FIRMA_RESERVA = 80;
+  const BODY_BOT = media ? (PH/2) - FTR_H - FIRMA_RESERVA
+                         : PH - FTR_H - FIRMA_RESERVA;
 
   var norm = function(s){
     return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -53,49 +51,16 @@ module.exports = async (req, res) => {
     return false;
   }
 
-  // Medir alturas reales con PDFKit
-  var tmp = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
-  tmp.addPage();
-  var bloques = [];
-  lineasLimpias.forEach(function(l){
-    if(!l.trim()){bloques.push({vacio:true,h:6});return;}
-    var bold = esBold(l);
-    tmp.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
-    var h = tmp.heightOfString(l,{width:TW,lineGap:2});
-    bloques.push({texto:l,bold:bold,h:h+5});
+  // Usar doc real para medir — no doc temporal
+  // Estrategia: generar con autoFirstPage:false y addPage manual con size fijo
+  var doc = new PDFDocument({
+    size: [PW, PH],
+    margin: 0,
+    autoFirstPage: false,
+    // CRITICO: deshabilitar el autosize
+    bufferPages: true
   });
-  tmp.end();
 
-  // Calcular altura total del contenido
-  var alturaTotal = bloques.reduce(function(s,b){return s+b.h;},0);
-  var espacioDisponible = BODY_BOT - BODY_TOP;
-
-  // Si el contenido es mas largo que el espacio, reducir lineGap y espacios
-  var ajuste = 1;
-  if(alturaTotal > espacioDisponible){
-    ajuste = espacioDisponible / alturaTotal;
-    // Reducir alturas proporcionalmente
-    bloques.forEach(function(b){
-      b.h = Math.floor(b.h * ajuste);
-    });
-  }
-  var lineGap = Math.max(0, Math.floor(2 * ajuste));
-  var espacioVacio = Math.max(3, Math.floor(6 * ajuste));
-  bloques.forEach(function(b){ if(b.vacio) b.h = espacioVacio; });
-
-  // Paginar
-  var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
-  bloques.forEach(function(b){
-    if(yAcum+b.h > BODY_BOT){
-      paginas.push({bloques:actual,primera:primera});
-      actual=[]; primera=false; yAcum=BODY_TOP;
-    }
-    actual.push(b); yAcum+=b.h;
-  });
-  if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
-
-  // PDF siempre 595x842
-  var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
   doc.on('end',function(){
@@ -105,34 +70,47 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  paginas.forEach(function(pag,pi){
-    var esUltima = pi===paginas.length-1;
-    doc.addPage({size:[PW,PH],margin:0});
-    doc.image(hdrPath, 0, 0, {width:PW});
-    doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
+  // Primera pagina
+  doc.addPage({size:[PW,PH], margin:0});
+  doc.image(hdrPath, 0, 0, {width:PW});
+  doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
 
-    var yFinal = BODY_TOP;
-    if(pag.primera){
-      doc.font('Helvetica').fontSize(10).fillColor('#111');
-      doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
-      doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
-      doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
+  // Fecha y titulo
+  doc.font('Helvetica').fontSize(10).fillColor('#111');
+  doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
+  doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
+  doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
+
+  var y = BODY_TOP;
+  var paginaActual = 0;
+
+  lineasLimpias.forEach(function(l){
+    if(!l.trim()){
+      y += 6;
+      return;
+    }
+    var bold = esBold(l);
+    doc.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
+    var h = doc.heightOfString(l, {width:TW, lineGap:2}) + 5;
+
+    // Si no cabe, nueva pagina FIJA
+    if(y + h > BODY_BOT){
+      paginaActual++;
+      doc.addPage({size:[PW,PH], margin:0});
+      doc.image(hdrPath, 0, 0, {width:PW});
+      doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
+      y = BODY_TOP;
     }
 
-    pag.bloques.forEach(function(b){
-      if(b.vacio){yFinal+=b.h;return;}
-      if(yFinal+b.h > BODY_BOT) return;
-      doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
-      doc.text(b.texto, MX, yFinal, {width:TW, lineGap:lineGap});
-      yFinal+=b.h;
-    });
-
-    if(esUltima){
-      var firmaLimite = media ? PH/2-FTR_H-70 : PH-FTR_H-70;
-      var firmaY = Math.min(yFinal+15, firmaLimite);
-      doc.image(frmPath, 310, firmaY, {width:155});
-    }
+    doc.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
+    doc.text(l, MX, y, {width:TW, lineGap:2});
+    y += h;
   });
+
+  // Firma en ultima pagina
+  var firmaLimite = media ? PH/2-FTR_H-70 : PH-FTR_H-70;
+  var firmaY = Math.min(y+15, firmaLimite);
+  doc.image(frmPath, 310, firmaY, {width:155});
 
   doc.end();
 };
