@@ -14,8 +14,7 @@ module.exports = async (req, res) => {
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
   const PW = 595, PH = 842;
-  const HDR_H = 116;
-  const FTR_H = 96;
+  const HDR_H = 116, FTR_H = 96;
   const MX = 50, TW = PW - MX * 2;
   const media = tamano === 'media';
   const FECHA_Y  = 128;
@@ -24,6 +23,8 @@ module.exports = async (req, res) => {
   const BODY_BOT = media ? (PH/2) - FTR_H - 80 : PH - FTR_H - 85;
 
   var norm = function(s){ return s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); };
+
+  // Limpiar texto
   var lineasRaw = (texto||'').split('\n');
   var lineasLimpias = [];
   var cortar = false;
@@ -38,6 +39,7 @@ module.exports = async (req, res) => {
     if(!cortar) lineasLimpias.push(l);
   });
 
+  // Detectar si toda la linea va en negrita
   function esBold(l) {
     var t = norm(l.trim());
     if(!t) return false;
@@ -46,18 +48,42 @@ module.exports = async (req, res) => {
     return false;
   }
 
+  // Parsear segmentos bold/normal dentro de una linea
+  // Marca con ** las partes que deben ir en negrita
+  function marcarNegritas(l) {
+    // Nombre del paciente (palabras en mayusculas despues de "paciente")
+    l = l.replace(/(paciente\s+)([A-ZÁÉÍÓÚÜÑ][A-ZÁÉÍÓÚÜÑ ]{3,})/g, '$1**$2**');
+    // Edad
+    l = l.replace(/(\bde\s+)(\d+)\s+(a[ñn]os?\s+de\s+edad)/gi, '$1**$2** $3');
+    // Fecha de nacimiento
+    l = l.replace(/(fecha\s+de\s+nacimiento\s+)(\d{1,2}\s+de\s+\w+\s+de\s+\d{4}|\d{1,2}\/\d{1,2}\/\d{4})/gi, '$1**$2**');
+    // Dias de incapacidad
+    l = l.replace(/(se\s+otorga[n]?\s+)(\d+\s+(?:\(\w+\)\s+)?d[ií]as?[^,.]*)/gi, '$1**$2**');
+    return l;
+  }
+
+  // Construir segmentos de una linea con bold/normal
+  function parsearLinea(l) {
+    var marcada = marcarNegritas(l);
+    var partes = marcada.split(/\*\*([^*]+)\*\*/g);
+    return partes.map(function(s,i){ return {t:s, b:i%2===1}; }).filter(function(s){ return s.t; });
+  }
+
+  // Medir bloques
   var tmp = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   tmp.addPage();
   var bloques = [];
   lineasLimpias.forEach(function(l){
     if(!l.trim()){bloques.push({vacio:true,h:7});return;}
-    var bold = esBold(l);
-    tmp.font(bold?'Helvetica-Bold':'Helvetica').fontSize(10);
+    var boldLinea = esBold(l);
+    tmp.font(boldLinea?'Helvetica-Bold':'Helvetica').fontSize(10);
     var h = tmp.heightOfString(l,{width:TW,lineGap:3});
-    bloques.push({texto:l,bold:bold,h:h+6});
+    var segs = boldLinea ? [{t:l,b:true}] : parsearLinea(l);
+    bloques.push({segs:segs, plain:l, boldLinea:boldLinea, h:h+6});
   });
   tmp.end();
 
+  // Paginar
   var paginas=[], actual=[], yAcum=BODY_TOP, primera=true;
   bloques.forEach(function(b){
     if(yAcum+b.h > BODY_BOT){
@@ -68,6 +94,7 @@ module.exports = async (req, res) => {
   });
   if(actual.length||!paginas.length) paginas.push({bloques:actual,primera:primera});
 
+  // PDF
   var doc = new PDFDocument({size:[PW,PH],margin:0,autoFirstPage:false});
   var chunks=[];
   doc.on('data',function(c){chunks.push(c);});
@@ -84,21 +111,30 @@ module.exports = async (req, res) => {
     doc.image(hdrPath, 0, 0, {width:PW});
     doc.image(ftrPath, 0, media ? PH/2-FTR_H : PH-FTR_H, {width:PW});
 
-    var y = BODY_TOP;
+    var yFinal = BODY_TOP;
     if(pag.primera){
       doc.font('Helvetica').fontSize(10).fillColor('#111');
       doc.text('CDMX a '+(fecha||''), MX, FECHA_Y, {align:'right', width:TW});
       doc.font('Helvetica-Bold').fontSize(11).fillColor('#1a5278');
       doc.text(titulo||'', MX, TITULO_Y, {align:'center', width:TW});
-      y = BODY_TOP;
     }
 
-    var yFinal = y;
     pag.bloques.forEach(function(b){
       if(b.vacio){yFinal+=b.h;return;}
-      if(yFinal+b.h <= BODY_BOT){
-        doc.font(b.bold?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
-        doc.text(b.texto, MX, yFinal, {width:TW, lineGap:3});
+      if(yFinal+b.h > BODY_BOT) return;
+      if(b.segs.length===1){
+        doc.font(b.segs[0].b?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
+        doc.text(b.segs[0].t, MX, yFinal, {width:TW, lineGap:3});
+      } else {
+        var last = b.segs.length-1;
+        b.segs.forEach(function(seg,si){
+          doc.font(seg.b?'Helvetica-Bold':'Helvetica').fontSize(10).fillColor('#111');
+          doc.text(seg.t,
+            si===0 ? MX : undefined,
+            si===0 ? yFinal : undefined,
+            {width:TW, lineGap:3, continued: si<last}
+          );
+        });
       }
       yFinal+=b.h;
     });
