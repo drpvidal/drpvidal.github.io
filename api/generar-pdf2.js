@@ -10,8 +10,7 @@ module.exports = async (req, res) => {
   const hdrPath = path.join(__dirname, '../assets/header.jpg');
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
-  const pageHeight = Math.max(580, 350 + (meds.length * 55) + 150);
-  const doc = new PDFDocument({ size: [595, pageHeight], margin: 0 });
+  const doc = new PDFDocument({ size: [595, 842], margin: 0 });
   const chunks = [];
   doc.on('data', chunk => chunks.push(chunk));
   doc.on('end', () => {
@@ -21,28 +20,30 @@ module.exports = async (req, res) => {
   });
   doc.image(hdrPath, 0, 0, { width: 595 });
   doc.font('Helvetica').fontSize(10).fillColor('#111111');
-  doc.text('CDMX a ' + (fecha||''), 0, 130, { align: 'center', width: 595 });
+  doc.text('CDMX a ' + (fecha || ''), 180, 130, { align: 'right', width: 370 });
   doc.font('Helvetica-Bold').fontSize(10).fillColor('#1a5278');
-  doc.text('Nombre: ' + (nombre||''), 44, 150);
+  doc.text('Nombre: ' + (nombre || ''), 44, 150);
   doc.font('Helvetica').fontSize(10).fillColor('#111111');
-  doc.text('Edad: ' + (edad||'') + ' anos          FN: ' + (fn||''), 44, 164);
+  doc.text('Edad: ' + (edad || '') + ' anos          FN: ' + (fn || ''), 44, 164);
   let y = 184;
-  (meds||[]).forEach(function(med, i) {
+  (meds || []).forEach(function(med, i) {
     doc.font('Helvetica-Bold').fontSize(10).fillColor('#1a5278');
-    doc.text((i+1)+'.- '+med.n, 44, y, {width:507});
-    y += doc.heightOfString((i+1)+'.- '+med.n, {width:507}) + 2;
+    doc.text((i+1) + '.- ' + med.n, 44, y, { width: 507 });
+    y += doc.heightOfString((i+1) + '.- ' + med.n, { width: 507 }) + 2;
     if (med.i) {
       doc.font('Helvetica').fontSize(10).fillColor('#111111');
-      doc.text(med.i, 44, y, {width:507});
-      y += doc.heightOfString(med.i, {width:507}) + 2;
+      doc.text(med.i, 44, y, { width: 507 });
+      y += doc.heightOfString(med.i, { width: 507 }) + 2;
     }
     if (med.c) {
-      var cant = med.c.replace(/^[(]|[)]$/g,'');
-      doc.text('('+cant+')', 44, y, {width:507});
-      y += doc.heightOfString('('+cant+')', {width:507}) + 8;
+      doc.font('Helvetica').fontSize(10).fillColor('#111111');
+      var cant = med.c.replace(/^[(]|[)]$/g, '');
+      doc.text('(' + cant + ')', 44, y, { width: 507 });
+      y += doc.heightOfString('(' + cant + ')', { width: 507 }) + 10;
     }
   });
-  doc.image(frmPath, 310, pageHeight-180, {width:170});
-  doc.image(ftrPath, 0, pageHeight-100, {width:595});
+  const firmaY = Math.max(y + 30, 580);
+  doc.image(frmPath, 310, firmaY, { width: 170 });
+  doc.image(ftrPath, 0, 742, { width: 595 });
   doc.end();
 };
