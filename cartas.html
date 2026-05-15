@@ -137,9 +137,9 @@ var PROMPTS={
   libre:'Redacta una carta medica formal en espanol. Medico: Dr. Pablo Vidal Gonzalez, Cirujano General y Gastrointestinal. MUY IMPORTANTE: NO uses asteriscos ni markdown. Solo texto plano. Devuelve solo el cuerpo del texto.'
 };
 
-document.querySelectorAll('.cat-btn').forEach(function(btn){
+document.querySelectorAll('.cat-btn[data-cat]').forEach(function(btn){
   btn.addEventListener('click',function(){
-    document.querySelectorAll('.cat-btn').forEach(function(b){b.classList.remove('selected');});
+    document.querySelectorAll('.cat-btn[data-cat]').forEach(function(b){b.classList.remove('selected');});
     btn.classList.add('selected');
     catSeleccionada=btn.dataset.cat;
   });
