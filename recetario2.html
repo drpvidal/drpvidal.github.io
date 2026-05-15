@@ -15,8 +15,8 @@ body{font-family:Arial,sans-serif;background:#e8e0d4;min-height:100vh;}
 .ct{font-size:0.67rem;font-weight:700;color:#1a5c38;letter-spacing:0.09em;text-transform:uppercase;margin-bottom:12px;padding-bottom:7px;border-bottom:2px solid #2a7d4f;}
 .fg{margin-bottom:11px;}
 label{display:block;font-size:0.67rem;font-weight:700;color:#888;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:5px;}
-input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:0.92rem;color:#111;-webkit-appearance:none;background:#fff;}
-input:focus,textarea:focus,select:focus{outline:none;border-color:#2a7d4f;}
+input,textarea{width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:8px;font-family:Arial,sans-serif;font-size:0.92rem;color:#111;-webkit-appearance:none;background:#fff;}
+input:focus,textarea:focus{outline:none;border-color:#2a7d4f;}
 textarea{min-height:65px;resize:vertical;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .eb{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#f0f7f3;border:1.5px solid #2a7d4f;border-radius:8px;min-height:44px;}
@@ -41,12 +41,12 @@ textarea{min-height:65px;resize:vertical;}
 .papel img.mb{width:100%;display:block;}
 .cuerpo{padding:3% 7%;font-size:1.8vw;color:#111;line-height:1.5;}
 @media(min-width:440px){.cuerpo{font-size:8px;}}
-.rfecha{text-align:center;margin-bottom:2.5%;}
+.rfecha{text-align:right;margin-bottom:2.5%;}
 .rnombre{font-weight:700;color:#1a5278;margin-bottom:0.5%;}
 .redad{margin-bottom:2%;}
-.rmed-nombre{font-weight:700;color:#1a5278;margin-bottom:0.8%;}
-.rmed-ind{margin-bottom:0.5%;white-space:pre-wrap;}
-.rmed-bloque{margin-bottom:2%;}
+.rmed-nombre{font-weight:700;color:#1a5278;margin-bottom:0.5%;}
+.rmed-ind{margin-bottom:1.5%;}
+.rmed-bloque{margin-bottom:1.5%;}
 .firma-area{text-align:right;padding:1% 7% 1.5%;}
 .firma-area img{width:28%;}
 .ob{max-width:420px;margin:10px auto 0;display:flex;flex-direction:column;gap:8px;}
@@ -71,7 +71,7 @@ textarea{min-height:65px;resize:vertical;}
     <div class="fr">
       <div class="fg"><label>Fecha de nacimiento</label><input type="date" id="fn"/></div>
       <div class="fg"><label>Edad</label>
-        <div class="eb"><span class="n" id="edn">-</span><span class="u">anos</span></div>
+        <div class="eb"><span class="n" id="edn">-</span><span class="u">años</span></div>
       </div>
     </div>
     <div class="fg"><label>Fecha de la receta</label><input type="date" id="fecha"/></div>
@@ -127,7 +127,47 @@ textarea{min-height:65px;resize:vertical;}
 <div class="toast" id="toast"></div>
 <script>
 var MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-var GRUPOS={antiacidos:[{n:'ULSEN PCS (OMEPRAZOL) 40 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.',c:'Favor de surtir una caja con 14 capsulas.'},{n:'DURATER (FAMOTIDINA) 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas por la noche, durante 14 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'PANTOPRAZOL 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'NEXIUM (ESOMEPRAZOL) 40 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.',c:'Favor de surtir una caja con 14 capsulas.'},{n:'DEXIVANT (DEXLANSOPRAZOL) 60 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas durante 14 dias.',c:'Favor de surtir una caja con 14 capsulas.'},{n:'KI-CAB (TEGOPRAZAN) 50 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 14 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'ABCITO (FEXUPRAZAN) 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 14 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'UNIVAL (SUCRALFATO) 1 G TABLETAS',i:'Tomar 1 tableta por via oral, disuelta en agua, una hora antes de cada alimento y 1 tableta antes de acostarse.',c:'Favor de surtir una caja.'}],procineticos:[{n:'DAGLA (CINITAPRIDA) 1 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 15 a 30 minutos antes de cada alimento, durante 14 dias.',c:'Favor de surtir una caja con 42 tabletas.'},{n:'MOTILIUM (DOMPERIDONA) 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 15 a 30 minutos antes de cada alimento, durante 14 dias.',c:'Favor de surtir una caja con 42 tabletas.'},{n:'METOCLOPRAMIDA 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 30 minutos antes de cada alimento, durante 14 dias.',c:'Favor de surtir una caja con 42 tabletas.'}],antibioticos:[{n:'BIOMICS (CEFIXIMA) 400 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas durante 6 dias.',c:'Favor de surtir una caja con 6 capsulas.'},{n:'ELQUINE (LEVOFLOXACINO) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 7 dias.',c:'Favor de surtir una caja con 7 tabletas.'},{n:'BACTRIM F (SULFAMETOXAZOL 800 MG / TRIMETOPRIM 160 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'MACROCIT (AZITROMICINA) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 3 dias.',c:'Favor de surtir una caja con 3 tabletas.'},{n:'AUGMENTIN (AMOXICILINA / ACIDO CLAVULANICO) 875 MG / 125 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'FLAGYL (METRONIDAZOL) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas durante 7 dias.',c:'Favor de surtir una caja con 21 tabletas.'},{n:'CIPROFLOX (CIPROFLOXACINO) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.',c:'Favor de surtir una caja con 14 tabletas.'},{n:'INVANZ (ERTAPENEM) 1 G FRASCO AMPULA',i:'Aplicar 1 g por via intramuscular profunda cada 24 horas durante 3 a 7 dias. Diluir con 3.2 mL de lidocaina simple al 1% sin epinefrina.',c:'Favor de surtir una caja con 1 frasco ampula y una ampolleta de lidocaina simple al 1% sin epinefrina.'}],analgesicos:[{n:'TYLEX 750 (PARACETAMOL) 750 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor.',c:'Favor de surtir una caja.'},{n:'PARACETAMOL 1 G TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor o fiebre.',c:'Favor de surtir una caja.'},{n:'DOLAC (KETOROLACO) 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor, posterior a los alimentos.',c:'Favor de surtir una caja.'},{n:'SUPRADOL SL (KETOROLACO) 30 MG TABLETAS SUBLINGUALES',i:'Colocar 1 tableta debajo de la lengua cada 8 horas en caso de dolor intenso.',c:'Favor de surtir una caja.'},{n:'IBUPROFENO 400 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, posterior a los alimentos, en caso de dolor o inflamacion.',c:'Favor de surtir una caja.'},{n:'IBUPROFENO 600 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, posterior a los alimentos, en caso de dolor o inflamacion.',c:'Favor de surtir una caja.'},{n:'PROFENID (KETOPROFENO) 100 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 12 horas, posterior a los alimentos, en caso de dolor o inflamacion.',c:'Favor de surtir una caja.'},{n:'EXCEL (CELECOXIB) 200 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 12 horas en caso de dolor o inflamacion.',c:'Favor de surtir una caja.'},{n:'ARCOXIA (ETORICOXIB) 120 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas en caso de dolor o inflamacion.',c:'Favor de surtir una caja.'},{n:'NORFLEX PLUS (ORFENADRINA 35 MG / PARACETAMOL 450 MG / CAFEINA 50 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor muscular o contractura.',c:'Favor de surtir una caja.'},{n:'DORIXINA RELAX (CLONIXINATO DE LISINA 125 MG / CICLOBENZAPRINA 5 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor muscular o contractura.',c:'Favor de surtir una caja.'},{n:'TRADOL (TRAMADOL) 50 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 8 horas en caso de dolor moderado a intenso.',c:'Favor de surtir una caja.'},{n:'TRAMACET (TRAMADOL 37.5 MG / PARACETAMOL 325 MG) TABLETAS',i:'Tomar 1 a 2 tabletas por via oral cada 8 horas en caso de dolor moderado a intenso.',c:'Favor de surtir una caja.'}]};
+var GRUPOS={
+antiacidos:[
+{n:'ULSEN PCS (OMEPRAZOL) 40 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.'},
+{n:'DURATER (FAMOTIDINA) 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas por la noche, durante 14 dias.'},
+{n:'PANTOPRAZOL 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.'},
+{n:'NEXIUM (ESOMEPRAZOL) 40 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas, 30 minutos antes del desayuno, durante 14 dias.'},
+{n:'DEXIVANT (DEXLANSOPRAZOL) 60 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas durante 14 dias.'},
+{n:'KI-CAB (TEGOPRAZAN) 50 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 14 dias.'},
+{n:'ABCITO (FEXUPRAZAN) 40 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 14 dias.'},
+{n:'UNIVAL (SUCRALFATO) 1 G TABLETAS',i:'Tomar 1 tableta por via oral, disuelta en agua, una hora antes de cada alimento y 1 tableta antes de acostarse.'}
+],
+procineticos:[
+{n:'DAGLA (CINITAPRIDA) 1 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 15 a 30 minutos antes de cada alimento, durante 14 dias.'},
+{n:'MOTILIUM (DOMPERIDONA) 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 15 a 30 minutos antes de cada alimento, durante 14 dias.'},
+{n:'METOCLOPRAMIDA 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, 30 minutos antes de cada alimento, durante 14 dias.'}
+],
+antibioticos:[
+{n:'BIOMICS (CEFIXIMA) 400 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 24 horas durante 6 dias.'},
+{n:'ELQUINE (LEVOFLOXACINO) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 7 dias.'},
+{n:'BACTRIM F (SULFAMETOXAZOL 800 MG / TRIMETOPRIM 160 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.'},
+{n:'MACROCIT (AZITROMICINA) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas durante 3 dias.'},
+{n:'AUGMENTIN (AMOXICILINA / ACIDO CLAVULANICO) 875 MG / 125 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.'},
+{n:'FLAGYL (METRONIDAZOL) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas durante 7 dias.'},
+{n:'CIPROFLOX (CIPROFLOXACINO) 500 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 12 horas durante 7 dias.'},
+{n:'INVANZ (ERTAPENEM) 1 G FRASCO AMPULA',i:'Aplicar 1 g por via intramuscular profunda cada 24 horas durante 3 a 7 dias. Diluir con 3.2 mL de lidocaina simple al 1% sin epinefrina.'}
+],
+analgesicos:[
+{n:'TYLEX 750 (PARACETAMOL) 750 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor.'},
+{n:'PARACETAMOL 1 G TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor o fiebre.'},
+{n:'DOLAC (KETOROLACO) 10 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor, posterior a los alimentos.'},
+{n:'SUPRADOL SL (KETOROLACO) 30 MG TABLETAS SUBLINGUALES',i:'Colocar 1 tableta debajo de la lengua cada 8 horas en caso de dolor intenso.'},
+{n:'IBUPROFENO 400 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, posterior a los alimentos, en caso de dolor o inflamacion.'},
+{n:'IBUPROFENO 600 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas, posterior a los alimentos, en caso de dolor o inflamacion.'},
+{n:'PROFENID (KETOPROFENO) 100 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 12 horas, posterior a los alimentos, en caso de dolor o inflamacion.'},
+{n:'EXCEL (CELECOXIB) 200 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 12 horas en caso de dolor o inflamacion.'},
+{n:'ARCOXIA (ETORICOXIB) 120 MG TABLETAS',i:'Tomar 1 tableta por via oral cada 24 horas en caso de dolor o inflamacion.'},
+{n:'NORFLEX PLUS (ORFENADRINA 35 MG / PARACETAMOL 450 MG / CAFEINA 50 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor muscular o contractura.'},
+{n:'DORIXINA RELAX (CLONIXINATO DE LISINA 125 MG / CICLOBENZAPRINA 5 MG) TABLETAS',i:'Tomar 1 tableta por via oral cada 8 horas en caso de dolor muscular o contractura.'},
+{n:'TRADOL (TRAMADOL) 50 MG CAPSULAS',i:'Tomar 1 capsula por via oral cada 8 horas en caso de dolor moderado a intenso.'},
+{n:'TRAMACET (TRAMADOL 37.5 MG / PARACETAMOL 325 MG) TABLETAS',i:'Tomar 1 a 2 tabletas por via oral cada 8 horas en caso de dolor moderado a intenso.'}
+]};
 
 function renderGrupo(idLista,grupo){
   var cont=document.getElementById(idLista);
@@ -136,7 +176,7 @@ function renderGrupo(idLista,grupo){
     div.className='sel-item';
     div.innerHTML='<input type="checkbox" id="chk-'+grupo+'-'+idx+'">'
       +'<div><div class="med-name">'+med.n+'</div>'
-      +'<div class="med-sub">'+med.i.substring(0,55)+'...</div></div>';
+      +'<div class="med-sub">'+med.i.substring(0,60)+'...</div></div>';
     div.querySelector('input').addEventListener('change',function(){
       div.classList.toggle('selected',this.checked);
     });
@@ -166,11 +206,11 @@ async function formatearIA(){
   document.getElementById('ia-spinner').classList.add('show');
   document.getElementById('ia-result').classList.remove('show');
   try{
-    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:'Eres asistente de un medico. Devuelve SOLO JSON sin markdown: {"nombre":"NOMBRE MAYUSCULAS presentacion","indicaciones":"indicacion completa.","cantidad":"Favor de surtir..."} Medicamento: '+txt}]})});
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:'Eres asistente de un medico. Devuelve SOLO JSON sin markdown: {"nombre":"NOMBRE MAYUSCULAS presentacion","indicaciones":"indicacion completa."} Solo nombre e indicaciones, sin campo cantidad ni surtir. Medicamento: '+txt}]})});
     var data=await res.json();
     var parsed=JSON.parse(data.content[0].text.trim().replace(/```json|```/g,'').trim());
     var el=document.getElementById('ia-result');
-    el.innerHTML='<b style="color:#1a5278">'+parsed.nombre+'</b><br>'+parsed.indicaciones+'<br>('+parsed.cantidad+')';
+    el.innerHTML='<b style="color:#1a5278">'+parsed.nombre+'</b><br>'+parsed.indicaciones;
     el.dataset.json=JSON.stringify(parsed);
     el.classList.add('show');
   }catch(e){toast('Error al formatear');}
@@ -183,11 +223,11 @@ function recolectarMeds(){
   ['antiacidos','procineticos','antibioticos','analgesicos'].forEach(function(grupo){
     GRUPOS[grupo].forEach(function(med,idx){
       var chk=document.getElementById('chk-'+grupo+'-'+idx);
-      if(chk&&chk.checked)meds.push(med);
+      if(chk&&chk.checked)meds.push({n:med.n,i:med.i});
     });
   });
   var iaEl=document.getElementById('ia-result');
-  if(iaEl.dataset.json){try{var ia=JSON.parse(iaEl.dataset.json);meds.push({n:ia.nombre,i:ia.indicaciones,c:ia.cantidad});}catch(e){}}
+  if(iaEl.dataset.json){try{var ia=JSON.parse(iaEl.dataset.json);meds.push({n:ia.nombre,i:ia.indicaciones});}catch(e){}}
   return meds;
 }
 
@@ -202,12 +242,11 @@ function generar(){
   if(!meds.length){toast('Selecciona al menos un medicamento');return;}
   document.getElementById('rf').textContent='CDMX a '+fL(fecha);
   document.getElementById('rn').textContent='Nombre: '+nombre;
-  document.getElementById('re').textContent='Edad: '+edad+' anos          FN: '+fC(fn);
+  document.getElementById('re').textContent='Edad: '+edad+' años          FN: '+fC(fn);
   var html='';
   meds.forEach(function(med,i){
     html+='<div class="rmed-bloque"><div class="rmed-nombre">'+(i+1)+'.- '+med.n+'</div>'
-      +'<div class="rmed-ind">'+med.i+'</div>'
-      +'<div>('+med.c.replace(/^\(|\)$/g,'')+')</div></div>';
+      +'<div class="rmed-ind">'+med.i+'</div></div>';
   });
   document.getElementById('rm').innerHTML=html;
   _r={nombre:nombre,fn:fn,fecha:fecha,edad:edad,meds:meds};
