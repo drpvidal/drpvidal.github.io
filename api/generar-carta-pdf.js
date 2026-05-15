@@ -13,14 +13,16 @@ module.exports = async (req, res) => {
   const ftrPath = path.join(__dirname, '../assets/footer.jpg');
   const frmPath = path.join(__dirname, '../assets/firma.png');
 
+  // Tamaño carta fijo siempre
   const PW = 595, PH = 842;
   const MX = 50, TW = PW - MX * 2;
-  const HDR_BOT = 128;
   const FTR_H = 100;
-  const FIRMA_SPACE = 110;
+  const HDR_BOT = 128;
   const BODY_TOP_P1 = 178;
   const BODY_TOP_PN = HDR_BOT + 20;
-  const BODY_BOT = PH - FTR_H - FIRMA_SPACE - 10;
+  // Espacio para firma + footer en ultima pagina
+  const FIRMA_RESERVA = 110;
+  const BODY_BOT = PH - FTR_H - FIRMA_RESERVA;
 
   const doc = new PDFDocument({ size: [PW, PH], margin: 0, autoFirstPage: false });
   const chunks = [];
@@ -32,50 +34,47 @@ module.exports = async (req, res) => {
     res.send(Buffer.concat(chunks));
   });
 
-  // Parsear texto: dividir en segmentos bold/normal
-  function parsear(linea) {
-    var partes = linea.split(/\*\*([^*]+)\*\*/g);
-    return partes.map(function(s, i){ return { t: s, b: i%2===1 }; }).filter(function(s){ return s.t; });
-  }
-
-  // Calcular altura de una linea (texto plano)
-  function altoLinea(txt) {
-    return doc.font('Helvetica').fontSize(10).heightOfString(txt, { width: TW, lineGap: 2 });
-  }
-
-  // Construir bloques a renderizar
+  // Dividir texto en lineas y calcular altura real de cada una
+  doc.font('Helvetica').fontSize(10);
   var lineas = (texto||'').split('\n');
   var bloques = [];
   lineas.forEach(function(l) {
-    if (!l.trim()) { bloques.push({ vacio: true }); return; }
-    var segs = parsear(l);
-    var plain = segs.map(function(s){ return s.t; }).join('');
-    bloques.push({ segs: segs, plain: plain, h: altoLinea(plain) + 4 });
+    if (!l.trim()) {
+      bloques.push({ vacio: true, h: 7 });
+    } else {
+      var h = doc.heightOfString(l, { width: TW, lineGap: 2 });
+      bloques.push({ texto: l, h: h + 5 });
+    }
   });
 
+  // Paginar: distribuir bloques en paginas de tamaño fijo
   var paginas = [];
-  var paginaActual = [];
-  var yUsado = BODY_TOP_P1;
-  var esPrimera = true;
+  var actual = [];
+  var yAcum = BODY_TOP_P1;
+  var primera = true;
 
   bloques.forEach(function(bloque) {
-    var h = bloque.vacio ? 8 : bloque.h;
-    var limite = esPrimera ? BODY_BOT : BODY_BOT;
-    if (yUsado + h > limite) {
-      paginas.push({ bloques: paginaActual, primera: esPrimera });
-      paginaActual = [];
-      esPrimera = false;
-      yUsado = BODY_TOP_PN;
+    var limite = BODY_BOT;
+    if (yAcum + bloque.h > limite) {
+      paginas.push({ bloques: actual, primera: primera });
+      actual = [];
+      primera = false;
+      yAcum = BODY_TOP_PN;
     }
-    paginaActual.push(bloque);
-    yUsado += h;
+    actual.push(bloque);
+    yAcum += bloque.h;
   });
-  paginas.push({ bloques: paginaActual, primera: esPrimera });
+  if (actual.length) paginas.push({ bloques: actual, primera: primera });
 
+  // Renderizar cada pagina
   paginas.forEach(function(pag, pi) {
     var esUltima = pi === paginas.length - 1;
     doc.addPage({ size: [PW, PH], margin: 0 });
+
+    // Header siempre
     doc.image(hdrPath, 0, 0, { width: PW });
+    // Footer siempre al fondo fijo
+    doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
 
     var y;
     if (pag.primera) {
@@ -89,28 +88,17 @@ module.exports = async (req, res) => {
     }
 
     pag.bloques.forEach(function(bloque) {
-      if (bloque.vacio) { y += 8; return; }
-      if (bloque.segs.length === 1 && !bloque.segs[0].b) {
-        doc.font('Helvetica').fontSize(10).fillColor('#111');
-        doc.text(bloque.segs[0].t, MX, y, { width: TW, lineGap: 2 });
-      } else {
-        var last = bloque.segs.length - 1;
-        bloque.segs.forEach(function(seg, si) {
-          doc.font(seg.b ? 'Helvetica-Bold' : 'Helvetica').fontSize(10).fillColor('#111');
-          doc.text(seg.t,
-            si === 0 ? MX : undefined,
-            si === 0 ? y : undefined,
-            { width: TW, lineGap: 2, continued: si < last }
-          );
-        });
-      }
+      if (bloque.vacio) { y += bloque.h; return; }
+      doc.font('Helvetica').fontSize(10).fillColor('#111');
+      doc.text(bloque.texto, MX, y, { width: TW, lineGap: 2 });
       y += bloque.h;
     });
 
+    // Firma solo en ultima pagina, antes del footer
     if (esUltima) {
-      doc.image(frmPath, 310, y + 15, { width: 170 });
+      var firmaY = Math.min(y + 15, PH - FTR_H - 95);
+      doc.image(frmPath, 310, firmaY, { width: 170 });
     }
-    doc.image(ftrPath, 0, PH - FTR_H, { width: PW });
   });
 
   doc.end();
