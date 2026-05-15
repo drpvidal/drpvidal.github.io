@@ -33,13 +33,7 @@ module.exports = async (req, res) => {
     if (med.i) {
       doc.font('Helvetica').fontSize(10).fillColor('#111111');
       doc.text(med.i, 44, y, { width: 507 });
-      y += doc.heightOfString(med.i, { width: 507 }) + 2;
-    }
-    if (med.c) {
-      doc.font('Helvetica').fontSize(10).fillColor('#111111');
-      var cant = med.c.replace(/^[(]|[)]$/g, '');
-      doc.text('(' + cant + ')', 44, y, { width: 507 });
-      y += doc.heightOfString('(' + cant + ')', { width: 507 }) + 10;
+      y += doc.heightOfString(med.i, { width: 507 }) + 12;
     }
   });
   const firmaY = Math.max(y + 30, 580);
