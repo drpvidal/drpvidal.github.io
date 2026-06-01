@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Quirúrgico</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f5f5f0;min-height:100vh}
+.app{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
+.header{margin-bottom:1.5rem}
+.header h1{font-size:20px;font-weight:600;margin-bottom:2px}
+.header p{font-size:13px;color:#666}
+.nav{display:flex;gap:4px;margin-bottom:1.5rem;background:#e8e8e4;border-radius:12px;padding:4px}
+.nav-btn{flex:1;padding:8px 4px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#666;border-radius:8px;transition:all 0.15s;font-family:inherit}
+.nav-btn.active{background:#fff;color:#1a1a1a;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.section{display:none}.section.active{display:block}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:600;color:#999;margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.06em}
+.form-label{font-size:12px;color:#555;margin-bottom:4px;display:block}
+.form-group{margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],input[type=date],input[type=email],input[type=tel],input[type=number],select,textarea{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:#1a1a1a;outline:none;transition:border-color 0.15s}
+input:focus,select:focus,textarea:focus{border-color:#1a1a1a}
+textarea{resize:vertical}
+.btn{padding:9px 18px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-family:inherit;color:#1a1a1a;transition:all 0.15s}
+.btn:hover{background:#f5f5f0}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:transparent}
+.btn-primary:hover{background:#333}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-danger{color:#dc2626;border-color:#fca5a5}
+.divider{border:none;border-top:1px solid #e8e8e4;margin:1rem 0}
+.upload-zone{border:2px dashed #ddd;border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.15s;background:#fafaf8;position:relative}
+.upload-zone:hover{border-color:#999}
+.tabs-mini{display:flex;gap:4px;margin-bottom:12px}
+.tab-mini{padding:5px 14px;border-radius:99px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;font-family:inherit;color:#666;transition:all 0.15s}
+.tab-mini.active{background:#1a1a1a;color:#fff;border-color:transparent}
+.record-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e8e8e4;font-size:13px}
+.record-row:last-child{border-bottom:none}
+.badge-success{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;background:#dcfce7;color:#16a34a}
+.ai-box{background:#f5f5f0;border-radius:8px;padding:12px;min-height:80px;font-size:13px;line-height:1.7;color:#1a1a1a;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.mic-btn{width:60px;height:60px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.2s;margin:0 auto}
+.mic-btn.recording{border-color:#dc2626;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.3)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
+.empty{text-align:center;color:#999;font-size:13px;padding:2rem 0}
+.equipo-row{display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:start;margin-bottom:10px}
+.equipo-label{font-size:12px;font-weight:500;color:#555;padding-top:10px}
+.otro-input{margin-top:6px;display:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.nota-base-box{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;font-size:12px;line-height:1.6;color:#1e40af;margin-bottom:12px;max-height:150px;overflow-y:auto}
+.nota-base-box.libre{background:#fdf4ff;border-color:#e9d5ff;color:#6b21a8}
+.nota-preview{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px;font-size:12px;color:#78350f;margin-top:8px}
+.nota-preview.libre{background:#f5f3ff;border-color:#c4b5fd;color:#4c1d95}
+@media(max-width:480px){.grid2{grid-template-columns:1fr}.equipo-row{grid-template-columns:1fr}.equipo-label{padding-top:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>Registro Quirúrgico</h1>
+    <p>Dr. Pablo Vidal — Sistema de gestión de cirugías</p>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('nueva')">Nueva cirugía</button>
+    <button class="nav-btn" onclick="showSection('nota')">Nota operatoria</button>
+    <button class="nav-btn" onclick="showSection('equipo')">Mi equipo</button>
+    <button class="nav-btn" onclick="showSection('historial')">Historial</button>
+  </div>
+
+  <div class="section active" id="sec-nueva">
+    <div class="card">
+      <div class="card-title">1 · Datos del paciente</div>
+      <div class="tabs-mini">
+        <button class="tab-mini active" onclick="switchPatientTab('foto',this)">Foto de etiqueta</button>
+        <button class="tab-mini" onclick="switchPatientTab('manual',this)">Ingreso manual</button>
+      </div>
+      <div id="tab-foto">
+        <div class="upload-zone" onclick="document.getElementById('etiqueta-input').click()">
+          <input type="file" id="etiqueta-input" accept="image/*" style="display:none" onchange="handleEtiqueta(event)">
+          <div id="upload-placeholder"><div style="font-size:28px;margin-bottom:8px">📷</div><div style="font-size:13px;font-weight:500">Subir foto de etiqueta</div><div style="font-size:11px;color:#999;margin-top:4px">Toca para elegir o tomar foto</div></div>
+          <div id="upload-preview" style="display:none"><img id="preview-img" style="width:100%;max-height:160px;object-fit:contain;border-radius:8px;margin-bottom:6px"><div style="font-size:12px;color:#666">Toca para cambiar</div></div>
+          <div id="scanning-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.55);border-radius:12px;align-items:center;justify-content:center;color:#fff;font-size:13px;flex-direction:column;gap:8px"><div style="font-size:24px">⚙️</div><div>Leyendo etiqueta con IA...</div></div>
+        </div>
+        <div id="ocr-result" style="display:none;margin-top:12px">
+          <div style="font-size:12px;color:#666;margin-bottom:8px">Datos detectados — podés editar si es necesario:</div>
+          <div class="grid2">
+            <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="foto-nombre" placeholder="Nombre completo"></div>
+            <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="foto-dob"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Edad</label><input type="text" id="foto-edad" placeholder="Ej: 45 años"></div>
+        </div>
+      </div>
+      <div id="tab-manual" style="display:none">
+        <div class="grid2">
+          <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="manual-nombre" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="manual-dob" onchange="calcularEdad()"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Edad</label><input type="text" id="manual-edad" placeholder="Se calcula automáticamente"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2 · Datos de la cirugía</div>
+      <div class="grid2">
+        <div class="form-group"><label class="form-label">Fecha de cirugía</label><input type="date" id="fecha-cirugia"></div>
+        <div class="form-group"><label class="form-label">Diagnóstico preoperatorio</label><input type="text" id="diagnostico" placeholder="Diagnóstico"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Procedimiento</label>
+        <select id="procedimiento" onchange="checkOtro('procedimiento','otro-procedimiento');cargarNotaBase()">
+          <option value="">Seleccionar...</option>
+          <optgroup label="Hernia inguinal">
+            <option>Plastia inguinal bilateral indirecta por laparoscopía</option>
+            <option>Plastia inguinal bilateral directa por laparoscopía</option>
+            <option>Plastia inguinal derecha indirecta por laparoscopía</option>
+            <option>Plastia inguinal izquierda indirecta por laparoscopía</option>
+            <option>Plastia inguinal izquierda directa por laparoscopía</option>
+          </optgroup>
+          <optgroup label="Vesícula biliar">
+            <option>Colecistectomía laparoscópica</option>
+            <option>Colecistectomía laparoscópica + ICG + colangiografía transoperatoria</option>
+          </optgroup>
+          <optgroup label="Reflujo gastroesofágico">
+            <option>Funduplicatura tipo Toupet por laparoscopía</option>
+            <option>Funduplicatura tipo Nissen por laparoscopía</option>
+          </optgroup>
+          <optgroup label="Tiroides">
+            <option>Tiroidectomía total con neuromonitoreo</option>
+            <option>Hemitiroidectomía derecha con neuromonitoreo</option>
+            <option>Hemitiroidectomía izquierda con neuromonitoreo</option>
+          </optgroup>
+          <optgroup label="Hemorroidal">
+            <option>Hemorroidectomía tipo Ferguson 3 paquetes</option>
+            <option>Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar</option>
+          </optgroup>
+          <optgroup label="Región sacrococcígea">
+            <option>Resección de quiste pilonidal</option>
+          </optgroup>
+          <optgroup label="Pared abdominal">
+            <option>Plastía umbilical abierta con malla</option>
+            <option>Plastía umbilical abierta con Ventral Patch 6cm</option>
+            <option>Plastía ventral laparoscópica IPOM Plus</option>
+          </optgroup>
+          <option value="otro">Otro...</option>
+        </select>
+        <input type="text" id="otro-procedimiento" class="otro-input" placeholder="Especificar procedimiento">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Institución</label>
+        <select id="institucion" onchange="checkOtro('institucion','otra-institucion')">
+          <option value="">Seleccionar...</option>
+          <option>Centro Médico ABC Observatorio</option>
+          <option>Centro Médico ABC Santa Fe</option>
+          <option>Star Médica Santa Fe</option>
+          <option>San Ángel Inn Patriotismo</option>
+          <option>San Ángel Inn Universidad</option>
+          <option>San Ángel Inn Chapultepec</option>
+          <option>Centro Quirúrgico Medici</option>
+          <option>Hospital Ángeles Lomas</option>
+          <option value="otro">Otra...</option>
+        </select>
+        <input type="text" id="otra-institucion" class="otro-input" placeholder="Nombre de la institución">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">3 · Equipo quirúrgico</div>
+      <div class="equipo-row">
+        <div class="equipo-label">Primer ayudante</div>
+        <div>
+          <select id="ayudante1" onchange="checkOtro('ayudante1','otro-ayudante1')">
+            <option value="">— No participó —</option>
+            <option>Dr. Enrique Stoopen Margain</option>
+            <option>Dr. Natan Sarue Saed</option>
+            <option>Dr. Jonathan Chernitzky Camaño</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-ayudante1" class="otro-input" placeholder="Nombre del ayudante">
+        </div>
+      </div>
+      <div class="equipo-row">
+        <div class="equipo-label">Segundo ayudante</div>
+        <div>
+          <select id="ayudante2" onchange="checkOtro('ayudante2','otro-ayudante2')">
+            <option value="">— No participó —</option>
+            <option>Dr. Enrique Stoopen Margain</option>
+            <option>Dr. Natan Sarue Saed</option>
+            <option>Dr. Jonathan Chernitzky Camaño</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-ayudante2" class="otro-input" placeholder="Nombre del ayudante">
+        </div>
+      </div>
+      <div class="equipo-row">
+        <div class="equipo-label">Anestesiólogo</div>
+        <div>
+          <select id="anestesio" onchange="checkOtro('anestesio','otro-anestesio')">
+            <option value="">— Seleccionar —</option>
+            <option>Dr. Alejandro Jiménez Casillas</option>
+            <option>Dr. Paulo López Reymundo</option>
+            <option>Dra. Giselle Uribe</option>
+            <option>Dra. Andrea Figueroa</option>
+            <option value="otro">Otro...</option>
+          </select>
+          <input type="text" id="otro-anestesio" class="otro-input" placeholder="Nombre del anestesiólogo">
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:1rem">
+      <button class="btn" onclick="limpiarFormulario()">Limpiar</button>
+      <button class="btn btn-primary" onclick="guardarCirugia()">Guardar registro</button>
+    </div>
+
+    <div id="save-confirm" style="display:none" class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="font-size:18px">✓</span>
+        <span style="font-weight:600;font-size:14px">Registro guardado correctamente</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-sm btn-primary" onclick="irANota()">Generar nota operatoria</button>
+        <button class="btn btn-sm" id="btn-email" onclick="enviarSecretaria()">Enviar a secretaria</button><button class="btn btn-sm" onclick="abrirModalAlta()" style="background:#2e7d32;color:#fff;border-color:transparent">📄 Indicaciones de alta</button>
+        <span id="email-status" style="font-size:12px"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-nota">
+    <div class="card">
+      <div class="card-title">Nota operatoria</div>
+      <div id="paso-seleccion">
+        <div class="form-group">
+          <label class="form-label">Seleccioná el procedimiento base</label>
+          <select id="nota-procedimiento" onchange="mostrarNotaBase()">
+            <option value="">Seleccionar procedimiento...</option>
+            <optgroup label="Hernia inguinal">
+              <option>Plastia inguinal bilateral indirecta por laparoscopía</option>
+              <option>Plastia inguinal bilateral directa por laparoscopía</option>
+              <option>Plastia inguinal derecha indirecta por laparoscopía</option>
+              <option>Plastia inguinal izquierda indirecta por laparoscopía</option>
+              <option>Plastia inguinal izquierda directa por laparoscopía</option>
+            </optgroup>
+            <optgroup label="Vesícula biliar">
+              <option>Colecistectomía laparoscópica</option>
+              <option>Colecistectomía laparoscópica + ICG + colangiografía transoperatoria</option>
+            </optgroup>
+            <optgroup label="Reflujo gastroesofágico">
+              <option>Funduplicatura tipo Toupet por laparoscopía</option>
+              <option>Funduplicatura tipo Nissen por laparoscopía</option>
+            </optgroup>
+            <optgroup label="Tiroides">
+              <option>Tiroidectomía total con neuromonitoreo</option>
+              <option>Hemitiroidectomía derecha con neuromonitoreo</option>
+              <option>Hemitiroidectomía izquierda con neuromonitoreo</option>
+            </optgroup>
+            <optgroup label="Hemorroidal">
+              <option>Hemorroidectomía tipo Ferguson 3 paquetes</option>
+              <option>Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar</option>
+            </optgroup>
+            <optgroup label="Región sacrococcígea">
+              <option>Resección de quiste pilonidal</option>
+            </optgroup>
+            <optgroup label="Pared abdominal">
+              <option>Plastía umbilical abierta con malla</option>
+              <option>Plastía umbilical abierta con Ventral Patch 6cm</option>
+              <option>Plastía ventral laparoscópica IPOM Plus</option>
+            </optgroup>
+            <optgroup label="Otro procedimiento">
+              <option value="libre">✏️ Dictado libre con IA — cualquier procedimiento</option>
+            </optgroup>
+          </select>
+        </div>
+        <div id="nota-base-preview" style="display:none">
+          <div class="nota-base-box" id="nota-base-texto"></div>
+          <button class="btn btn-primary" id="btn-usar-nota" style="width:100%;margin-top:8px" onclick="mostrarPasoVariantes()">Usar esta nota base →</button>
+        </div>
+      </div>
+      <div id="paso-variantes" style="display:none">
+        <div class="nota-preview" id="procedimiento-seleccionado"></div>
+        <hr class="divider">
+        <div class="form-group">
+          <label class="form-label" style="font-weight:500;color:#1a1a1a" id="dictado-label">¿Hubo algo diferente en esta cirugía?</label>
+          <div style="font-size:12px;color:#666;margin-bottom:8px" id="dictado-hint">Dictá o escribí solo lo que fue distinto.</div>
+          <div style="text-align:center;padding:0.75rem 0">
+            <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">🎤</button>
+            <div style="text-align:center;font-size:12px;color:#666;margin-top:8px" id="mic-status">Presioná para dictar</div>
+          </div>
+          <textarea id="dictado-texto" rows="4" placeholder="Ej: Se encontró saco herniario de gran tamaño..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:1rem">
+          <button class="btn btn-sm" onclick="volverSeleccion()">← Cambiar nota</button>
+          <button class="btn btn-primary" onclick="generarNota()">Generar nota completa con IA →</button>
+        </div>
+        <div id="nota-resultado" style="display:none">
+          <hr class="divider">
+          <label class="form-label" style="font-weight:500">Nota operatoria generada</label>
+          <div class="ai-box" id="nota-contenido"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
+            <button class="btn btn-sm" onclick="copiarNota()">Copiar texto</button>
+            <button class="btn btn-sm btn-primary" onclick="enviarNotaSecretaria()">Enviar a secretaria</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="sec-equipo">
+    <div class="card">
+      <div class="card-title">Agregar integrante</div>
+      <div class="grid2">
+        <div class="form-group"><label class="form-label">Nombre completo</label><input type="text" id="eq-nombre" placeholder="Dr. Nombre Apellido"></div>
+        <div class="form-group"><label class="form-label">Tipo</label><select id="eq-tipo"><option value="ayudante">Ayudante</option><option value="anestesio">Anestesiólogo</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="form-group"><label class="form-label">Email</label><input type="email" id="eq-email" placeholder="doctor@email.com"></div>
+        <div class="form-group"><label class="form-label">Teléfono (opcional)</label><input type="tel" id="eq-tel" placeholder="+52 55 0000 0000"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="agregarMiembro()">Agregar</button></div>
+    </div>
+    <div class="card"><div class="card-title">Ayudantes</div><div id="lista-ayudantes"></div></div>
+    <div class="card"><div class="card-title">Anestesiólogos</div><div id="lista-anestesio"></div></div>
+  </div>
+
+  <div class="section" id="sec-historial">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <span style="font-weight:600;font-size:14px">Registros guardados</span>
+        <span id="historial-count" style="font-size:12px;color:#999"></span>
+      </div>
+      <div id="historial-lista"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+
+const WEBHOOK_URL='/api/webhook';
+  
+const NOTAS_BASE = {
+  'Plastia inguinal bilateral indirecta por laparoscopía': `HERNIA INGUINAL BILATERAL\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe exploran ambas regiones inguinales, confirmando hernia inguinal bilateral. Se inicia la disección en el lado izquierdo, realizando apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nPosteriormente, se realiza el mismo abordaje en el lado contralateral, con apertura del peritoneo y desarrollo del espacio preperitoneal. Se identifican y disecan las estructuras anatómicas, corroborando los orificios directo e indirecto, con hallazgo de defecto herniario indirecto. Se reduce el saco herniario correspondiente y se reseca el lipoma del cordón, respetando las estructuras del cordón espermático. Se continúa la disección hasta exponer el ligamento de Cooper hacia el pubis y se coloca malla Progrip de 16 x 12 cm, cubriendo completamente el orificio miopectíneo.\nUna vez colocadas las mallas, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0, cubriendo por completo las mismas.\nSe verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastia inguinal bilateral directa por laparoscopía': `HERNIA INGUINAL BILATERAL DIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe exploran ambas regiones inguinales, confirmando hernia inguinal bilateral de tipo directo. Se inicia la disección en el lado izquierdo, realizando apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis, respetando en todo momento las estructuras del cordón espermático. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nPosteriormente, se realiza el mismo abordaje en el lado contralateral. Se identifican y disecan las estructuras anatómicas, con hallazgo de defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo completamente el orificio miopectíneo.\nUna vez colocadas las mallas, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastia inguinal derecha indirecta por laparoscopía': `HERNIA INGUINAL DERECHA INDIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal derecha, confirmando hernia inguinal indirecta. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastia inguinal izquierda indirecta por laparoscopía': `HERNIA INGUINAL IZQUIERDA INDIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal izquierda, confirmando hernia inguinal indirecta. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario indirecto. Se reduce el saco herniario y se reseca el lipoma del cordón, respetando en todo momento las estructuras del cordón espermático. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastia inguinal izquierda directa por laparoscopía': `HERNIA INGUINAL IZQUIERDA DIRECTA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.\nSe explora la región inguinal izquierda, confirmando hernia inguinal directa. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando los orificios directo e indirecto, encontrando defecto herniario directo. Se reduce el contenido herniario y se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis, respetando en todo momento las estructuras del cordón espermático. Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo.\nUna vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0. Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Colecistectomía laparoscópica': `COLECISTECTOMÍA POR LAPAROSCOPIA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. No se coloca sonda Foley. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios, utilizando dos trocares de 11 mm y dos de 5 mm, distribuidos de manera habitual.\nSe realiza exploración inicial de la cavidad abdominal. Se identifica la vesícula biliar; se toma el fondo vesicular con pinza y se eleva en dirección cefálica, mientras que con otra pinza se tracciona el infundíbulo en sentido lateral e inferior, logrando adecuada exposición del triángulo de Calot.\nSe inicia la disección del triángulo de Calot, liberando tejido fibroareolar y adiposo, identificando de manera progresiva el conducto cístico y la arteria cística. Se continúa la disección hasta obtener visión crítica de seguridad de Strasberg.\nSe procede a la realización de colangiografía transoperatoria mediante canalización del conducto cístico, utilizando catéter tipo Arrow con infusión de medio de contraste; bajo fluoroscopia transoperatoria se obtiene adecuada opacificación de la vía biliar, sin defectos de llenado, sin evidencia de litos y con adecuado paso de contraste hacia duodeno.\nPosteriormente, se colocan dos grapas proximales y una grapa distal tanto en el conducto cístico como en la arteria cística, realizándose sección de ambas estructuras. Se continúa con disección de la vesícula biliar del lecho hepático mediante energía monopolar.\nSe verifica adecuada hemostasia y ausencia de fuga biliar. Se retira la pieza quirúrgica a través del puerto umbilical. Se retiran los trocares bajo visión directa.\nSe realiza cierre de la aponeurosis de los sitios de 11 mm con Monomax 0 y cierre de piel con sutura subcuticular de Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Colecistectomía laparoscópica + ICG + colangiografía transoperatoria': `COLECISTECTOMÍA LAPAROSCÓPICA + VERDE DE INDOCIANINA (ICG) + COLANGIOGRAFÍA TRANSOPERATORIA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. No se coloca sonda Foley. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios, utilizando dos trocares de 11 mm y dos de 5 mm.\nSe realiza exploración inicial de la cavidad abdominal. Se identifica la vesícula biliar y se logra adecuada exposición del triángulo de Calot. Se inicia la disección liberando tejido fibroareolar y adiposo, identificando el conducto cístico y la arteria cística, hasta obtener visión crítica de seguridad de Strasberg.\nDe manera preoperatoria se administraron 2 ml de verde de indocianina diluidos en 10 ml de solución, aproximadamente dos horas previas al procedimiento. Durante el acto quirúrgico, mediante sistema de fluorescencia, se identificaron las estructuras de la vía biliar, facilitando su reconocimiento anatómico y contribuyendo a una disección segura.\nSe procede a la realización de colangiografía transoperatoria mediante canalización del conducto cístico con catéter tipo Arrow; bajo fluoroscopia se obtiene adecuada opacificación de la vía biliar intra y extrahepática, sin defectos de llenado y con adecuado paso de contraste hacia duodeno.\nSe colocan dos grapas proximales y una distal en conducto cístico y arteria cística, realizándose sección de ambas estructuras. Se diseca la vesícula del lecho hepático con energía monopolar. Se verifica hemostasia y ausencia de fuga biliar. Se retira la pieza a través del puerto umbilical.\nSe realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Funduplicatura tipo Toupet por laparoscopía': `FUNDUPLICATURA LAPAROSCÓPICA TIPO TOUPET (270°)\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios. Se sustituye trocar en epigastrio por separador hepático tipo Nathanson, logrando adecuada elevación del lóbulo hepático izquierdo.\nSe identifica la unión esófago-gástrica y se procede a la disección del hiato esofágico, liberando el esófago distal y permitiendo su adecuada movilización intraabdominal con energía ultrasónica. Se identifican y respetan los nervios vagos anterior y posterior. Los vasos cortos gástricos no se seccionan.\nSe realiza apertura de la ventana retroesofágica, permitiendo el paso del fundus gástrico hacia el lado derecho del esófago sin tensión. Se verifica adecuada longitud intraabdominal del esófago.\nSe realiza cierre de pilares diafragmáticos con Ethibond 2-0, colocando al menos dos puntos, logrando hiato adecuado.\nSe confecciona funduplicatura tipo Toupet (270°). Se fija el fundus al pilar derecho con tres puntos de Ethibond 2-0. Se colocan tres puntos esófago-gástricos en cada lado, conformando válvula posterior de 270°, verificando adecuada orientación sin torsión.\nSe revisa hemostasia y correcta posición. Se retira separador hepático. Se retiran trocares bajo visión directa. Se realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Funduplicatura tipo Nissen por laparoscopía': `FUNDUPLICATURA LAPAROSCÓPICA TIPO NISSEN (360°)\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión umbilical y acceso a cavidad abdominal mediante técnica abierta. Se coloca trócar umbilical de 11 mm y se establece neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios. Se sustituye trocar en epigastrio por separador hepático tipo Nathanson.\nSe identifica la unión esófago-gástrica y se inicia disección del hiato esofágico con energía ultrasónica, liberando el esófago distal. Se identifican y respetan los nervios vagos anterior y posterior.\nSe realiza liberación completa del fundus gástrico mediante sección de vasos cortos con energía ultrasónica. Se completa apertura de ventana retroesofágica, permitiendo el paso del fundus hacia el lado derecho del esófago. Se verifica adecuada longitud intraabdominal.\nSe realiza cierre de pilares diafragmáticos con Ethibond 2-0, al menos dos puntos, logrando hiato adecuado.\nSe confecciona funduplicatura tipo Nissen (360°), pasando el fundus por detrás del esófago. Se colocan dos puntos de fijación posteriores del fundus al pilar derecho. Se realiza funduplicatura con tres puntos, calibrando con bujía esofágica de 60 Fr, logrando funduplicatura tipo "floppy" sin tensión ni torsión.\nSe revisa hemostasia y correcta posición. Se retira separador hepático. Se retiran trocares bajo visión directa. Se realiza cierre de aponeurosis con Monomax 0 y piel con Monocryl 3-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Tiroidectomía total con neuromonitoreo': `TIROIDECTOMÍA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante colocación de rodillo interescapular. Se realiza intubación orotraqueal con tubo endotraqueal con electrodos laríngeos para neuromonitoreo intraoperatorio, verificando adecuada posición y señal basal. Se realiza protocolo de asepsia y antisepsia de la región cervical anterior.\nSe realiza incisión cervical transversa tipo Kocher siguiendo pliegue cutáneo natural. Se incide piel y tejido celular subcutáneo hasta identificar y abrir el platisma. Se desarrollan colgajos subplatismales superior e inferior.\nSe identifica la línea alba cervical y se realiza apertura longitudinal entre los músculos pretiroideos, exponiendo la glándula tiroides.\nSe inicia disección del lóbulo tiroideo con movilización medial. Se identifican, coagulan y seccionan los vasos tiroideos superiores con disección cercana a la cápsula para proteger la rama externa del nervio laríngeo superior. Se utiliza energía bipolar avanzada para control hemostático.\nSe continúa disección capsular identificando y preservando las glándulas paratiroides superior e inferior con su vascularización.\nSe identifica el nervio laríngeo recurrente en su trayecto, confirmando señal mediante neuromonitoreo. Se continúa disección respetando el nervio, evitando tracción, compresión o energía térmica cercana. Se realiza liberación progresiva hasta el ligamento de Berry bajo visión directa.\nSe repite el procedimiento en el lado contralateral con identificación y preservación de paratiroides y neuromonitoreo bilateral.\nSe verifica hemostasia del lecho quirúrgico y se confirma integridad funcional de ambos nervios laríngeos recurrentes. Se coloca drenaje si se considera necesario. Se realiza cierre por planos con sutura absorbible y piel con técnica subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Hemitiroidectomía derecha con neuromonitoreo': `HEMITIROIDECTOMÍA DERECHA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante rodillo interescapular. Se realiza intubación con tubo endotraqueal con electrodos laríngeos para neuromonitoreo, verificando señal basal. Se realiza asepsia y antisepsia de región cervical anterior.\nSe realiza incisión tipo Kocher siguiendo pliegue cutáneo natural. Se desarrollan colgajos subplatismales. Se abre la línea alba cervical exponiendo el lóbulo tiroideo derecho.\nSe inicia disección del lóbulo derecho con movilización medial. Se identifican y seccionan los vasos tiroideos superiores con disección capsular para proteger el nervio laríngeo superior. Se preservan las glándulas paratiroides con su vascularización.\nSe identifica el nervio laríngeo recurrente derecho confirmando integridad mediante neuromonitoreo. Se completa la liberación respetando el nervio hasta el ligamento de Berry. Se separa el lóbulo de tráquea e istmo, el cual es seccionado. Se retira la pieza.\nSe verifica hemostasia y se confirma integridad del nervio laríngeo recurrente. Se coloca drenaje si es necesario. Cierre por planos con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Hemitiroidectomía izquierda con neuromonitoreo': `HEMITIROIDECTOMÍA IZQUIERDA ABIERTA CON NEUROMONITOREO INTRAOPERATORIO DEL NERVIO LARÍNGEO RECURRENTE\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada, con extensión cervical mediante rodillo interescapular. Se realiza intubación con tubo endotraqueal con electrodos laríngeos para neuromonitoreo, verificando señal basal. Se realiza asepsia y antisepsia de región cervical anterior.\nSe realiza incisión tipo Kocher siguiendo pliegue cutáneo natural. Se desarrollan colgajos subplatismales. Se abre la línea alba cervical exponiendo el lóbulo tiroideo izquierdo.\nSe inicia disección del lóbulo izquierdo con movilización medial. Se identifican y seccionan los vasos tiroideos superiores con disección capsular para proteger el nervio laríngeo superior. Se preservan las glándulas paratiroides con su vascularización.\nSe identifica el nervio laríngeo recurrente izquierdo confirmando integridad mediante neuromonitoreo. Se completa la liberación respetando el nervio hasta el ligamento de Berry. Se separa el lóbulo de tráquea e istmo, el cual es seccionado. Se retira la pieza.\nSe verifica hemostasia y se confirma integridad del nervio laríngeo recurrente. Se coloca drenaje si es necesario. Cierre por planos con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Hemorroidectomía tipo Ferguson 3 paquetes': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica sobre la mucosa y piel. Se continúa con disección cuidadosa respetando el complejo esfinteriano. Se identifica el pedículo vascular, el cual es ligado con catgut crómico 3-0. Se reseca el paquete hemorroidal.\nSe realiza cierre de la herida con técnica cerrada tipo Ferguson, utilizando catgut crómico 3-0 para plano mucoso y 4-0 para cierre cutáneo.\nSe procede de manera similar con los dos paquetes restantes, respetando puentes mucocutáneos adecuados.\nSe verifica hemostasia en todos los sitios. Se coloca Spongostan impregnado con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar': `HEMORROIDECTOMÍA TIPO FERGUSON DE TRES PAQUETES CON ENERGÍA BIPOLAR AVANZADA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición de litotomía bajo anestesia general. Se realiza asepsia y antisepsia de la región perianal y colocación de campos estériles.\nSe realiza exploración anal inicial, identificando enfermedad hemorroidal en tres paquetes principales. Se coloca separador anal para adecuada exposición.\nSe inicia la resección del primer paquete mediante técnica de Ferguson, realizando incisión elíptica. Se continúa con disección utilizando energía bipolar avanzada, permitiendo adecuada hemostasia y disminuyendo sangrado transoperatorio. Se respeta el complejo esfinteriano. El pedículo vascular es sellado con energía bipolar y reforzado con catgut crómico 3-0.\nSe realiza cierre con técnica cerrada tipo Ferguson, catgut crómico 3-0 para mucosa y 4-0 para piel.\nSe procede de manera similar con los dos paquetes restantes utilizando energía bipolar, respetando puentes mucocutáneos.\nSe verifica hemostasia sin evidencia de sangrado activo. Se coloca Spongostan con lidocaína. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Resección de quiste pilonidal': `RESECCIÓN DE QUISTE PILONIDAL\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en posición prona bajo anestesia general, con adecuada protección de puntos de presión. Se realiza protocolo de asepsia y antisepsia de la región sacrococcígea y glútea, con colocación de campos estériles.\nSe realiza identificación del quiste pilonidal y sus trayectos sinuosos mediante inspección y exploración cuidadosa. Se delimita la zona de resección con marcador cutáneo, incluyendo los orificios primarios, trayectos y el tejido afectado con márgenes adecuados.\nSe realiza infiltración local con solución de adrenalina diluida para reducir sangrado transoperatorio. Se incide la piel con bisturí siguiendo la marcación previa. Se continúa la resección en bloque del quiste pilonidal con sus trayectos, disecando hasta el tejido sano subyacente y resecando hasta el nivel de la fascia presacra. Se retira la pieza en bloque, verificando márgenes libres.\nSe verifica hemostasia meticulosa del lecho quirúrgico con electrocauterio. El espécimen se envía a estudio histopatológico.\nSe realiza cierre por planos: tejido celular subcutáneo con puntos separados de Vicryl 2-0 y cierre de piel con puntos separados de Nylon 3-0, logrando adecuada aproximación de bordes sin tensión. Se coloca apósito compresivo estéril.\nSe verifica hemostasia final y se da por terminado el procedimiento quirúrgico.`,
+  'Plastía umbilical abierta con malla': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial umbilical. Se diseca el ombligo preservando su implantación cutánea y se libera el saco herniario.\nSe identifica el contenido herniario, el cual es reducido a cavidad abdominal. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", con puntos cortos y equidistantes para adecuada distribución de tensión.\nSe coloca malla en plano preaponeurótico cubriendo ampliamente el defecto con traslape sobre tejido sano, fijada con puntos separados.\nSe fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo con sutura absorbible y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastía umbilical abierta con Ventral Patch 6cm': `PLASTÍA UMBILICAL ABIERTA MÁS COLOCACIÓN DE MALLA TIPO VENTRAL PATCH DE 6 CM\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza incisión periumbilical siguiendo el contorno inferior del ombligo. Se incide piel y tejido celular subcutáneo hasta identificar el saco herniario y el defecto fascial. Se diseca el ombligo preservando su implantación cutánea.\nSe identifica y reduce el contenido herniario. Se reseca el saco redundante. Se delimitan los bordes del defecto fascial.\nSe coloca malla tipo Ventral Patch de 6 cm en plano intraperitoneal, introduciéndola a través del defecto y desplegándola contra la cara interna de la pared abdominal. Se fija mediante sus sistemas de anclaje, asegurando extensión correcta sin pliegues.\nSe realiza cierre del defecto fascial con Prolene 0 utilizando técnica de "small bites", cubriendo la malla en su totalidad. Se fija el ombligo a la fascia. Se verifica hemostasia. Cierre de tejido celular subcutáneo y piel subcuticular. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
+  'Plastía ventral laparoscópica IPOM Plus': `PLASTÍA VENTRAL POR LAPAROSCOPIA TIPO IPOM PLUS\nTÉCNICA QUIRÚRGICA\nPrevio consentimiento informado, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.\nSe realiza acceso a cavidad abdominal mediante puerto de 10 mm en región lateral derecha, estableciendo neumoperitoneo con CO₂ a 15 mmHg. Se introduce óptica de 30°. Bajo visión directa se colocan dos trocares adicionales de 5 mm en región lateral derecha.\nSe realiza exploración inicial. Se liberan adherencias con energía ultrasónica, logrando adecuada exposición de la pared abdominal. Se identifican los defectos herniarios delimitando sus bordes.\nSe realiza cierre del defecto con técnica IPOM Plus, afrontando la aponeurosis con Prolene pasado a través de la pared abdominal mediante incisiones puntiformes con dispositivo tipo Endo Close.\nSe introduce malla intraperitoneal tipo Symbotex de aproximadamente 20 x 15 cm, cubriendo ampliamente los defectos. Se fija con sistema tipo SecureStrap en doble corona de fijación, asegurando distribución uniforme sin pliegues.\nSe verifica hemostasia y correcta posición de la malla. Se desinsufla y retiran trocares bajo visión directa. Cierre de aponeurosis con Monomax 0 y piel con Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`
+};
+
+let registros=JSON.parse(localStorage.getItem('registros')||'[]');
+let ultimoRegistro=null;
+let isRecording=false;
+let recognition=null;
+let currentTranscript='';
+let notaGenerada='';
+let notaBaseSeleccionada='';
+let modoLibre=false;
+
+function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function showSection(s){document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));document.getElementById('sec-'+s).classList.add('active');['nueva','nota','equipo','historial'].forEach((sec,i)=>{if(sec===s)document.querySelectorAll('.nav-btn')[i].classList.add('active');});if(s==='equipo')renderEquipo();if(s==='historial')renderHistorial();}
+function irANota(){showSection('nota');const proc=ultimoRegistro&&ultimoRegistro.procedimiento;if(proc){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}mostrarNotaBase();}}
+function switchPatientTab(tab,btn){document.querySelectorAll('.tab-mini').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-foto').style.display=tab==='foto'?'block':'none';document.getElementById('tab-manual').style.display=tab==='manual'?'block':'none';}
+function setDefaultDate(){document.getElementById('fecha-cirugia').value=new Date().toISOString().split('T')[0];}
+function calcularEdad(){const dob=document.getElementById('manual-dob').value;if(!dob)return;const hoy=new Date(),nac=new Date(dob);let edad=hoy.getFullYear()-nac.getFullYear();if(hoy.getMonth()-nac.getMonth()<0||(hoy.getMonth()===nac.getMonth()&&hoy.getDate()<nac.getDate()))edad--;document.getElementById('manual-edad').value=edad+' años';}
+function checkOtro(selId,inpId){document.getElementById(inpId).style.display=document.getElementById(selId).value==='otro'?'block':'none';}
+function getVal(selId,otroId){const v=document.getElementById(selId).value;if(!v)return '';if(v==='otro')return document.getElementById(otroId).value.trim();return v;}
+function cargarNotaBase(){const proc=document.getElementById('procedimiento').value;if(proc&&NOTAS_BASE[proc]){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}}}
+
+function mostrarNotaBase(){
+  const proc=document.getElementById('nota-procedimiento').value;
+  const preview=document.getElementById('nota-base-preview');
+  const texto=document.getElementById('nota-base-texto');
+  const btn=document.getElementById('btn-usar-nota');
+  if(proc==='libre'){
+    texto.className='nota-base-box libre';
+    texto.textContent='Modo libre: dictá o escribí el procedimiento completo y la IA generará la nota operatoria desde cero. Podés ser tan breve o detallado como quieras.';
+    btn.textContent='Usar modo libre →';
+    preview.style.display='block';
+    notaBaseSeleccionada='';
+    modoLibre=true;
+  } else if(proc&&NOTAS_BASE[proc]){
+    texto.className='nota-base-box';
+    texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';
+    btn.textContent='Usar esta nota base →';
+    preview.style.display='block';
+    notaBaseSeleccionada=NOTAS_BASE[proc];
+    modoLibre=false;
+  } else {
+    preview.style.display='none';
+    modoLibre=false;
+  }
+}
+
+function mostrarPasoVariantes(){
+  const proc=document.getElementById('nota-procedimiento').value;
+  document.getElementById('paso-seleccion').style.display='none';
+  document.getElementById('paso-variantes').style.display='block';
+  const badge=document.getElementById('procedimiento-seleccionado');
+  const label=document.getElementById('dictado-label');
+  const hint=document.getElementById('dictado-hint');
+  const textarea=document.getElementById('dictado-texto');
+  if(proc==='libre'){
+    badge.className='nota-preview libre';
+    badge.textContent='✏️ Modo libre — la IA generará la nota desde tu dictado';
+    label.textContent='Dictá el procedimiento completo';
+    hint.textContent='Describí la cirugía con los detalles que recuerdes. La IA redactará la nota en formato formal.';
+    textarea.placeholder='Ej: Paciente en prono, resección de quiste pilonidal con cierre primario, sin complicaciones...';
+  } else {
+    badge.className='nota-preview';
+    badge.textContent='📋 Nota base: '+proc;
+    label.textContent='¿Hubo algo diferente en esta cirugía?';
+    hint.textContent='Dictá o escribí solo lo que fue distinto. Si todo fue estándar, podés dejarlo vacío.';
+    textarea.placeholder='Ej: Se encontró saco herniario de gran tamaño...';
+  }
+  document.getElementById('nota-resultado').style.display='none';
+  document.getElementById('dictado-texto').value='';
+  currentTranscript='';
+}
+
+function volverSeleccion(){document.getElementById('paso-seleccion').style.display='block';document.getElementById('paso-variantes').style.display='none';}
+
+async function handleEtiqueta(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async(ev)=>{
+    document.getElementById('upload-placeholder').style.display='none';
+    document.getElementById('upload-preview').style.display='block';
+    document.getElementById('preview-img').src=ev.target.result;
+    const overlay=document.getElementById('scanning-overlay');
+    overlay.style.display='flex';
+    const base64=ev.target.result.split(',')[1];
+    try{
+      const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:300,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:file.type,data:base64}},{type:'text',text:'Esta es una etiqueta de ingreso hospitalario. Extrae nombre completo, fecha de nacimiento y edad. Responde SOLO en JSON: {"nombre":"","fechaNacimiento":"YYYY-MM-DD","edad":""}. Si no encuentras algún dato usa cadena vacía.'}]}]})});
+      const data=await res.json();
+      const parsed=JSON.parse(data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+      document.getElementById('foto-nombre').value=parsed.nombre||'';
+      document.getElementById('foto-dob').value=parsed.fechaNacimiento||'';
+      document.getElementById('foto-edad').value=parsed.edad||'';
+      showToast('Etiqueta leída correctamente');
+    }catch(err){showToast('No se pudo leer — ingresá manualmente');}
+    document.getElementById('ocr-result').style.display='block';
+    overlay.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function construirRegistro(){
+  const esFoto=document.querySelector('.tab-mini.active').textContent.includes('Foto');
+  return{paciente:esFoto?document.getElementById('foto-nombre').value:document.getElementById('manual-nombre').value,fechaNacimiento:esFoto?document.getElementById('foto-dob').value:document.getElementById('manual-dob').value,edad:esFoto?document.getElementById('foto-edad').value:document.getElementById('manual-edad').value,fechaCirugia:document.getElementById('fecha-cirugia').value,diagnostico:document.getElementById('diagnostico').value,procedimiento:getVal('procedimiento','otro-procedimiento'),institucion:getVal('institucion','otra-institucion'),primerAyudante:getVal('ayudante1','otro-ayudante1'),segundoAyudante:getVal('ayudante2','otro-ayudante2'),anestesiologo:getVal('anestesio','otro-anestesio'),notaOperatoria:notaGenerada||''};
+}
+
+function guardarCirugia(){
+  const reg=construirRegistro();
+  if(!reg.paciente){showToast('Ingresá el nombre del paciente.');return;}
+  reg.id=Date.now();registros.push(reg);localStorage.setItem('registros',JSON.stringify(registros));ultimoRegistro=reg;
+  document.getElementById('save-confirm').style.display='block';
+  document.getElementById('email-status').textContent='';
+  document.getElementById('save-confirm').scrollIntoView({behavior:'smooth'});
+  showToast('Registro guardado correctamente');
+}
+
+async function enviarSecretaria(){
+  if(!ultimoRegistro){showToast('Primero guardá un registro.');return;}
+  const btn=document.getElementById('btn-email');const status=document.getElementById('email-status');
+  btn.disabled=true;btn.textContent='Enviando...';status.textContent='';
+  try{
+    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
+    const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(res.ok||res.status===200){status.innerHTML='<span style="color:#16a34a">✓ Enviado a secretaria</span>';showToast('Enviado correctamente');}
+    else{status.innerHTML='<span style="color:#dc2626">Error al enviar</span>';}
+  }catch(err){status.innerHTML='<span style="color:#dc2626">Error de conexión</span>';}
+  btn.disabled=false;btn.textContent='Enviar a secretaria';
+}
+
+async function enviarNotaSecretaria(){
+  if(!ultimoRegistro){showToast('No hay registro activo.');return;}
+  ultimoRegistro.notaOperatoria=notaGenerada;
+  await enviarSecretaria();
+}
+
+function limpiarFormulario(){
+  ['foto-nombre','foto-dob','foto-edad','manual-nombre','manual-dob','manual-edad','diagnostico','otro-procedimiento','otra-institucion','otro-ayudante1','otro-ayudante2','otro-anestesio'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['procedimiento','institucion','ayudante1','ayudante2','anestesio'].forEach(id=>{document.getElementById(id).value='';});
+  ['otro-procedimiento','otra-institucion','otro-ayudante1','otro-ayudante2','otro-anestesio'].forEach(id=>{document.getElementById(id).style.display='none';});
+  document.getElementById('upload-placeholder').style.display='block';
+  document.getElementById('upload-preview').style.display='none';
+  document.getElementById('ocr-result').style.display='none';
+  document.getElementById('save-confirm').style.display='none';
+  ultimoRegistro=null;notaGenerada='';currentTranscript='';setDefaultDate();
+}
+
+function copiarNota(){navigator.clipboard.writeText(document.getElementById('nota-contenido').textContent).then(()=>showToast('Nota copiada al portapapeles'));}
+function toggleRecording(){if(!isRecording)startRecording();else stopRecording();}
+function startRecording(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById('mic-status').textContent='Usá Chrome para el dictado.';return;}recognition=new SR();recognition.lang='es-MX';recognition.continuous=true;recognition.interimResults=true;recognition.onresult=e=>{let interim='',final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}currentTranscript+=final;document.getElementById('dictado-texto').value=currentTranscript+interim;};recognition.onerror=()=>stopRecording();recognition.start();isRecording=true;document.getElementById('mic-btn').classList.add('recording');document.getElementById('mic-btn').textContent='⏹';document.getElementById('mic-status').textContent='Dictando... presioná para detener';}
+function stopRecording(){if(recognition)recognition.stop();isRecording=false;document.getElementById('mic-btn').classList.remove('recording');document.getElementById('mic-btn').textContent='🎤';document.getElementById('mic-status').textContent='Dictado detenido.';}
+
+async function generarNota(){
+  const extras=document.getElementById('dictado-texto').value.trim();
+  const btn=event.target;btn.disabled=true;btn.textContent='Generando...';
+  document.getElementById('nota-resultado').style.display='block';
+  document.getElementById('nota-contenido').textContent='Generando nota operatoria personalizada...';
+  const reg=ultimoRegistro||{};
+
+  const datosEquipo = `- Paciente: ${reg.paciente||'No especificado'}
+- Fecha: ${reg.fechaCirugia||new Date().toLocaleDateString('es-MX')}
+- Diagnóstico preoperatorio: ${reg.diagnostico||'No especificado'}
+- Institución: ${reg.institucion||'No especificada'}
+- Cirujano: Dr. Pablo Vidal
+- Primer ayudante: ${reg.primerAyudante||'No especificado'}
+- Segundo ayudante: ${reg.segundoAyudante||'No aplica'}
+- Anestesiólogo: ${reg.anestesiologo||'No especificado'}`;
+
+  let prompt;
+  if(modoLibre){
+    if(!extras){showToast('Dictá el procedimiento antes de generar.');btn.disabled=false;btn.textContent='Generar nota completa con IA →';return;}
+    prompt=`Eres un asistente médico especializado en notas operatorias quirúrgicas en español.
+
+El cirujano ha dictado el siguiente procedimiento:
+${extras}
+
+DATOS DEL PACIENTE Y CIRUGÍA:
+${datosEquipo}
+
+Redacta una nota operatoria quirúrgica completa y formal en español médico. Sigue esta estructura:
+1. Encabezado con nombre del paciente, edad, fecha y diagnóstico preoperatorio
+2. Equipo quirúrgico
+3. Técnica quirúrgica detallada (expande el dictado con terminología médica apropiada, manteniendo todos los detalles mencionados)
+4. Cierre con verificación de hemostasia y fin del procedimiento
+
+Responde ÚNICAMENTE con la nota operatoria, sin explicaciones adicionales.`;
+  } else {
+    prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.
+
+NOTA BASE DEL PROCEDIMIENTO:
+${notaBaseSeleccionada}
+
+DATOS DEL PACIENTE Y CIRUGÍA:
+${datosEquipo}
+
+${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}
+
+Genera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
+  }
+
+  try{
+    const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    notaGenerada=data.content.map(i=>i.text||'').join('\n');
+    document.getElementById('nota-contenido').textContent=notaGenerada;
+    if(ultimoRegistro){ultimoRegistro.notaOperatoria=notaGenerada;localStorage.setItem('registros',JSON.stringify(registros));}
+    showToast('Nota generada correctamente');
+  }catch(err){document.getElementById('nota-contenido').textContent='Error al conectar con la IA. Verificá tu conexión.';}
+  btn.disabled=false;btn.textContent='Generar nota completa con IA →';
+}
+
+let equipoCatalogo=JSON.parse(localStorage.getItem('equipo')||'null')||{ayudantes:['Dr. Enrique Stoopen Margain','Dr. Natan Sarue Saed','Dr. Jonathan Chernitzky Camaño'],anestesio:['Dr. Alejandro Jiménez Casillas','Dr. Paulo López Reymundo','Dra. Giselle Uribe','Dra. Andrea Figueroa']};
+function guardarEquipo(){localStorage.setItem('equipo',JSON.stringify(equipoCatalogo));}
+function agregarMiembro(){const nombre=document.getElementById('eq-nombre').value.trim();const tipo=document.getElementById('eq-tipo').value;if(!nombre){showToast('Ingresá el nombre.');return;}equipoCatalogo[tipo==='ayudante'?'ayudantes':'anestesio'].push(nombre);guardarEquipo();document.getElementById('eq-nombre').value='';renderEquipo();showToast('Integrante agregado');}
+function renderEquipo(){['ayudantes','anestesio'].forEach(tipo=>{const cont=document.getElementById('lista-'+tipo);const lista=equipoCatalogo[tipo];if(!lista.length){cont.innerHTML='<div class="empty">Sin integrantes.</div>';return;}cont.innerHTML=lista.map((nombre,i)=>`<div class="record-row"><div style="width:36px;height:36px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#555;flex-shrink:0">${nombre.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div style="flex:1;font-size:13px;font-weight:500">${nombre}</div><button class="btn btn-sm btn-danger" onclick="eliminarMiembro(${i},'${tipo}')">Eliminar</button></div>`).join('');});}
+function eliminarMiembro(idx,tipo){if(!confirm('¿Eliminar?'))return;equipoCatalogo[tipo].splice(idx,1);guardarEquipo();renderEquipo();}
+function renderHistorial(){const cont=document.getElementById('historial-lista');const count=document.getElementById('historial-count');count.textContent=registros.length+' registro'+(registros.length!==1?'s':'');if(!registros.length){cont.innerHTML='<div class="empty">No hay registros todavía.</div>';return;}cont.innerHTML=[...registros].reverse().map(r=>`<div class="record-row"><div style="flex:1"><div style="font-weight:600;font-size:13px">${r.paciente||'Paciente sin nombre'}</div><div style="font-size:11px;color:#666;margin-top:2px">${r.procedimiento||''} · ${r.institucion||''} · ${r.fechaCirugia||''}</div><div style="font-size:11px;color:#999;margin-top:1px">${[r.primerAyudante,r.segundoAyudante,r.anestesiologo].filter(Boolean).join(' · ')}</div></div><span class="badge-success">Guardado</span></div>`).join('');}
+
+setDefaultDate();
+renderEquipo();
+</script>
+
+
+<!-- MODAL INDICACIONES DE ALTA -->
+<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
+<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
+<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
+<div id="modalAlta" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;max-width:420px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;max-height:90vh;overflow-y:auto;">
+    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📄 Indicaciones de Alta</div>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;">Se generarán 2 Word adjuntos: Indicaciones + Receta</div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label><input id="altaFecha" type="text" placeholder="ej: 4 de mayo de 2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;dis
+head -583 index.html > index_nuevo.html
+cat >> index_nuevo.html << 'ENDMODAL'
+<div id="modalAlta" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;max-width:420px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;max-height:90vh;overflow-y:auto;">
+    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📄 Indicaciones de Alta</div>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;">Se generarán 2 Word adjuntos: Indicaciones + Receta</div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label><input id="altaFecha" type="text" placeholder="ej: 4 de mayo de 2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha de próxima cita</label><div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button onclick="altaSugerirFecha(7)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">7 días</button><button onclick="altaSugerirFecha(14)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">14 días</button><button onclick="altaSugerirFecha(21)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">21 días</button><button onclick="altaSugerirFecha(30)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">30 días</button></div><input id="altaFechaCita" type="text" placeholder="ej: 18/05/2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div id="altaInfoPaciente" style="background:#f0f7ff;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:#1e3a5f;border-left:3px solid #1976d2;"></div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Indicaciones base incluidas</div><div style="background:#f5f5f0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.7;color:#444;">ULSEN · BIOMICS · TYLEX · DOLAC — Medidas generales — Signos de alarma</div></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Cambiar medicamento o agregar algo? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn" onclick="toggleAltaRec('altaVariantes','altaMicBtn','altaMicStatus')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaVariantes" rows="2" placeholder="ej: cambiar DOLAC por Ketorolaco 10mg cada 8h" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Agregar indicaciones específicas? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="font-size:11px;color:#888;margin-bottom:6px;">La IA genera una hoja extra. Ej: baños de asiento, cuidados de herida perianal</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn2" onclick="toggleAltaRec('altaEspeciales','altaMicBtn2','altaMicStatus2')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus2" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaEspeciales" rows="2" placeholder="Dejar vacío si no se necesita hoja extra." style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px;"><button onclick="cerrarModalAlta()" style="flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Cancelar</button><button onclick="enviarAlta()" id="btnEnviarAlta" style="flex:2;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">📎 Generar y enviar</button></div>
+    <div id="altaStatus" style="margin-top:10px;font-size:12px;text-align:center;"></div>
+  </div>
+</div>
+<script>
+let altaRecs={},altaTxts={};
+function abrirModalAlta(){const hoy=new Date();const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];document.getElementById('altaFecha').value=hoy.getDate()+' de '+meses[hoy.getMonth()]+' de '+hoy.getFullYear();document.getElementById('altaFechaCita').value='';document.getElementById('altaStatus').textContent='';document.getElementById('altaVariantes').value='';document.getElementById('altaEspeciales').value='';altaTxts={};const esFoto=document.querySelector('.tab-mini.active')&&document.querySelector('.tab-mini.active').textContent.includes('Foto');const nombre=esFoto?(document.getElementById('foto-nombre').value||''):(document.getElementById('manual-nombre').value||'');const edad=esFoto?(document.getElementById('foto-edad').value||''):(document.getElementById('manual-edad').value||'');const fn=esFoto?(document.getElementById('foto-dob').value||''):(document.getElementById('manual-dob').value||'');const proc=document.getElementById('procedimiento').value==='otro'?document.getElementById('otro-procedimiento').value:(document.getElementById('procedimiento').value||'');let fnL=fn;if(fn){const[y,m,d]=fn.split('-');if(y&&m&&d)fnL=d+'/'+m+'/'+y;}document.getElementById('altaInfoPaciente').innerHTML='<b>Paciente:</b> '+(nombre||'—')+' &nbsp;·&nbsp; <b>Edad:</b> '+(edad||'—')+' &nbsp;·&nbsp; <b>FN:</b> '+(fnL||'—')+'<br><b>Procedimiento:</b> '+(proc||'—');window._altaDatos={nombre,edad,fechaNacimiento:fnL,procedimiento:proc};document.getElementById('modalAlta').style.display='flex';}
+function cerrarModalAlta(){Object.values(altaRecs).forEach(r=>{try{r.stop();}catch(e){}});altaRecs={};document.getElementById('modalAlta').style.display='none';}
+function altaSugerirFecha(dias){const d=new Date();d.setDate(d.getDate()+dias);const dd=String(d.getDate()).padStart(2,'0');const mm=String(d.getMonth()+1).padStart(2,'0');document.getElementById('altaFechaCita').value=dd+'/'+mm+'/'+d.getFullYear();}
+function toggleAltaRec(tid,bid,sid){if(altaRecs[tid]){altaRecs[tid].stop();delete altaRecs[tid];document.getElementById(bid).textContent='🎤';document.getElementById(bid).style.borderColor='#ddd';document.getElementById(sid).textContent='Dictado detenido.';return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById(sid).textContent='Usá Chrome.';return;}const r=new SR();r.lang='es-MX';r.continuous=true;r.interimResults=true;altaTxts[tid]=altaTxts[tid]||'';r.onresult=e=>{let f='',i='';for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript+' ';else i+=e.results[x][0].transcript;}altaTxts[tid]+=f;document.getElementById(tid).value=altaTxts[tid]+i;};r.onerror=()=>{delete altaRecs[tid];document.getElementById(bid).textContent='🎤';};r.start();altaRecs[tid]=r;document.getElementById(bid).textContent='⏹';document.getElementById(bid).style.borderColor='#dc2626';document.getElementById(sid).textContent='Dictando... presioná para detener';}
+async function enviarAlta(){const fecha=document.getElementById('altaFecha').value.trim();const fechaCita=document.getElementById('altaFechaCita').value.trim();const variantes=document.getElementById('altaVariantes').value.trim();const especiales=document.getElementById('altaEspeciales').value.trim();const statusEl=document.getElementById('altaStatus');const btn=document.getElementById('btnEnviarAlta');if(!fecha){statusEl.textContent='⚠️ Ingresa la fecha del documento.';return;}if(!fechaCita){statusEl.textContent='⚠️ Ingresa la fecha de la próxima cita.';return;}Object.values(altaRecs).forEach(r=>{try{r.stop();}catch(e){}});btn.disabled=true;btn.textContent=especiales?'Generando con IA...':variantes?'Ajustando con IA...':'Generando documentos...';statusEl.textContent='';try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha,fechaCita,nombre:window._altaDatos.nombre,edad:window._altaDatos.edad,fechaNacimiento:window._altaDatos.fechaNacimiento,procedimiento:window._altaDatos.procedimiento,indicacionesExtra:variantes||'',indicacionesEspeciales:especiales||''})});const data=await res.json();if(data.status==='ok'){statusEl.style.color='#2e7d32';statusEl.textContent='✅ 2 documentos enviados a drpablovidal@gmail.com';setTimeout(()=>cerrarModalAlta(),2500);}else throw new Error(data.error||'Error desconocido');}catch(err){statusEl.style.color='#c62828';statusEl.textContent='❌ Error: '+err.message;}finally{btn.disabled=false;btn.textContent='📎 Generar y enviar';}}
+document.getElementById('modalAlta').addEventListener('click',function(e){if(e.target===this)cerrarModalAlta();});
+</script>
+</body>
+</html>
