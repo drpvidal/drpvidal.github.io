@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Indicaciones de Ingreso — Dr. Pablo Vidal González</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand-mark">🏥</div>
+      <div>
+        <h1>Indicaciones de Ingreso</h1>
+        <p>Dr. Pablo Vidal González · Cirugía General y Laparoscópica</p>
+      </div>
+    </header>
+
+    <section class="workspace">
+      <form class="panel" id="form">
+        <div class="panel-head">
+          <h2>Datos para generar indicaciones</h2>
+          <button type="button" class="ghost-button" id="clearButton">Limpiar</button>
+        </div>
+
+        <label class="field">
+          <span>Nombre completo *</span>
+          <input id="patientName" autocomplete="name" placeholder="Apellidos, Nombre" required>
+        </label>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Fecha de nacimiento *</span>
+            <input id="birthDate" type="date" required>
+          </label>
+          <div class="field">
+            <span>Edad</span>
+            <output id="ageOutput">Ingrese fecha de nacimiento</output>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Procedimiento quirúrgico *</span>
+          <select id="procedure" required></select>
+        </label>
+
+        <label class="field" id="otherProcedureField" hidden>
+          <span>Otro procedimiento *</span>
+          <input id="otherProcedure" placeholder="Escriba el procedimiento quirúrgico">
+        </label>
+
+        <label class="field">
+          <span>Diagnóstico de ingreso</span>
+          <select id="diagnosis"></select>
+        </label>
+
+        <label class="field" id="otherDiagnosisField" hidden>
+          <span>Otro diagnóstico *</span>
+          <input id="otherDiagnosis" placeholder="Escriba el diagnóstico de ingreso">
+        </label>
+
+        <label class="field">
+          <span>Hospital *</span>
+          <select id="hospital" required></select>
+        </label>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Fecha de ingreso *</span>
+            <input id="admissionDate" type="date" required>
+          </label>
+          <label class="field">
+            <span>Hora de ingreso *</span>
+            <input id="admissionTime" type="time" value="08:00" required>
+          </label>
+        </div>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Fecha del procedimiento *</span>
+            <input id="surgeryDate" type="date" required>
+          </label>
+          <label class="field">
+            <span>Hora del procedimiento *</span>
+            <input id="surgeryTime" type="time" value="11:00" required>
+          </label>
+        </div>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Fecha de inicio de ayuno</span>
+            <input id="fastingDate" type="date">
+          </label>
+          <label class="field">
+            <span>Hora de inicio de ayuno</span>
+            <input id="fastingTime" type="time" value="23:30">
+          </label>
+        </div>
+
+        <div class="quick-actions">
+          <button type="button" class="ghost-button small-button" id="fastingPreviousButton">Ayuno día previo</button>
+          <button type="button" class="ghost-button small-button" id="fastingSameDayButton">Ayuno mismo día</button>
+        </div>
+
+        <div class="grid two">
+          <label class="field">
+            <span>Solución al ingreso</span>
+            <select id="solutionRate">
+              <option value="40">Solución Hartmann a 40 ml/hora</option>
+              <option value="60">Solución Hartmann a 60 ml/hora</option>
+              <option value="80" selected>Solución Hartmann a 80 ml/hora</option>
+              <option value="100">Solución Hartmann a 100 ml/hora</option>
+              <option value="120">Solución Hartmann a 120 ml/hora</option>
+            </select>
+          </label>
+        </div>
+
+        <fieldset class="checks">
+          <legend>Estudios al ingreso</legend>
+          <label><input type="checkbox" name="studies" value="Perfil Quirurgico XIII" checked> Perfil Quirurgico XIII</label>
+          <label><input type="checkbox" name="studies" value="Biometría hemática"> Biometría hemática</label>
+          <label><input type="checkbox" name="studies" value="Química sanguínea"> Química sanguínea</label>
+          <label><input type="checkbox" name="studies" value="Electrolitos séricos"> Electrolitos séricos</label>
+          <label><input type="checkbox" name="studies" value="Pruebas de función hepática"> Pruebas de función hepática</label>
+          <label><input type="checkbox" name="studies" value="Amilasa y lipasa"> Amilasa y lipasa</label>
+          <label><input type="checkbox" name="studies" value="Coagulograma"> Coagulograma</label>
+          <label><input type="checkbox" name="studies" value="Tele de Tórax"> Tele de Tórax</label>
+          <label><input type="checkbox" name="studies" value="Electrocardiograma"> Electrocardiograma</label>
+        </fieldset>
+
+        <fieldset class="checks">
+          <legend>Interconsultas</legend>
+          <label><input type="checkbox" name="interconsultations" value="Dr. Fernando Magaña"> Dr. Fernando Magaña</label>
+          <label><input type="checkbox" name="interconsultations" value="Dr. Omar Fueyo"> Dr. Omar Fueyo</label>
+          <label><input type="checkbox" name="interconsultations" value="Lic. Marcela Sawaya"> Lic. Marcela Sawaya</label>
+          <label><input type="checkbox" name="interconsultations" value="Dr. Jorge Guajardo"> Dr. Jorge Guajardo</label>
+          <label><input type="checkbox" name="interconsultations" value="Dr. Jon Mikel Iñarritu"> Dr. Jon Mikel Iñarritu</label>
+          <label><input type="checkbox" name="interconsultations" value="Dra. Ana María Serrano"> Dra. Ana María Serrano</label>
+          <label><input type="checkbox" id="otherInterconsultationCheck"> Otro</label>
+          <input id="otherInterconsultation" class="inline-extra" placeholder="Nombre de interconsulta" hidden>
+        </fieldset>
+
+        <label class="field">
+          <span>Indicaciones adicionales</span>
+          <textarea id="extraNotes" rows="3" placeholder="Ej. reservar hemoderivados, valoración específica, traer estudios previos"></textarea>
+        </label>
+      </form>
+
+      <section class="preview-panel">
+        <div class="toolbar no-print">
+          <button type="button" id="copyButton">Copiar texto</button>
+          <button type="button" id="downloadPdfButton">Descargar PDF</button>
+          <button type="button" id="sharePdfButton">WhatsApp / compartir</button>
+          <button type="button" id="emailPdfButton">Correo PDF</button>
+          <button type="button" id="printButton">Imprimir</button>
+        </div>
+        <article class="document" id="documentPreview"></article>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
