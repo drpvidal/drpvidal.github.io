@@ -217,33 +217,51 @@ function generarPDF(compartirPDF) {
   if (!_r.nombre) { toast('Genera la receta primero'); return; }
   toast('Generando PDF...');
 
-  var el = document.querySelector('.papel');
-  var rect = el.getBoundingClientRect();
+  var original = document.querySelector('.papel');
+  if (!original) { toast('Error: no encontré la receta'); return; }
 
-  html2canvas(el, {
+  var clone = original.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.left = '-10000px';
+  clone.style.top = '0';
+  clone.style.width = '595px';
+  clone.style.minWidth = '595px';
+  clone.style.maxWidth = 'none';
+  clone.style.overflow = 'visible';
+  clone.style.margin = '0';
+  clone.style.borderRadius = '0';
+  clone.style.boxShadow = 'none';
+  clone.style.background = '#ffffff';
+  clone.style.zIndex = '-1';
+
+  document.body.appendChild(clone);
+
+  var W = 595;
+  var H = clone.scrollHeight;
+
+  html2canvas(clone, {
     scale: 3,
     useCORS: true,
     allowTaint: true,
     backgroundColor: '#ffffff',
-    width: rect.width,
-    height: rect.height,
-    windowWidth: document.documentElement.clientWidth,
-    windowHeight: document.documentElement.clientHeight,
+    width: W,
+    height: H,
+    windowWidth: 800,
+    windowHeight: H,
     scrollX: 0,
     scrollY: 0
   }).then(function(canvas) {
+    document.body.removeChild(clone);
+
     var imgData = canvas.toDataURL('image/jpeg', 0.98);
 
-    var pdfWidthMm = 255;
-    var pdfHeightMm = 182;
-
     var pdf = new window.jspdf.jsPDF({
-      unit: 'mm',
-      format: [pdfWidthMm, pdfHeightMm],
-      orientation: 'landscape'
+      unit: 'px',
+      format: [W, H],
+      orientation: W > H ? 'landscape' : 'portrait'
     });
 
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidthMm, pdfHeightMm);
+    pdf.addImage(imgData, 'JPEG', 0, 0, W, H);
 
     var nombre = 'Receta_' + _r.nombre.replace(/ /g,'_') + '.pdf';
 
@@ -259,6 +277,7 @@ function generarPDF(compartirPDF) {
     pdf.save(nombre);
     toast('PDF descargado');
   }).catch(function(e) {
+    if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
     toast('Error: ' + e.message);
   });
 }
