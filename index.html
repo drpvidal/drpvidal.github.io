@@ -11,8 +11,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1
 .header{margin-bottom:1.5rem}
 .header h1{font-size:20px;font-weight:600;margin-bottom:2px}
 .header p{font-size:13px;color:#666}
-.nav{display:flex;gap:4px;margin-bottom:1.5rem;background:#e8e8e4;border-radius:12px;padding:4px}
-.nav-btn{flex:1;padding:8px 4px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#666;border-radius:8px;transition:all 0.15s;font-family:inherit}
+.nav{display:flex;gap:4px;margin-bottom:1.5rem;background:#e8e8e4;border-radius:12px;padding:4px;overflow-x:auto}
+.nav-btn{flex:1;min-width:max-content;padding:8px 10px;border:none;background:transparent;cursor:pointer;font-size:12px;color:#666;border-radius:8px;transition:all 0.15s;font-family:inherit}
 .nav-btn.active{background:#fff;color:#1a1a1a;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
 .section{display:none}.section.active{display:block}
 .card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem}
@@ -38,7 +38,11 @@ textarea{resize:vertical}
 .record-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e8e8e4;font-size:13px}
 .record-row:last-child{border-bottom:none}
 .badge-success{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;background:#dcfce7;color:#16a34a}
-.ai-box{background:#f5f5f0;border-radius:8px;padding:12px;min-height:80px;font-size:13px;line-height:1.7;color:#1a1a1a;white-space:pre-wrap;max-height:400px;overflow-y:auto}
+.ai-box{background:#f5f5f0;border-radius:8px;padding:12px;min-height:80px;font-size:13px;line-height:1.7;color:#1a1a1a;max-height:400px;overflow-y:auto}
+.ai-box h2{font-size:15px;margin:0 0 10px;font-weight:700;text-transform:uppercase}
+.ai-box h3{font-size:13px;margin:14px 0 6px;font-weight:700;color:#333;text-transform:uppercase}
+.ai-box p{margin:0 0 8px}
+.ai-box hr{border:none;border-top:1px solid #ddd;margin:12px 0}
 .mic-btn{width:60px;height:60px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:all 0.2s;margin:0 auto}
 .mic-btn.recording{border-color:#dc2626;animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.3)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
@@ -64,6 +68,8 @@ textarea{resize:vertical}
   <div class="nav">
     <button class="nav-btn active" onclick="showSection('nueva')">Nueva cirugía</button>
     <button class="nav-btn" onclick="showSection('nota')">Nota operatoria</button>
+    <button class="nav-btn" onclick="abrirModalPost()">Hospital</button>
+    <button class="nav-btn" onclick="abrirModalAlta()">Indicaciones alta</button>
     <button class="nav-btn" onclick="showSection('equipo')">Mi equipo</button>
     <button class="nav-btn" onclick="showSection('historial')">Historial</button>
   </div>
@@ -72,10 +78,17 @@ textarea{resize:vertical}
     <div class="card">
       <div class="card-title">1 · Datos del paciente</div>
       <div class="tabs-mini">
-        <button class="tab-mini active" onclick="switchPatientTab('foto',this)">Foto de etiqueta</button>
-        <button class="tab-mini" onclick="switchPatientTab('manual',this)">Ingreso manual</button>
+        <button class="tab-mini active" onclick="switchPatientTab('manual',this)">Ingreso manual</button>
+        <button class="tab-mini" onclick="switchPatientTab('foto',this)">Foto de etiqueta</button>
       </div>
-      <div id="tab-foto">
+      <div id="tab-manual">
+        <div class="grid2">
+          <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="manual-nombre" placeholder="Nombre completo"></div>
+          <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="manual-dob" onchange="calcularEdad()"></div>
+        </div>
+        <div class="form-group"><label class="form-label">Edad</label><input type="text" id="manual-edad" placeholder="Se calcula automáticamente"></div>
+      </div>
+      <div id="tab-foto" style="display:none">
         <div class="upload-zone" onclick="document.getElementById('etiqueta-input').click()">
           <input type="file" id="etiqueta-input" accept="image/*" style="display:none" onchange="handleEtiqueta(event)">
           <div id="upload-placeholder"><div style="font-size:28px;margin-bottom:8px">📷</div><div style="font-size:13px;font-weight:500">Subir foto de etiqueta</div><div style="font-size:11px;color:#999;margin-top:4px">Toca para elegir o tomar foto</div></div>
@@ -90,13 +103,6 @@ textarea{resize:vertical}
           </div>
           <div class="form-group"><label class="form-label">Edad</label><input type="text" id="foto-edad" placeholder="Ej: 45 años"></div>
         </div>
-      </div>
-      <div id="tab-manual" style="display:none">
-        <div class="grid2">
-          <div class="form-group"><label class="form-label">Nombre del paciente</label><input type="text" id="manual-nombre" placeholder="Nombre completo"></div>
-          <div class="form-group"><label class="form-label">Fecha de nacimiento</label><input type="date" id="manual-dob" onchange="calcularEdad()"></div>
-        </div>
-        <div class="form-group"><label class="form-label">Edad</label><input type="text" id="manual-edad" placeholder="Se calcula automáticamente"></div>
       </div>
     </div>
 
@@ -198,6 +204,7 @@ textarea{resize:vertical}
           <select id="anestesio" onchange="checkOtro('anestesio','otro-anestesio')">
             <option value="">— Seleccionar —</option>
             <option>Dr. Alejandro Jiménez Casillas</option>
+            <option>Dr. Juvenal Franco</option>
             <option>Dr. Paulo López Reymundo</option>
             <option>Dra. Giselle Uribe</option>
             <option>Dra. Andrea Figueroa</option>
@@ -210,7 +217,7 @@ textarea{resize:vertical}
 
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:1rem">
       <button class="btn" onclick="limpiarFormulario()">Limpiar</button>
-      <button class="btn btn-primary" onclick="guardarCirugia()">Guardar registro</button>
+      <button class="btn btn-primary" onclick="guardarCirugiaYSiguiente()">Siguiente</button>
     </div>
 
     <div id="save-confirm" style="display:none" class="card">
@@ -219,8 +226,10 @@ textarea{resize:vertical}
         <span style="font-weight:600;font-size:14px">Registro guardado correctamente</span>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <button class="btn btn-sm btn-primary" onclick="irANota()">Generar nota operatoria</button>
-        <button class="btn btn-sm" id="btn-email" onclick="enviarSecretaria()">Enviar a secretaria</button><button class="btn btn-sm" onclick="abrirModalAlta()" style="background:#2e7d32;color:#fff;border-color:transparent">📄 Indicaciones de alta</button>
+        <button class="btn btn-sm btn-primary" onclick="irANota()">Siguiente: nota operatoria</button>
+        <button class="btn btn-sm" id="btn-email" onclick="enviarSecretaria()">Enviar paquete a secretaria</button>
+        <button class="btn btn-sm" onclick="abrirModalPost()" style="background:#1a237e;color:#fff;border-color:transparent">📄 Indicaciones hospitalarias</button>
+        <button class="btn btn-sm" onclick="abrirModalAlta()" style="background:#2e7d32;color:#fff;border-color:transparent">📎 Indicaciones de alta</button>
         <span id="email-status" style="font-size:12px"></span>
       </div>
     </div>
@@ -231,7 +240,7 @@ textarea{resize:vertical}
       <div class="card-title">Nota operatoria</div>
       <div id="paso-seleccion">
         <div class="form-group">
-          <label class="form-label">Seleccioná el procedimiento base</label>
+          <label class="form-label">Seleccioná una nota base o pegá/dictá texto libre</label>
           <select id="nota-procedimiento" onchange="mostrarNotaBase()">
             <option value="">Seleccionar procedimiento...</option>
             <optgroup label="Hernia inguinal">
@@ -288,8 +297,9 @@ textarea{resize:vertical}
           </div>
           <textarea id="dictado-texto" rows="4" placeholder="Ej: Se encontró saco herniario de gran tamaño..."></textarea>
         </div>
-        <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:1rem">
+        <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap">
           <button class="btn btn-sm" onclick="volverSeleccion()">← Cambiar nota</button>
+          <button class="btn btn-sm" onclick="guardarTextoTalCualComoBase()">Guardar texto tal cual</button>
           <button class="btn btn-primary" onclick="generarNota()">Generar nota completa con IA →</button>
         </div>
         <div id="nota-resultado" style="display:none">
@@ -298,7 +308,9 @@ textarea{resize:vertical}
           <div class="ai-box" id="nota-contenido"></div>
           <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">
             <button class="btn btn-sm" onclick="copiarNota()">Copiar texto</button>
-            <button class="btn btn-sm btn-primary" onclick="enviarNotaSecretaria()">Enviar a secretaria</button>
+            <button class="btn btn-sm" id="btn-guardar-base" onclick="guardarNotaComoBase()">Guardar nota generada</button>
+            <button class="btn btn-sm" onclick="abrirModalPost()">Siguiente: hospital</button>
+            <button class="btn btn-sm btn-primary" onclick="enviarNotaSecretaria()">Enviar paquete a secretaria</button>
           </div>
         </div>
       </div>
@@ -306,20 +318,17 @@ textarea{resize:vertical}
   </div>
 
   <div class="section" id="sec-equipo">
+    <div class="card"><div class="card-title">Ayudantes</div><div id="lista-ayudantes"></div></div>
+    <div class="card"><div class="card-title">Anestesiólogos</div><div id="lista-anestesio"></div></div>
     <div class="card">
       <div class="card-title">Agregar integrante</div>
       <div class="grid2">
         <div class="form-group"><label class="form-label">Nombre completo</label><input type="text" id="eq-nombre" placeholder="Dr. Nombre Apellido"></div>
         <div class="form-group"><label class="form-label">Tipo</label><select id="eq-tipo"><option value="ayudante">Ayudante</option><option value="anestesio">Anestesiólogo</option></select></div>
       </div>
-      <div class="grid2">
-        <div class="form-group"><label class="form-label">Email</label><input type="email" id="eq-email" placeholder="doctor@email.com"></div>
-        <div class="form-group"><label class="form-label">Teléfono (opcional)</label><input type="tel" id="eq-tel" placeholder="+52 55 0000 0000"></div>
-      </div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="eq-email" placeholder="doctor@email.com"></div>
       <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="agregarMiembro()">Agregar</button></div>
     </div>
-    <div class="card"><div class="card-title">Ayudantes</div><div id="lista-ayudantes"></div></div>
-    <div class="card"><div class="card-title">Anestesiólogos</div><div id="lista-anestesio"></div></div>
   </div>
 
   <div class="section" id="sec-historial">
@@ -367,22 +376,48 @@ let currentTranscript='';
 let notaGenerada='';
 let notaBaseSeleccionada='';
 let modoLibre=false;
+let notasPersonalizadas=JSON.parse(localStorage.getItem('notasPersonalizadas')||'{}');
+
+function getNotasBase(){return {...NOTAS_BASE,...notasPersonalizadas};}
+function agregarOpcionesNotasPersonalizadas(){
+  const nombres=Object.keys(notasPersonalizadas).sort((a,b)=>a.localeCompare(b,'es'));
+  ['procedimiento','nota-procedimiento'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    let group=sel.querySelector('optgroup[data-personalizadas="true"]');
+    if(!group){
+      group=document.createElement('optgroup');
+      group.label='Mis notas guardadas';
+      group.dataset.personalizadas='true';
+      const otro=Array.from(sel.querySelectorAll('optgroup')).find(g=>g.label==='Otro procedimiento');
+      sel.insertBefore(group,otro||null);
+    }
+    group.innerHTML='';
+    nombres.forEach(nombre=>{
+      const opt=document.createElement('option');
+      opt.value=nombre;
+      opt.textContent=nombre;
+      group.appendChild(opt);
+    });
+  });
+}
 
 function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
-function showSection(s){document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));document.getElementById('sec-'+s).classList.add('active');['nueva','nota','equipo','historial'].forEach((sec,i)=>{if(sec===s)document.querySelectorAll('.nav-btn')[i].classList.add('active');});if(s==='equipo')renderEquipo();if(s==='historial')renderHistorial();}
+function showSection(s){document.getElementById('toast').classList.remove('show');document.querySelectorAll('.section').forEach(el=>el.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));document.getElementById('sec-'+s).classList.add('active');const navIndex={nueva:0,nota:1,equipo:4,historial:5}[s];if(navIndex!==undefined)document.querySelectorAll('.nav-btn')[navIndex].classList.add('active');if(s==='equipo')renderEquipo();if(s==='historial')renderHistorial();}
 function irANota(){showSection('nota');const proc=ultimoRegistro&&ultimoRegistro.procedimiento;if(proc){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}mostrarNotaBase();}}
 function switchPatientTab(tab,btn){document.querySelectorAll('.tab-mini').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('tab-foto').style.display=tab==='foto'?'block':'none';document.getElementById('tab-manual').style.display=tab==='manual'?'block':'none';}
 function setDefaultDate(){document.getElementById('fecha-cirugia').value=new Date().toISOString().split('T')[0];}
 function calcularEdad(){const dob=document.getElementById('manual-dob').value;if(!dob)return;const hoy=new Date(),nac=new Date(dob);let edad=hoy.getFullYear()-nac.getFullYear();if(hoy.getMonth()-nac.getMonth()<0||(hoy.getMonth()===nac.getMonth()&&hoy.getDate()<nac.getDate()))edad--;document.getElementById('manual-edad').value=edad+' años';}
 function checkOtro(selId,inpId){document.getElementById(inpId).style.display=document.getElementById(selId).value==='otro'?'block':'none';}
 function getVal(selId,otroId){const v=document.getElementById(selId).value;if(!v)return '';if(v==='otro')return document.getElementById(otroId).value.trim();return v;}
-function cargarNotaBase(){const proc=document.getElementById('procedimiento').value;if(proc&&NOTAS_BASE[proc]){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}}}
+function cargarNotaBase(){const proc=document.getElementById('procedimiento').value;const notas=getNotasBase();if(proc&&notas[proc]){const sel=document.getElementById('nota-procedimiento');for(let i=0;i<sel.options.length;i++){if(sel.options[i].text===proc){sel.selectedIndex=i;break;}}}}
 
 function mostrarNotaBase(){
   const proc=document.getElementById('nota-procedimiento').value;
   const preview=document.getElementById('nota-base-preview');
   const texto=document.getElementById('nota-base-texto');
   const btn=document.getElementById('btn-usar-nota');
+  const notas=getNotasBase();
   if(proc==='libre'){
     texto.className='nota-base-box libre';
     texto.textContent='Modo libre: dictá o escribí el procedimiento completo y la IA generará la nota operatoria desde cero. Podés ser tan breve o detallado como quieras.';
@@ -390,12 +425,12 @@ function mostrarNotaBase(){
     preview.style.display='block';
     notaBaseSeleccionada='';
     modoLibre=true;
-  } else if(proc&&NOTAS_BASE[proc]){
+  } else if(proc&&notas[proc]){
     texto.className='nota-base-box';
-    texto.textContent=NOTAS_BASE[proc].substring(0,300)+'...';
+    texto.textContent=notas[proc].substring(0,300)+'...';
     btn.textContent='Usar esta nota base →';
     preview.style.display='block';
-    notaBaseSeleccionada=NOTAS_BASE[proc];
+    notaBaseSeleccionada=notas[proc];
     modoLibre=false;
   } else {
     preview.style.display='none';
@@ -427,6 +462,8 @@ function mostrarPasoVariantes(){
   document.getElementById('nota-resultado').style.display='none';
   document.getElementById('dictado-texto').value='';
   currentTranscript='';
+  const guardarBase=document.getElementById('btn-guardar-base');
+  if(guardarBase)guardarBase.style.display='none';
 }
 
 function volverSeleccion(){document.getElementById('paso-seleccion').style.display='block';document.getElementById('paso-variantes').style.display='none';}
@@ -470,18 +507,38 @@ function guardarCirugia(){
   document.getElementById('save-confirm').scrollIntoView({behavior:'smooth'});
   showToast('Registro guardado correctamente');
 }
+function guardarCirugiaYSiguiente(){guardarCirugia();if(ultimoRegistro)irANota();}
 
-async function enviarSecretaria(){
-  if(!ultimoRegistro){showToast('Primero guardá un registro.');return;}
+function generarPostoperatorioBaseParaPaquete(){
+  const fechaEl=document.getElementById('postFecha');
+  if(fechaEl&&!fechaEl.value)fechaEl.value=isoDate(new Date());
+  const solEl=document.getElementById('postSolucion');
+  if(solEl&&!solEl.value)solEl.value='80';
+  const velocidad=solEl?solEl.value:'80';
+  const fecha=fechaLargaDesdeISO(fechaEl?fechaEl.value:isoDate(new Date()));
+  const interconsulta=typeof postInterconsultaSeleccionada==='function'?postInterconsultaSeleccionada():'';
+  const cuidados=typeof postCuidadosSeleccionados==='function'?postCuidadosSeleccionados():[];
+  const dieta=typeof postDietaSeleccionada==='function'?postDietaSeleccionada():'Ayuno hasta nueva orden.';
+  return basePostoperatoria(velocidad,fecha,interconsulta,cuidados,dieta);
+}
+
+async function enviarSecretaria(adjuntosExtra=[]){
+  if(!postTextoGenerado)postTextoGenerado=generarPostoperatorioBaseParaPaquete();
+  if(!ultimoRegistro){
+    ultimoRegistro=construirRegistro();
+    ultimoRegistro.id=Date.now();
+  }
+  if(!ultimoRegistro.paciente){showToast('Ingresá al menos el nombre del paciente.');return;}
   const btn=document.getElementById('btn-email');const status=document.getElementById('email-status');
-  btn.disabled=true;btn.textContent='Enviando...';status.textContent='';
+  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
+  if(status)status.textContent='';
   try{
-    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
+    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',indicacionesPostoperatorias:postTextoGenerado||'',adjuntosExtra:adjuntosExtra||[],timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
     const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    if(res.ok||res.status===200){status.innerHTML='<span style="color:#16a34a">✓ Enviado a secretaria</span>';showToast('Enviado correctamente');}
-    else{status.innerHTML='<span style="color:#dc2626">Error al enviar</span>';}
-  }catch(err){status.innerHTML='<span style="color:#dc2626">Error de conexión</span>';}
-  btn.disabled=false;btn.textContent='Enviar a secretaria';
+    if(res.ok||res.status===200){if(status)status.innerHTML='<span style="color:#16a34a">✓ Enviado a secretaria</span>';showToast('Paquete enviado correctamente');}
+    else{if(status)status.innerHTML='<span style="color:#dc2626">Error al enviar</span>';showToast('Error al enviar');}
+  }catch(err){if(status)status.innerHTML='<span style="color:#dc2626">Error de conexión</span>';showToast('El envío requiere Vercel dev o la app desplegada.');}
+  if(btn){btn.disabled=false;btn.textContent='Enviar paquete a secretaria';}
 }
 
 async function enviarNotaSecretaria(){
@@ -501,7 +558,48 @@ function limpiarFormulario(){
   ultimoRegistro=null;notaGenerada='';currentTranscript='';setDefaultDate();
 }
 
+function nombreSugeridoNotaBase(){
+  const notaProc=document.getElementById('nota-procedimiento').value;
+  const regProc=document.getElementById('procedimiento').value==='otro'?document.getElementById('otro-procedimiento').value:document.getElementById('procedimiento').value;
+  return notaProc&&notaProc!=='libre'?notaProc:(regProc||'');
+}
+function guardarNotaEnCatalogo(textoGuardar){
+  if(!textoGuardar){showToast('Escribí, pegá o generá una nota antes de guardarla.');return;}
+  const nombre=prompt('Nombre del procedimiento para guardar:',nombreSugeridoNotaBase()||'');
+  if(!nombre||!nombre.trim())return;
+  notasPersonalizadas[nombre.trim()]=textoGuardar.trim();
+  localStorage.setItem('notasPersonalizadas',JSON.stringify(notasPersonalizadas));
+  agregarOpcionesNotasPersonalizadas();
+  showToast('Nota base guardada');
+}
+function guardarTextoTalCualComoBase(){
+  const texto=(document.getElementById('dictado-texto').value||'').trim();
+  guardarNotaEnCatalogo(texto);
+}
+function guardarNotaComoBase(){
+  const textoGuardar=(notaGenerada&&notaGenerada.trim())?notaGenerada.trim():'';
+  if(!textoGuardar){showToast('Primero generá la nota con IA, o usa Guardar texto tal cual.');return;}
+  guardarNotaEnCatalogo(textoGuardar);
+}
 function copiarNota(){navigator.clipboard.writeText(document.getElementById('nota-contenido').textContent).then(()=>showToast('Nota copiada al portapapeles'));}
+function escapeHtml(text){return (text||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function renderMarkdownLite(text){
+  const clean=(text||'').replace(/^```(?:markdown)?\s*|\s*```$/g,'').trim();
+  return clean.split(/\n{2,}/).map(block=>{
+    const raw=block.trim();
+    if(!raw)return '';
+    if(/^---+$/.test(raw))return '<hr>';
+    const noHashes=raw.replace(/^#{1,3}\s*/,'');
+    const escaped=escapeHtml(noHashes).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    if(/^#{1,2}\s/.test(raw)||/^[A-ZÁÉÍÓÚÑ0-9\s:()/-]{8,}$/.test(noHashes)){
+      return '<h2>'+escaped+'</h2>';
+    }
+    if(/^[A-ZÁÉÍÓÚÑ0-9\s:()/-]{4,}:$/.test(noHashes)){
+      return '<h3>'+escaped+'</h3>';
+    }
+    return '<p>'+escaped.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+}
 function toggleRecording(){if(!isRecording)startRecording();else stopRecording();}
 function startRecording(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById('mic-status').textContent='Usá Chrome para el dictado.';return;}recognition=new SR();recognition.lang='es-MX';recognition.continuous=true;recognition.interimResults=true;recognition.onresult=e=>{let interim='',final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript;}currentTranscript+=final;document.getElementById('dictado-texto').value=currentTranscript+interim;};recognition.onerror=()=>stopRecording();recognition.start();isRecording=true;document.getElementById('mic-btn').classList.add('recording');document.getElementById('mic-btn').textContent='⏹';document.getElementById('mic-status').textContent='Dictando... presioná para detener';}
 function stopRecording(){if(recognition)recognition.stop();isRecording=false;document.getElementById('mic-btn').classList.remove('recording');document.getElementById('mic-btn').textContent='🎤';document.getElementById('mic-status').textContent='Dictado detenido.';}
@@ -511,6 +609,8 @@ async function generarNota(){
   const btn=event.target;btn.disabled=true;btn.textContent='Generando...';
   document.getElementById('nota-resultado').style.display='block';
   document.getElementById('nota-contenido').textContent='Generando nota operatoria personalizada...';
+  const guardarBaseBtn=document.getElementById('btn-guardar-base');
+  if(guardarBaseBtn)guardarBaseBtn.style.display='none';
   const reg=ultimoRegistro||{};
 
   const datosEquipo = `- Paciente: ${reg.paciente||'No especificado'}
@@ -525,47 +625,25 @@ async function generarNota(){
   let prompt;
   if(modoLibre){
     if(!extras){showToast('Dictá el procedimiento antes de generar.');btn.disabled=false;btn.textContent='Generar nota completa con IA →';return;}
-    prompt=`Eres un asistente médico especializado en notas operatorias quirúrgicas en español.
-
-El cirujano ha dictado el siguiente procedimiento:
-${extras}
-
-DATOS DEL PACIENTE Y CIRUGÍA:
-${datosEquipo}
-
-Redacta una nota operatoria quirúrgica completa y formal en español médico. Sigue esta estructura:
-1. Encabezado con nombre del paciente, edad, fecha y diagnóstico preoperatorio
-2. Equipo quirúrgico
-3. Técnica quirúrgica detallada (expande el dictado con terminología médica apropiada, manteniendo todos los detalles mencionados)
-4. Cierre con verificación de hemostasia y fin del procedimiento
-
-Responde ÚNICAMENTE con la nota operatoria, sin explicaciones adicionales.`;
+    prompt=`Eres un asistente médico especializado en notas operatorias quirúrgicas en español.\n\nEl cirujano ha dictado el siguiente procedimiento:\n${extras}\n\nDATOS DEL PACIENTE Y CIRUGÍA:\n${datosEquipo}\n\nRedacta una nota operatoria quirúrgica completa y formal en español médico. Sigue esta estructura:\n1. Encabezado con nombre del paciente, edad, fecha y diagnóstico preoperatorio\n2. Equipo quirúrgico\n3. Técnica quirúrgica detallada (expande el dictado con terminología médica apropiada, manteniendo todos los detalles mencionados)\n4. Cierre con verificación de hemostasia y fin del procedimiento\n\nNo uses Markdown crudo con asteriscos. Si necesitas títulos, escríbelos como texto en mayúsculas en líneas separadas.\nResponde ÚNICAMENTE con la nota operatoria, sin explicaciones adicionales.`;
   } else {
-    prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.
-
-NOTA BASE DEL PROCEDIMIENTO:
-${notaBaseSeleccionada}
-
-DATOS DEL PACIENTE Y CIRUGÍA:
-${datosEquipo}
-
-${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}
-
-Genera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
+    prompt=`Eres un asistente médico especializado en notas operatorias. Tu tarea es tomar una nota operatoria base y personalizarla con los datos específicos de esta cirugía.\n\nNOTA BASE DEL PROCEDIMIENTO:\n${notaBaseSeleccionada}\n\nDATOS DEL PACIENTE Y CIRUGÍA:\n${datosEquipo}\n\n${extras?`VARIANTES O HALLAZGOS ESPECIALES EN ESTA CIRUGÍA:\n${extras}\n\nIntegra estos hallazgos de forma natural en la nota operatoria.`:'Esta cirugía fue estándar sin variantes. Usa la nota base tal cual, incorporando los datos del paciente y equipo.'}\n\nGenera la nota operatoria completa y formal, comenzando con los datos del paciente, fecha, diagnóstico y equipo quirúrgico, seguido de la técnica quirúrgica. Mantén el estilo médico formal. No uses Markdown crudo con asteriscos. Responde ÚNICAMENTE con la nota, sin explicaciones adicionales.`;
   }
 
   try{
     const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const data=await res.json();
     notaGenerada=data.content.map(i=>i.text||'').join('\n');
-    document.getElementById('nota-contenido').textContent=notaGenerada;
+    document.getElementById('nota-contenido').innerHTML=renderMarkdownLite(notaGenerada);
+    if(guardarBaseBtn)guardarBaseBtn.style.display='inline-block';
     if(ultimoRegistro){ultimoRegistro.notaOperatoria=notaGenerada;localStorage.setItem('registros',JSON.stringify(registros));}
     showToast('Nota generada correctamente');
-  }catch(err){document.getElementById('nota-contenido').textContent='Error al conectar con la IA. Verificá tu conexión.';}
+  }catch(err){document.getElementById('nota-contenido').textContent='Error al conectar con la IA. Verificá tu conexión.';if(guardarBaseBtn)guardarBaseBtn.style.display='inline-block';}
   btn.disabled=false;btn.textContent='Generar nota completa con IA →';
 }
 
-let equipoCatalogo=JSON.parse(localStorage.getItem('equipo')||'null')||{ayudantes:['Dr. Enrique Stoopen Margain','Dr. Natan Sarue Saed','Dr. Jonathan Chernitzky Camaño'],anestesio:['Dr. Alejandro Jiménez Casillas','Dr. Paulo López Reymundo','Dra. Giselle Uribe','Dra. Andrea Figueroa']};
+let equipoCatalogo=JSON.parse(localStorage.getItem('equipo')||'null')||{ayudantes:['Dr. Enrique Stoopen Margain','Dr. Natan Sarue Saed','Dr. Jonathan Chernitzky Camaño'],anestesio:['Dr. Alejandro Jiménez Casillas','Dr. Juvenal Franco','Dr. Paulo López Reymundo','Dra. Giselle Uribe','Dra. Andrea Figueroa']};
+if(!equipoCatalogo.anestesio.includes('Dr. Juvenal Franco')){equipoCatalogo.anestesio.splice(1,0,'Dr. Juvenal Franco');guardarEquipo();}
 function guardarEquipo(){localStorage.setItem('equipo',JSON.stringify(equipoCatalogo));}
 function agregarMiembro(){const nombre=document.getElementById('eq-nombre').value.trim();const tipo=document.getElementById('eq-tipo').value;if(!nombre){showToast('Ingresá el nombre.');return;}equipoCatalogo[tipo==='ayudante'?'ayudantes':'anestesio'].push(nombre);guardarEquipo();document.getElementById('eq-nombre').value='';renderEquipo();showToast('Integrante agregado');}
 function renderEquipo(){['ayudantes','anestesio'].forEach(tipo=>{const cont=document.getElementById('lista-'+tipo);const lista=equipoCatalogo[tipo];if(!lista.length){cont.innerHTML='<div class="empty">Sin integrantes.</div>';return;}cont.innerHTML=lista.map((nombre,i)=>`<div class="record-row"><div style="width:36px;height:36px;border-radius:50%;background:#f0f0ec;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#555;flex-shrink:0">${nombre.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div style="flex:1;font-size:13px;font-weight:500">${nombre}</div><button class="btn btn-sm btn-danger" onclick="eliminarMiembro(${i},'${tipo}')">Eliminar</button></div>`).join('');});}
@@ -573,43 +651,95 @@ function eliminarMiembro(idx,tipo){if(!confirm('¿Eliminar?'))return;equipoCatal
 function renderHistorial(){const cont=document.getElementById('historial-lista');const count=document.getElementById('historial-count');count.textContent=registros.length+' registro'+(registros.length!==1?'s':'');if(!registros.length){cont.innerHTML='<div class="empty">No hay registros todavía.</div>';return;}cont.innerHTML=[...registros].reverse().map(r=>`<div class="record-row"><div style="flex:1"><div style="font-weight:600;font-size:13px">${r.paciente||'Paciente sin nombre'}</div><div style="font-size:11px;color:#666;margin-top:2px">${r.procedimiento||''} · ${r.institucion||''} · ${r.fechaCirugia||''}</div><div style="font-size:11px;color:#999;margin-top:1px">${[r.primerAyudante,r.segundoAyudante,r.anestesiologo].filter(Boolean).join(' · ')}</div></div><span class="badge-success">Guardado</span></div>`).join('');}
 
 setDefaultDate();
+agregarOpcionesNotasPersonalizadas();
 renderEquipo();
 </script>
 
+<!-- MODAL INDICACIONES HOSPITALARIAS -->
+<div id="modalPost" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:24px;max-width:520px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;max-height:90vh;overflow-y:auto;">
+    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📄 Indicaciones Hospitalarias</div>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;">Indicaciones postoperatorias para el hospital.</div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha</label><input id="postFecha" type="date" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div id="postInfoPaciente" style="background:#f0f7ff;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:#1e3a5f;border-left:3px solid #1976d2;"></div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Solución Hartmann</label><select id="postSolucion" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"><option value="40">40 cc/hora</option><option value="60">60 cc/hora</option><option value="80" selected>80 cc/hora</option><option value="100">100 cc/hora</option><option value="125">125 cc/hora</option></select></div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Dieta</label><select id="postDieta" onchange="toggleHoraDietaHospital()" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"><option value="ayuno">Ayuno hasta nueva orden</option><option value="liquidos">Líquidos claros</option><option value="liquidos_blanda">Líquidos claros y dieta blanda al tolerar</option><option value="blanda">Dieta blanda</option></select><div id="postDietaHoraWrap" style="display:none;margin-top:6px;"><label style="font-size:11px;color:#666;display:block;margin-bottom:4px;">Hora de inicio</label><input id="postDietaHora" type="text" inputmode="numeric" placeholder="Ej: 16:30" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div></div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Estructura base</div><div style="background:#f5f5f0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.7;color:#444;">1. Dieta · 2. Soluciones · 3. Cuidados generales · 4. Medicamentos · Interconsultas si aplica · Avisar eventualidades / extras</div></div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Cuidados generales opcionales</div><div style="display:grid;gap:7px;font-size:12px;color:#333;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 12px;"><label><input type="checkbox" class="post-cuidado-extra" value="Ejercicios ventilatorios con espirometría incentiva Triflow."> Ejercicios ventilatorios con espirometría incentiva Triflow</label><label><input type="checkbox" class="post-cuidado-extra" value="Cuidados de drenaje y cuantificación."> Cuidados de drenaje y cuantificación</label><label><input type="checkbox" class="post-cuidado-extra" value="Cuidados de sonda Foley."> Cuidados de sonda Foley</label><label><input type="checkbox" class="post-cuidado-extra" value="Fisioterapia respiratoria."> Fisioterapia respiratoria</label><label><input type="checkbox" class="post-cuidado-extra" value="Fisioterapia para movilidad."> Fisioterapia para movilidad</label><label><input type="checkbox" class="post-cuidado-extra" value="Interconsulta a clínica de estomas y heridas."> Interconsulta clínica de estomas y heridas</label></div></div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Interconsulta <span style="font-weight:400;color:#999">(opcional)</span></div><div style="display:grid;gap:7px;font-size:12px;color:#333;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 12px;"><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Fernando Magaña"> Dr. Fernando Magaña</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Omar Fueyo"> Dr. Omar Fueyo</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Lic. Marcela Sawaya"> Lic. Marcela Sawaya</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Jorge Guajardo"> Dr. Jorge Guajardo</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Jon Mikel Iñarritu"> Dr. Jon Mikel Iñarritu</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dra. Ana María Serrano"> Dra. Ana María Serrano</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Paul Palacios"> Dr. Paul Palacios</label><label><input type="checkbox" class="post-interconsulta-opcion" value="Dr. Diego Ontañón"> Dr. Diego Ontañón</label><label><input type="checkbox" id="postInterconsultaOtroCheck" onchange="toggleOtraPostInterconsulta()" value="otro"> Otro</label><input id="postInterconsultaOtro" type="text" placeholder="Nombre de interconsulta" style="display:none;width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;margin-top:2px;"></div></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Cambios de medicamentos <span style="font-weight:400;color:#999">(opcional)</span></label><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="postMicBtn" onclick="toggleDictado('postCambios','postMicBtn','postMicStatus')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="postMicStatus" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="postCambios" rows="2" placeholder="ej: cambiar ketorolaco por tramadol; suspender ceftriaxona" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Indicaciones extra <span style="font-weight:400;color:#999">(opcional)</span></label><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="postMicBtn2" onclick="toggleDictado('postExtras','postMicBtn2','postMicStatus2')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="postMicStatus2" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="postExtras" rows="2" placeholder="ej: deambulación asistida, retiro de drenaje si gasto menor a..." style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div id="postResultado" class="ai-box" style="display:none;margin-bottom:10px;max-height:280px;white-space:pre-wrap;"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;"><button onclick="cerrarModalPost()" style="flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Cancelar</button><button onclick="generarPostoperatorio()" id="btnPostTexto" style="flex:2;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">Generar texto</button><button onclick="copiarPostoperatorio()" id="btnCopiarPost" style="display:none;flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Copiar</button><button onclick="cerrarModalPost();abrirModalAlta();" style="flex:2;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">Siguiente: alta</button></div>
+  </div>
+</div>
 
 <!-- MODAL INDICACIONES DE ALTA -->
-<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
-<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
-<!-- MODAL INDICACIONES DE ALTA — reemplaza el bloque anterior completo -->
 <div id="modalAlta" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:12px;padding:24px;max-width:420px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;max-height:90vh;overflow-y:auto;">
-    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📄 Indicaciones de Alta</div>
-    <div style="font-size:11px;color:#999;margin-bottom:16px;">Se generarán 2 Word adjuntos: Indicaciones + Receta</div>
-    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label><input id="altaFecha" type="text" placeholder="ej: 4 de mayo de 2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
-    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;dis
-head -583 index.html > index_nuevo.html
-cat >> index_nuevo.html << 'ENDMODAL'
-<div id="modalAlta" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:12px;padding:24px;max-width:420px;width:92%;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:-apple-system,sans-serif;max-height:90vh;overflow-y:auto;">
-    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📄 Indicaciones de Alta</div>
-    <div style="font-size:11px;color:#999;margin-bottom:16px;">Se generarán 2 Word adjuntos: Indicaciones + Receta</div>
-    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label><input id="altaFecha" type="text" placeholder="ej: 4 de mayo de 2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
-    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha de próxima cita</label><div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button onclick="altaSugerirFecha(7)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">7 días</button><button onclick="altaSugerirFecha(14)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">14 días</button><button onclick="altaSugerirFecha(21)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">21 días</button><button onclick="altaSugerirFecha(30)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">30 días</button></div><input id="altaFechaCita" type="text" placeholder="ej: 18/05/2026" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div style="font-size:16px;font-weight:600;color:#1a237e;margin-bottom:4px;">📎 Indicaciones de Alta</div>
+    <div style="font-size:11px;color:#999;margin-bottom:16px;">Se generarán 2 Word adjuntos: Indicaciones + Receta.</div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha del documento</label><input id="altaFecha" type="date" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
+    <div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">Fecha de próxima cita</label><div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;"><button onclick="altaSugerirFecha(8)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">8 días</button><button onclick="altaSugerirFecha(15)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">15 días</button><button onclick="altaSugerirFecha(21)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">21 días</button><button onclick="altaSugerirFecha(30)" style="padding:5px 10px;border:1px solid #1976d2;background:#e3f2fd;border-radius:6px;cursor:pointer;font-size:12px;">30 días</button></div><input id="altaFechaCita" type="date" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;"></div>
     <div id="altaInfoPaciente" style="background:#f0f7ff;border-radius:8px;padding:10px 14px;margin:12px 0;font-size:12px;color:#1e3a5f;border-left:3px solid #1976d2;"></div>
     <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Indicaciones base incluidas</div><div style="background:#f5f5f0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.7;color:#444;">ULSEN · BIOMICS · TYLEX · DOLAC — Medidas generales — Signos de alarma</div></div>
-    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Cambiar medicamento o agregar algo? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn" onclick="toggleAltaRec('altaVariantes','altaMicBtn','altaMicStatus')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaVariantes" rows="2" placeholder="ej: cambiar DOLAC por Ketorolaco 10mg cada 8h" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
-    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Agregar indicaciones específicas? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="font-size:11px;color:#888;margin-bottom:6px;">La IA genera una hoja extra. Ej: baños de asiento, cuidados de herida perianal</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn2" onclick="toggleAltaRec('altaEspeciales','altaMicBtn2','altaMicStatus2')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus2" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaEspeciales" rows="2" placeholder="Dejar vacío si no se necesita hoja extra." style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
-    <div style="display:flex;gap:8px;margin-top:4px;"><button onclick="cerrarModalAlta()" style="flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Cancelar</button><button onclick="enviarAlta()" id="btnEnviarAlta" style="flex:2;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">📎 Generar y enviar</button></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Cambiar medicamento o agregar algo? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn" onclick="toggleDictado('altaVariantes','altaMicBtn','altaMicStatus')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaVariantes" rows="2" placeholder="ej: cambiar DOLAC por Ketorolaco 10mg cada 8h" style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:600;color:#555;display:block;margin-bottom:4px;">¿Agregar indicaciones específicas? <span style="font-weight:400;color:#999">(opcional)</span></label><div style="font-size:11px;color:#888;margin-bottom:6px;">La IA genera una hoja extra si se necesita.</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;"><button id="altaMicBtn2" onclick="toggleDictado('altaEspeciales','altaMicBtn2','altaMicStatus2')" style="width:40px;height:40px;border-radius:50%;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button><span id="altaMicStatus2" style="font-size:11px;color:#888;">Presioná para dictar</span></div><textarea id="altaEspeciales" rows="2" placeholder="Dejar vacío si no se necesita hoja extra." style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:13px;font-family:inherit;resize:vertical;"></textarea></div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px;">Interconsulta <span style="font-weight:400;color:#999">(opcional)</span></div><div style="display:grid;gap:7px;font-size:12px;color:#333;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 12px;"><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Fernando Magaña"> Dr. Fernando Magaña</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Omar Fueyo"> Dr. Omar Fueyo</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Lic. Marcela Sawaya"> Lic. Marcela Sawaya</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Jorge Guajardo"> Dr. Jorge Guajardo</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Jon Mikel Iñarritu"> Dr. Jon Mikel Iñarritu</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dra. Ana María Serrano"> Dra. Ana María Serrano</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Paul Palacios"> Dr. Paul Palacios</label><label><input type="checkbox" class="alta-interconsulta-opcion" value="Dr. Diego Ontañón"> Dr. Diego Ontañón</label><label><input type="checkbox" id="altaInterconsultaOtroCheck" onchange="toggleOtraInterconsulta()" value="otro"> Otro</label><input id="altaInterconsultaOtro" type="text" placeholder="Nombre de interconsulta" style="display:none;width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:8px;padding:9px 12px;font-size:14px;font-family:inherit;margin-top:2px;"></div></div>
+    <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;"><button onclick="cerrarModalAlta()" style="flex:1;padding:10px;border:1px solid #ddd;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit;">Cancelar</button><button onclick="enviarAlta()" id="btnEnviarAlta" style="flex:2;padding:10px;background:#2e7d32;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">📎 Enviar alta</button><button onclick="enviarPaqueteConAlta()" style="flex:2;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">Enviar alta + paquete</button></div>
     <div id="altaStatus" style="margin-top:10px;font-size:12px;text-align:center;"></div>
   </div>
 </div>
 <script>
-let altaRecs={},altaTxts={};
-function abrirModalAlta(){const hoy=new Date();const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];document.getElementById('altaFecha').value=hoy.getDate()+' de '+meses[hoy.getMonth()]+' de '+hoy.getFullYear();document.getElementById('altaFechaCita').value='';document.getElementById('altaStatus').textContent='';document.getElementById('altaVariantes').value='';document.getElementById('altaEspeciales').value='';altaTxts={};const esFoto=document.querySelector('.tab-mini.active')&&document.querySelector('.tab-mini.active').textContent.includes('Foto');const nombre=esFoto?(document.getElementById('foto-nombre').value||''):(document.getElementById('manual-nombre').value||'');const edad=esFoto?(document.getElementById('foto-edad').value||''):(document.getElementById('manual-edad').value||'');const fn=esFoto?(document.getElementById('foto-dob').value||''):(document.getElementById('manual-dob').value||'');const proc=document.getElementById('procedimiento').value==='otro'?document.getElementById('otro-procedimiento').value:(document.getElementById('procedimiento').value||'');let fnL=fn;if(fn){const[y,m,d]=fn.split('-');if(y&&m&&d)fnL=d+'/'+m+'/'+y;}document.getElementById('altaInfoPaciente').innerHTML='<b>Paciente:</b> '+(nombre||'—')+' &nbsp;·&nbsp; <b>Edad:</b> '+(edad||'—')+' &nbsp;·&nbsp; <b>FN:</b> '+(fnL||'—')+'<br><b>Procedimiento:</b> '+(proc||'—');window._altaDatos={nombre,edad,fechaNacimiento:fnL,procedimiento:proc};document.getElementById('modalAlta').style.display='flex';}
-function cerrarModalAlta(){Object.values(altaRecs).forEach(r=>{try{r.stop();}catch(e){}});altaRecs={};document.getElementById('modalAlta').style.display='none';}
-function altaSugerirFecha(dias){const d=new Date();d.setDate(d.getDate()+dias);const dd=String(d.getDate()).padStart(2,'0');const mm=String(d.getMonth()+1).padStart(2,'0');document.getElementById('altaFechaCita').value=dd+'/'+mm+'/'+d.getFullYear();}
-function toggleAltaRec(tid,bid,sid){if(altaRecs[tid]){altaRecs[tid].stop();delete altaRecs[tid];document.getElementById(bid).textContent='🎤';document.getElementById(bid).style.borderColor='#ddd';document.getElementById(sid).textContent='Dictado detenido.';return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById(sid).textContent='Usá Chrome.';return;}const r=new SR();r.lang='es-MX';r.continuous=true;r.interimResults=true;altaTxts[tid]=altaTxts[tid]||'';r.onresult=e=>{let f='',i='';for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript+' ';else i+=e.results[x][0].transcript;}altaTxts[tid]+=f;document.getElementById(tid).value=altaTxts[tid]+i;};r.onerror=()=>{delete altaRecs[tid];document.getElementById(bid).textContent='🎤';};r.start();altaRecs[tid]=r;document.getElementById(bid).textContent='⏹';document.getElementById(bid).style.borderColor='#dc2626';document.getElementById(sid).textContent='Dictando... presioná para detener';}
-async function enviarAlta(){const fecha=document.getElementById('altaFecha').value.trim();const fechaCita=document.getElementById('altaFechaCita').value.trim();const variantes=document.getElementById('altaVariantes').value.trim();const especiales=document.getElementById('altaEspeciales').value.trim();const statusEl=document.getElementById('altaStatus');const btn=document.getElementById('btnEnviarAlta');if(!fecha){statusEl.textContent='⚠️ Ingresa la fecha del documento.';return;}if(!fechaCita){statusEl.textContent='⚠️ Ingresa la fecha de la próxima cita.';return;}Object.values(altaRecs).forEach(r=>{try{r.stop();}catch(e){}});btn.disabled=true;btn.textContent=especiales?'Generando con IA...':variantes?'Ajustando con IA...':'Generando documentos...';statusEl.textContent='';try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha,fechaCita,nombre:window._altaDatos.nombre,edad:window._altaDatos.edad,fechaNacimiento:window._altaDatos.fechaNacimiento,procedimiento:window._altaDatos.procedimiento,indicacionesExtra:variantes||'',indicacionesEspeciales:especiales||''})});const data=await res.json();if(data.status==='ok'){statusEl.style.color='#2e7d32';statusEl.textContent='✅ 2 documentos enviados a drpablovidal@gmail.com';setTimeout(()=>cerrarModalAlta(),2500);}else throw new Error(data.error||'Error desconocido');}catch(err){statusEl.style.color='#c62828';statusEl.textContent='❌ Error: '+err.message;}finally{btn.disabled=false;btn.textContent='📎 Generar y enviar';}}
+let dictadoRecs={},dictadoTxts={},postTextoGenerado='';
+function isoDate(d){return d.toISOString().split('T')[0];}
+function fechaLargaDesdeISO(iso){if(!iso)return '';const [y,m,d]=iso.split('-').map(Number);const meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];return `${d} de ${meses[m-1]} de ${y}`;}
+function fechaCortaDesdeISO(iso){if(!iso)return '';const [y,m,d]=iso.split('-');return `${d}/${m}/${y}`;}
+function datosPacienteActual(){const esFoto=document.querySelector('.tab-mini.active')&&document.querySelector('.tab-mini.active').textContent.includes('Foto');const nombre=esFoto?(document.getElementById('foto-nombre').value||''):(document.getElementById('manual-nombre').value||'');const edad=esFoto?(document.getElementById('foto-edad').value||''):(document.getElementById('manual-edad').value||'');const fn=esFoto?(document.getElementById('foto-dob').value||''):(document.getElementById('manual-dob').value||'');const proc=document.getElementById('procedimiento').value==='otro'?document.getElementById('otro-procedimiento').value:(document.getElementById('procedimiento').value||'');return{nombre,edad,fechaNacimiento:fechaCortaDesdeISO(fn)||fn,procedimiento:proc};}
+function infoPacienteHtml(d){return '<b>Paciente:</b> '+(d.nombre||'—')+' &nbsp;·&nbsp; <b>Edad:</b> '+(d.edad||'—')+' &nbsp;·&nbsp; <b>FN:</b> '+(d.fechaNacimiento||'—')+'<br><b>Procedimiento:</b> '+(d.procedimiento||'—');}
+function abrirModalPost(){const hoy=new Date();document.getElementById('postFecha').value=isoDate(hoy);document.getElementById('postSolucion').value='80';document.getElementById('postDieta').value='ayuno';document.getElementById('postDietaHora').value='';document.getElementById('postDietaHoraWrap').style.display='none';document.getElementById('postCambios').value='';document.getElementById('postExtras').value='';document.querySelectorAll('.post-cuidado-extra').forEach(cb=>cb.checked=false);document.querySelectorAll('.post-interconsulta-opcion').forEach(cb=>cb.checked=false);document.getElementById('postInterconsultaOtroCheck').checked=false;document.getElementById('postInterconsultaOtro').value='';document.getElementById('postInterconsultaOtro').style.display='none';document.getElementById('postResultado').style.display='none';document.getElementById('postResultado').textContent='';document.getElementById('btnCopiarPost').style.display='none';postTextoGenerado='';dictadoTxts={};const datos=datosPacienteActual();document.getElementById('postInfoPaciente').innerHTML=infoPacienteHtml(datos);document.getElementById('modalPost').style.display='flex';}
+function cerrarModalPost(){detenerDictados();document.getElementById('modalPost').style.display='none';}
+function formatearListaNombres(lista){if(!lista.length)return '';if(lista.length===1)return lista[0];return lista.slice(0,-1).join(', ')+' y '+lista[lista.length-1];}
+function toggleOtraPostInterconsulta(){document.getElementById('postInterconsultaOtro').style.display=document.getElementById('postInterconsultaOtroCheck').checked?'block':'none';}
+function postInterconsultaSeleccionada(){const lista=Array.from(document.querySelectorAll('.post-interconsulta-opcion:checked')).map(cb=>cb.value);const otro=document.getElementById('postInterconsultaOtroCheck').checked?document.getElementById('postInterconsultaOtro').value.trim():'';if(otro)lista.push(otro);return formatearListaNombres(lista);}
+function postCuidadosSeleccionados(){return Array.from(document.querySelectorAll('.post-cuidado-extra:checked')).map(cb=>cb.value);}
+function toggleHoraDietaHospital(){const v=document.getElementById('postDieta').value;document.getElementById('postDietaHoraWrap').style.display=v==='ayuno'?'none':'block';}
+function formatoHoraHospital(hora){
+  if(!hora)return '';
+  const limpia=String(hora).trim().replace('.',':');
+  const match=limpia.match(/^(\d{1,2})(?::(\d{2}))?$/);
+  if(!match)return limpia+' horas';
+  const h=Math.max(0,Math.min(23,Number(match[1])));
+  const m=match[2]||'00';
+  return String(h)+(m!=='00'?':'+m:'')+' horas';
+}
+function postDietaSeleccionada(){
+  const dieta=document.getElementById('postDieta').value;
+  const hora=formatoHoraHospital(document.getElementById('postDietaHora').value);
+  const sufijo=hora?' a partir de las '+hora:'';
+  if(dieta==='liquidos')return 'Líquidos claros'+sufijo+'.';
+  if(dieta==='liquidos_blanda')return 'Líquidos claros'+sufijo+'; al tolerar líquidos claros, progresar a dieta blanda.';
+  if(dieta==='blanda')return 'Dieta blanda'+sufijo+'.';
+  return 'Ayuno hasta nueva orden.';
+}
+function abrirModalAlta(){const hoy=new Date();const manana=new Date();manana.setDate(hoy.getDate()+1);document.getElementById('altaFecha').value=isoDate(manana);document.getElementById('altaFechaCita').value='';document.getElementById('altaStatus').textContent='';document.getElementById('altaVariantes').value='';document.getElementById('altaEspeciales').value='';document.querySelectorAll('.alta-interconsulta-opcion').forEach(cb=>cb.checked=false);document.getElementById('altaInterconsultaOtroCheck').checked=false;document.getElementById('altaInterconsultaOtro').value='';document.getElementById('altaInterconsultaOtro').style.display='none';dictadoTxts={};const datos=datosPacienteActual();document.getElementById('altaInfoPaciente').innerHTML=infoPacienteHtml(datos);window._altaDatos=datos;document.getElementById('modalAlta').style.display='flex';}
+function cerrarModalAlta(){detenerDictados();document.getElementById('modalAlta').style.display='none';}
+function toggleOtraInterconsulta(){document.getElementById('altaInterconsultaOtro').style.display=document.getElementById('altaInterconsultaOtroCheck').checked?'block':'none';}
+function altaInterconsultaSeleccionada(){const lista=Array.from(document.querySelectorAll('.alta-interconsulta-opcion:checked')).map(cb=>cb.value);const otro=document.getElementById('altaInterconsultaOtroCheck').checked?document.getElementById('altaInterconsultaOtro').value.trim():'';if(otro)lista.push(otro);return formatearListaNombres(lista);}
+function altaSugerirFecha(dias){const d=new Date();d.setDate(d.getDate()+dias);document.getElementById('altaFechaCita').value=isoDate(d);}
+function detenerDictados(){Object.values(dictadoRecs).forEach(r=>{try{r.stop();}catch(e){}});dictadoRecs={};}
+function toggleDictado(tid,bid,sid){if(dictadoRecs[tid]){dictadoRecs[tid].stop();delete dictadoRecs[tid];document.getElementById(bid).textContent='🎤';document.getElementById(bid).style.borderColor='#ddd';document.getElementById(sid).textContent='Dictado detenido.';return;}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){document.getElementById(sid).textContent='Usá Chrome.';return;}const r=new SR();r.lang='es-MX';r.continuous=true;r.interimResults=true;dictadoTxts[tid]=dictadoTxts[tid]||'';r.onresult=e=>{let f='',i='';for(let x=e.resultIndex;x<e.results.length;x++){if(e.results[x].isFinal)f+=e.results[x][0].transcript+' ';else i+=e.results[x][0].transcript;}dictadoTxts[tid]+=f;document.getElementById(tid).value=dictadoTxts[tid]+i;};r.onerror=()=>{delete dictadoRecs[tid];document.getElementById(bid).textContent='🎤';};r.start();dictadoRecs[tid]=r;document.getElementById(bid).textContent='⏹';document.getElementById(bid).style.borderColor='#dc2626';document.getElementById(sid).textContent='Dictando... presioná para detener';}
+function basePostoperatoria(velocidad,fecha,interconsulta,cuidadosExtra,dietaTexto){
+const cuidadosExtraTxt=(cuidadosExtra||[]).length?'\n'+cuidadosExtra.map(c=>'- '+c).join('\n'):'';
+const dieta=dietaTexto||'Ayuno hasta nueva orden.';
+const interconsultaTxt=interconsulta&&interconsulta.trim()?`\n\n5. Interconsultas:\n- Interconsulta e indicaciones por ${interconsulta.trim()}.\n\n6. Avisar eventualidades / indicaciones extra:\n- Avisar eventualidades al médico tratante.`:`\n\n5. Avisar eventualidades / indicaciones extra:\n- Avisar eventualidades al médico tratante.`;
+return `Fecha: ${fecha}\n\n1. Dieta:\n- ${dieta}\n\n2. Soluciones:\n- Solución Hartmann a ${velocidad} cc/hora.\n\n3. Cuidados generales:\n- Control de líquidos mediante balance hídrico.\n- Medias TED al muslo.\n- Posición semi-Fowler a 30°.${cuidadosExtraTxt}\n- Oxígeno suplementario a 5 L/minuto.\n- Hielo local sobre heridas quirúrgicas.\n- Colocar hielo en hombros cuando sea necesario.\n- Vigilar diuresis.\n\n4. Medicamentos:\n- Omeprazol 40 mg IV cada 24 horas.\n- Ceftriaxona 1 g IV cada 12 horas.\n- Paracetamol 1 g IV cada 8 horas.\n- Ketorolaco 30 mg IV cada 8 horas.\n- Ondansetrón 8 mg IV cada 8 horas, solo en caso de náusea.\n${interconsultaTxt}`;}
+async function generarPostoperatorio(){const velocidad=document.getElementById('postSolucion').value;const cambios=document.getElementById('postCambios').value.trim();const extras=document.getElementById('postExtras').value.trim();const interconsultaPost=postInterconsultaSeleccionada();const cuidadosExtra=postCuidadosSeleccionados();const dietaTexto=postDietaSeleccionada();const box=document.getElementById('postResultado');const btn=document.getElementById('btnPostTexto');const base=basePostoperatoria(velocidad,fechaLargaDesdeISO(document.getElementById('postFecha').value),interconsultaPost,cuidadosExtra,dietaTexto);box.style.display='block';box.textContent='Generando indicaciones...';btn.disabled=true;btn.textContent='Generando...';try{if(cambios||extras){const prompt=`Eres un asistente médico. Reescribe estas indicaciones postoperatorias hospitalarias en español médico claro y ordenado.\n\nBASE:\n${base}\n\nCAMBIOS DE MEDICAMENTOS:\n${cambios||'Sin cambios.'}\n\nINDICACIONES EXTRA:\n${extras||'Sin indicaciones extra.'}\n\nReglas:\n- Conserva las secciones numeradas del texto base y su orden.\n- Si existe interconsulta, mantenla como sección propia antes de Avisar eventualidades / indicaciones extra.\n- Dentro de cada sección usa viñetas con guión, no subnumeración.\n- Integra cambios de medicamentos sin contradicciones.\n- Si hay extras, agrégalos al final en Avisar eventualidades / indicaciones extra o donde correspondan clínicamente.\n- No uses Markdown, asteriscos ni explicaciones. Devuelve solo el texto final.`;
+const res=await fetch('/api/anthropic',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:prompt}]})});if(!res.headers.get('content-type')?.includes('application/json'))throw new Error('Servidor local sin API');const data=await res.json();postTextoGenerado=data.content.map(i=>i.text||'').join('\n').trim()||base;}else{postTextoGenerado=base;}box.textContent=postTextoGenerado;document.getElementById('btnCopiarPost').style.display='block';showToast('Indicaciones generadas');}catch(err){postTextoGenerado=base;box.textContent=base;document.getElementById('btnCopiarPost').style.display='block';showToast('Dejé la base lista; la IA funciona al desplegar o con Vercel dev.');}finally{btn.disabled=false;btn.textContent='Generar texto';}}
+function copiarPostoperatorio(){if(!postTextoGenerado)generarPostoperatorio();else navigator.clipboard.writeText(postTextoGenerado).then(()=>showToast('Indicaciones copiadas'));}
+async function enviarPaqueteConAlta(){if(!postTextoGenerado)postTextoGenerado=generarPostoperatorioBaseParaPaquete();const adjuntosAlta=await enviarAlta(false,true);cerrarModalAlta();await enviarSecretaria(adjuntosAlta);}
+async function enviarAlta(cerrarAlFinal=true,returnAttachments=false){const fechaISO=document.getElementById('altaFecha').value;const citaISO=document.getElementById('altaFechaCita').value;const fecha=fechaLargaDesdeISO(fechaISO);const fechaCita=fechaCortaDesdeISO(citaISO);const variantes=document.getElementById('altaVariantes').value.trim();const especiales=document.getElementById('altaEspeciales').value.trim();const interconsultaAlta=altaInterconsultaSeleccionada();const statusEl=document.getElementById('altaStatus');const btn=document.getElementById('btnEnviarAlta');if(!fechaISO){statusEl.textContent='Ingresa la fecha del documento.';return;}if(!citaISO){statusEl.textContent='Ingresa la fecha de la próxima cita.';return;}detenerDictados();btn.disabled=true;btn.textContent=especiales?'Generando con IA...':variantes?'Ajustando con IA...':'Generando documentos...';statusEl.textContent='';try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fecha,fechaCita,nombre:window._altaDatos.nombre,edad:window._altaDatos.edad,fechaNacimiento:window._altaDatos.fechaNacimiento,procedimiento:window._altaDatos.procedimiento,indicacionesExtra:variantes||'',indicacionesEspeciales:especiales||'',interconsultaAlta:interconsultaAlta||'',returnAttachments})});if(!res.headers.get('content-type')?.includes('application/json'))throw new Error('El envío de alta requiere Vercel dev o la app desplegada.');const data=await res.json();if(data.status==='ok'){statusEl.style.color='#2e7d32';statusEl.textContent=returnAttachments?'Alta lista para adjuntar al paquete':'2 documentos de alta enviados a drpablovidal@gmail.com';if(returnAttachments)return data.attachments||[];if(cerrarAlFinal)setTimeout(()=>cerrarModalAlta(),2500);}else throw new Error(data.error||'Error desconocido');}catch(err){if(returnAttachments)throw err;statusEl.style.color='#c62828';statusEl.textContent='Error: '+err.message;}finally{btn.disabled=false;btn.textContent='📎 Generar y enviar';}}
+document.getElementById('modalPost').addEventListener('click',function(e){if(e.target===this)cerrarModalPost();});
 document.getElementById('modalAlta').addEventListener('click',function(e){if(e.target===this)cerrarModalAlta();});
 </script>
 </body>
