@@ -1,166 +1,781 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SyncMed One | Indicaciones de Ingreso — Dr. Pablo Vidal González</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SyncMed One | Programación Quirúrgica — Dr. Pablo Vidal González</title>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+<script src="consentimiento-observatorio.b64.js"></script>
+<script src="firma-pablo-vidal.b64.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:linear-gradient(160deg,#eef7ff 0%,#f8fcff 60%,#eaf7ff 100%);min-height:100vh;padding:20px 16px;color:#0b1f3a}
+.wrap{max-width:680px;margin:0 auto}
+.header{display:flex;align-items:center;gap:12px;margin-bottom:20px;background:linear-gradient(135deg,#0b1f3a 0%,#1266ff 58%,#08c7c7 100%);padding:18px;border-radius:18px;box-shadow:0 12px 32px rgba(18,102,255,.22)}
+.hicon{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.96);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 8px 22px rgba(18,102,255,.18)}.hicon img{width:34px;height:34px;object-fit:contain}
+.header h1{font-size:19px;font-weight:800;color:#ffffff}
+.header p{font-size:12px;color:rgba(255,255,255,.84);margin-top:2px}
+.pasos{display:flex;background:#fff;border-radius:11px;border:1.5px solid #cfe6ff;overflow:hidden;margin-bottom:18px}
+.pi{flex:1;padding:10px 4px;text-align:center;border-right:1px solid #cfe6ff;cursor:default}
+.pi:last-child{border-right:none}
+.pi.a{background:linear-gradient(135deg,#1266ff,#0b8fdc)}
+.pi.l{background:#eef7ff;cursor:pointer}
+.pn{font-size:11px;font-weight:700;color:#64748b}
+.pi.a .pn{color:#fff}.pi.l .pn{color:#1266ff}
+.pl{font-size:10px;color:#64748b;margin-top:2px}
+.pi.a .pl{color:rgba(255,255,255,0.85)}.pi.l .pl{color:#1266ff}
+.card{background:#fff;border-radius:16px;border:1.5px solid #cfe6ff;padding:24px;box-shadow:0 4px 24px rgba(74,144,164,0.08)}
+.card h2{font-size:16px;color:#0b1f3a;margin-bottom:18px}
+.campo{margin-bottom:18px}
+.campo label{display:block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#1266ff;margin-bottom:6px}
+.req{color:#e05555;margin-left:4px}
+.campo input,.campo select,.campo textarea{width:100%;padding:11px 14px;border:1.5px solid #cfe6ff;border-radius:8px;font-size:15px;color:#0b1f3a;background:#f8fcff;outline:none;font-family:Georgia,serif;transition:border-color 0.2s}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:#1266ff}
+.campo select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a90a4' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-color:#f8fcff;padding-right:36px}
+.campo textarea{height:80px;resize:vertical;line-height:1.6}
+.campo textarea.consarea{min-height:150px;overflow:hidden}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.edad-box{padding:11px 14px;border:1.5px solid #b8dcea;border-radius:8px;background:#eef7ff;color:#1266ff;font-weight:700;font-size:17px;min-height:46px;display:flex;align-items:center}
+.edad-box.v{color:#64748b;font-weight:400;font-size:12px}
+.hint{margin-top:6px;font-size:12px;color:#64748b;padding-left:4px}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap}
+.hbtn{flex:1;min-width:60px;padding:10px 6px;border-radius:8px;border:1.5px solid #cfe6ff;background:#fff;color:#0b1f3a;font-size:14px;cursor:pointer;font-family:Georgia,serif;transition:all 0.15s}
+.hbtn.a{border-color:#1266ff;background:#eef7ff;color:#1266ff;font-weight:700}
+.hbtn.o{color:#64748b;font-size:13px}
+.fbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.fbtn{flex:1;min-width:90px;padding:10px 8px;border-radius:8px;border:1.5px solid #cfe6ff;background:#fff;color:#0b1f3a;font-size:13px;cursor:pointer;font-family:Georgia,serif;transition:all 0.15s}
+.fbtn.a{border-color:#1266ff;background:#eef7ff;color:#1266ff;font-weight:700}
+.ayuno{background:#fff8e8;border:1px solid #f0d080;border-radius:9px;padding:10px 14px;font-size:13px;color:#8a6a10;margin-bottom:18px}
+.colores{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+.cbtn{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;outline:none;transition:border 0.15s}
+.cbtn.a{border-color:#0b1f3a}
+.elista{border:1.5px solid #cfe6ff;border-radius:8px;overflow:hidden}
+.eitem{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #cfe6ff;transition:background 0.1s}
+.eitem:last-child{border-bottom:none}
+.eitem.s{background:#f8fcff}
+.eitem input{width:16px;height:16px;accent-color:#1266ff;cursor:pointer}
+.enombre{flex:1;font-size:14px}
+.erol{font-size:11px;color:#64748b;background:#e0eef4;border-radius:20px;padding:2px 10px}
+.invbox{background:#f0f9f5;border:1px solid #b8e8d4;border-radius:9px;padding:12px 16px;margin-top:12px}
+.invbox p{font-size:12px;font-weight:700;color:#2a7a5a;margin-bottom:6px}
+.invbox span{display:block;font-size:13px;color:#3a6a5a;margin:2px 0}
+.mlista{border:1.5px solid #cfe6ff;border-radius:8px;padding:10px 14px;margin-bottom:16px}
+.mitem{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8f0f4;font-size:13px}
+.mitem:last-child{border-bottom:none}
+.mquit{background:none;border:none;color:#e05555;cursor:pointer;font-size:16px;font-weight:700;padding:0 4px}
+.condgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cond{display:flex;align-items:flex-start;gap:8px;border:1.5px solid #cfe6ff;border-radius:8px;background:#fff;padding:9px 11px;font-size:13px;line-height:1.35;cursor:pointer}
+.cond.s{background:#eef7ff;border-color:#1266ff;color:#08c7c7;font-weight:700}
+.cond input{width:15px;height:15px;margin-top:1px;accent-color:#1266ff;flex-shrink:0}
+.consbox{background:#f8fcff;border:1.5px solid #cfe6ff;border-radius:10px;padding:14px;margin-bottom:14px}
+.consbox h3{font-size:13px;color:#0b1f3a;margin-bottom:8px}
+.consnote{background:#eef8fb;border:1px solid #c5e1ec;color:#08c7c7;border-radius:9px;padding:10px 14px;font-size:13px;line-height:1.45;margin-bottom:14px}
+.consactions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+.mini{border:1.5px solid #1266ff;background:#fff;color:#1266ff;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Georgia,serif}
+.mini.fill{background:#1266ff;color:#fff}
+.keyrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.firma-preview{max-width:220px;max-height:70px;display:block;margin-top:10px;border:1px solid #cfe6ff;border-radius:8px;background:#fff;padding:8px}
+.rcard{background:#fff;border-radius:11px;border:1.5px solid #cfe6ff;padding:14px 16px;margin-bottom:12px}
+.rtit{font-size:11px;font-weight:700;color:#1266ff;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:6px}
+.rfila{font-size:13px;color:#0b1f3a;margin:2px 0}
+.doc{background:#fff;border:2px solid #c8dce6;border-radius:10px;padding:24px 28px;font-size:13.5px;line-height:1.85;margin-top:4px}
+.doch{text-align:center;border-bottom:2px solid #0b1f3a;padding-bottom:14px;margin-bottom:18px}
+.doch .ds{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:#64748b}
+.doch h3{font-size:14.5px;letter-spacing:0.04em;text-transform:uppercase;margin-top:7px}
+.dt{width:100%;border-collapse:collapse;margin-bottom:16px}
+.dt td{padding:3px 0;vertical-align:top}
+.dsec{font-weight:700;font-size:12.5px;border-bottom:1px solid #cfe6ff;padding-bottom:3px;margin:14px 0 6px}
+.di{padding-left:14px;margin:3px 0}
+.aviso{background:#fff8e8;border:1px solid #f0d080;border-radius:9px;padding:12px 16px;font-size:13px;color:#8a6a10;margin-top:14px}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;padding-top:16px;border-top:1px solid #cfe6ff}
+.nc{font-size:11px;color:#64748b}
+.bp{background:linear-gradient(135deg,#1266ff,#0b8fdc);color:#fff;border:none;border-radius:10px;padding:13px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:Georgia,serif}
+.bp:disabled{opacity:0.4;cursor:not-allowed}
+.bs{background:#fff;color:#1266ff;border:1.5px solid #1266ff;border-radius:10px;padding:11px 24px;font-size:15px;font-weight:600;cursor:pointer;font-family:Georgia,serif}
+.bs.inv{visibility:hidden}
+.bconf{background:linear-gradient(135deg,#2ecc71,#27ae60)}
+.bfull{width:100%;margin-bottom:10px}
+.errbox{margin-top:12px;background:#fef0f0;border:1px solid #f5c0c0;border-radius:8px;padding:10px 14px;font-size:13px;color:#c0392b}
+.conf{text-align:center;padding:24px 16px 16px}
+.chk{width:66px;height:66px;border-radius:50%;background:linear-gradient(135deg,#1266ff,#2ecc8a);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px}
+.conf h2{font-size:19px;color:#0b1f3a;margin-bottom:6px}
+.cdato{color:#64748b;margin:2px 0;font-size:13px}
+.acbox{background:#f0f9f5;border:1px solid #b8e8d4;border-radius:10px;padding:13px 16px;margin:18px 0 16px;text-align:left}
+.acbox p{font-size:12px;font-weight:700;color:#2a7a5a;margin-bottom:8px}
+.acbox span{display:block;font-size:13px;color:#3a6a5a;margin:3px 0}
+@media(max-width:480px){.g2{grid-template-columns:1fr}.doc{padding:16px}}
+@media(max-width:560px){.condgrid,.keyrow{grid-template-columns:1fr}}
+
+/* SyncMed One visual polish */
+button,.btn,.mini.fill,.navbtn,.submit{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%)!important;color:#fff!important}
+.card,.pasos{box-shadow:0 10px 28px rgba(11,31,58,.08)!important}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:#1266ff!important;box-shadow:0 0 0 3px rgba(18,102,255,.12)!important}
+</style>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand-mark">🏥</div>
-      <div>
-        <h1>Indicaciones de Ingreso</h1>
-        <p>Dr. Pablo Vidal González · Cirugía General y Laparoscópica</p>
-      </div>
-    </header>
+<div class="wrap">
+  <div class="header">
+    <div class="hicon"><img src="assets/syncmed-one-logo.png" alt="SyncMed One"></div>
+    <div><h1>SyncMed One</h1><p>Programación Quirúrgica · Dr. Pablo Vidal González</p></div>
+  </div>
+  <div class="pasos" id="pasos"></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+const URL_AS = "https://script.google.com/macros/s/AKfycbxhOJevaVUuttmyDXS9DyquBRLBcsJD_aao-g9E3-VOHekc-7xpCiSV6BLV7fIhDUEU/exec";
+const HOSP = [
+  {n:"Centro Médico ABC Observatorio",d:"Sur 136 No. 116, Col. Las Américas, Álvaro Obregón, Ciudad de México, C.P. 01120."},
+  {n:"Centro Médico ABC Santa Fe",d:"Av. Carlos Graef Fernández 154, Col. Santa Fe, Cuajimalpa, Ciudad de México, C.P. 05300."},
+  {n:"Hospital Ángeles Lomas",d:"Barranca 240, Col. Hacienda de las Palmas, Huixquilucan, Estado de México, C.P. 52763."},
+  {n:"Hospital San Ángel Inn Patriotismo",d:"Av. Patriotismo 67, Col. San Juan, Ciudad de México, C.P. 03730."},
+  {n:"Hospital San Ángel Inn Chapultepec",d:"Av. Chapultepec 489, Col. Juárez, Cuauhtémoc, C.P. 06600, Ciudad de México."},
+  {n:"Hospital San Ángel Inn Universidad",d:"Mayorazgo 130, Col. Xoco, Ciudad de México, C.P. 03339."},
+  {n:"Hospital San Ángel Inn del Valle",d:"Mier y Pesado 222, Col. Del Valle Norte, C.P. 03103, Benito Juárez, Ciudad de México."},
+  {n:"Cirugía Ambulatoria Medici",d:"Av. Álvaro Obregón 151-Piso 1, Roma Norte, Cuauhtémoc, C.P. 06700, Ciudad de México."},
+];
+const EQ = [
+  {n:"Dr. Alejandro Jiménez Casillas",r:"Anestesiólogo",e:"alex050@hotmail.com"},
+  {n:"Dr. Enrique Stoopen Margain",r:"Ayudante",e:"dr.enriquestoopen@gmail.com"},
+  {n:"Dr. Natan Sarue Saed",r:"Ayudante",e:"natansa@gmail.com"},
+  {n:"Dr. Jonathan Chernitsky Camaño",r:"Ayudante",e:"jonathanchernitzky@gmail.com"},
+  {n:"Consultorio 110 ABC",r:"Consultorio",e:"ABC.Consultorio.110@gmail.com"},
+];
+const PROCS = [
+  {n:"Apendicitis aguda – Apendicectomía laparoscópica",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Bolsa de extracción","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Colecistectomía por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Bolsa de extracción Endo Catch (1ª opción) / Endo-Pouch (2ª opción)","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Colecistectomía por laparoscopia más colangiografía transoperatoria",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Catéter periférico largo tipo Arrow","Engrapadora de 10 mm","Llave de tres vías","Jeringas de 20 ml x2","Medio de contraste","Fluoroscopía","Bolsa de extracción","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Colecistectomía por laparoscopia más colangiografía transoperatoria más identificación de tejidos por fluorescencia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Catéter periférico largo tipo Arrow","Engrapadora de 10 mm","Llave de tres vías","Jeringas de 20 ml x2","Medio de contraste","Fluoroscopía","Bolsa de extracción","Verde de indocianina (ICG)","Torre de fluorescencia","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia inguinal bilateral por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x2 (1ª opción) / 15 cm x2 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia inguinal derecha por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm (1ª opción) / 15 cm (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia inguinal izquierda por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm (1ª opción) / 15 cm (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia ventral por laparoscopia más colocación de malla (IPOM Plus)",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Proceed 15x15 o 20x15 / Symbotex 20x15","Securestrap (mín. 30 fijaciones o 2 dispositivos)","Endo Close","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Funduplicatura tipo Toupet por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Separador Nathanson + brazo","Ethibond 2-0 doble armado x10","Bajanudos x2","Energía ultrasónica","Calibrador esofágico 60 Fr","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Funduplicatura tipo Nissen por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Separador Nathanson + brazo","Ethibond 2-0 doble armado x10","Bajanudos x2","Energía ultrasónica","Calibrador esofágico 60 Fr","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hemorroidectomía tipo Ferguson",i:["Catgut crómico 3-0","Catgut crómico 4-0","Diprospan","Gasa Espongostan","Procto-Glyvenol","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0","LigaSure (variante con energía)"]},
+  {n:"Exploración anal bajo anestesia",i:["Separador Pratt","Separador Hill-Ferguson","Catgut crómico 3-0","Catgut crómico 4-0","Diprospan","Gasa Espongostan","Procto-Glyvenol","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Tiroidectomía total",i:["Neuromonitoreo (NIM)","Tubo endotraqueal con electrodos","LigaSure","Pinzas bipolares","Microinstrumental","Seda 3-0","Seda 4-0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hemitiroidectomía derecha",i:["Neuromonitoreo (NIM)","Tubo endotraqueal con electrodos","LigaSure","Pinzas bipolares","Microinstrumental","Seda 3-0","Seda 4-0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hemitiroidectomía izquierda",i:["Neuromonitoreo (NIM)","Tubo endotraqueal con electrodos","LigaSure","Pinzas bipolares","Microinstrumental","Seda 3-0","Seda 4-0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia umbilical",i:["Polipropileno 0 / Prolene 0","Polipropileno 1 / Prolene 1","Monomax 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Plastia umbilical con malla",i:["Polipropileno 0 / Prolene 0","Polipropileno 1 / Prolene 1","Monomax 0","Malla Ventral Patch ≥ 6 cm","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Coledocolitiasis – CPRE y/o exploración de vía biliar",i:[]},
+  {n:"Obstrucción intestinal – Laparotomía / laparoscopía exploradora",i:[]},
+  {n:"Absceso anorrectal – Drenaje quirúrgico",i:["Separador anal","Material de drenaje","Gasas","Solución para irrigación","Catgut crómico 3-0","Catgut crómico 4-0"]},
+];
+const CONSENT_PROCS = [
+  {id:"apendicitis",match:["Apendicitis"],dx:"Apendicitis aguda",proc:"Apendicectomía laparoscópica",desc:"Apendicectomía laparoscópica, lavado de cavidad abdominal y procedimientos adicionales necesarios según hallazgos transoperatorios.",ben:"Resolución del cuadro infeccioso e inflamatorio, prevención de perforación, absceso intraabdominal, peritonitis, sepsis y complicaciones derivadas de la apendicitis aguda.",alt:"Manejo médico conservador con antibióticos en casos seleccionados, observación clínica y drenaje percutáneo de colecciones cuando aplique.",freq:"Dolor postoperatorio, infección de heridas, seroma, hematoma, náusea, vómito, distensión abdominal, íleo postoperatorio, sangrado leve, adherencias y necesidad de conversión a cirugía abierta.",grave:"Lesión intestinal, lesión vascular, lesión ureteral o vesical, absceso intraabdominal, fuga del muñón apendicular, peritonitis, sepsis, tromboembolia pulmonar, complicaciones anestésicas, reintervención quirúrgica e incluso muerte."},
+  {id:"colecistitis_aguda",match:["Colecistectomía por laparoscopia más colangiografía","Colecistectomía por laparoscopia más colangiografía transoperatoria más identificación"],dx:"Colecistitis aguda",proc:"Colecistectomía laparoscópica",desc:"Colecistectomía laparoscópica con realización de colangiografía intraoperatoria y procedimientos adicionales según hallazgos transoperatorios.",ben:"Resolución del proceso inflamatorio e infeccioso de la vesícula biliar, alivio del dolor y prevención de perforación vesicular, pancreatitis, colangitis y sepsis.",alt:"Manejo médico con antibióticos, analgésicos y dieta; colecistostomía percutánea en pacientes seleccionados o de alto riesgo.",freq:"Dolor postoperatorio, infección de heridas, seroma, hematoma, sangrado, náusea, vómito, diarrea transitoria, fuga biliar leve, íleo postoperatorio y conversión a cirugía abierta.",grave:"Lesión de vía biliar, lesión hepática, lesión intestinal o vascular, fuga biliar importante, pancreatitis, absceso intraabdominal, colangitis, sepsis, tromboembolia pulmonar, complicaciones anestésicas, necesidad de reintervención e incluso muerte."},
+  {id:"colecistitis_cronica",match:["Colecistectomía por laparoscopia"],dx:"Colecistitis crónica litiásica / cólico biliar",proc:"Colecistectomía laparoscópica",desc:"Colecistectomía laparoscópica con posible realización de colangiografía intraoperatoria.",ben:"Resolución de dolor biliar, prevención de nuevos episodios de colecistitis, pancreatitis y complicaciones asociadas a colelitiasis.",alt:"Manejo médico conservador, cambios dietéticos y observación clínica.",freq:"Dolor, infección de heridas, hematoma, seroma, diarrea transitoria, náusea, vómito, sangrado leve y conversión a cirugía abierta.",grave:"Lesión de vía biliar, lesión intestinal o vascular, fuga biliar, pancreatitis, absceso intraabdominal, tromboembolia pulmonar, complicaciones anestésicas, necesidad de reintervención e incluso muerte."},
+  {id:"coledocolitiasis",match:["Coledocolitiasis"],dx:"Coledocolitiasis",proc:"CPRE y/o exploración de vía biliar",desc:"Colangiopancreatografía retrógrada endoscópica con esfinterotomía y extracción de litos y/o exploración laparoscópica de vía biliar.",ben:"Desobstrucción de la vía biliar, resolución de ictericia, colangitis y prevención de pancreatitis.",alt:"Manejo médico temporal, drenajes biliares percutáneos o cirugía abierta.",freq:"Dolor abdominal, distensión, sangrado leve, náusea, vómito y pancreatitis leve.",grave:"Pancreatitis severa, perforación duodenal, colangitis, hemorragia importante, lesión de vía biliar, sepsis, necesidad de cirugía urgente e incluso muerte."},
+  {id:"obstruccion",match:["Obstrucción intestinal"],dx:"Obstrucción intestinal",proc:"Laparotomía / laparoscopía exploradora",desc:"Laparoscopía o laparotomía exploradora con liberación de adherencias, resección intestinal, anastomosis, ostomía y procedimientos adicionales según hallazgos.",ben:"Resolución de la obstrucción intestinal y prevención de isquemia intestinal, perforación, peritonitis y sepsis.",alt:"Manejo conservador con ayuno, sonda nasogástrica, líquidos intravenosos y vigilancia en casos seleccionados.",freq:"Dolor, infección de heridas, sangrado, íleo prolongado, adherencias, seroma, hematoma y necesidad de conversión quirúrgica.",grave:"Fuga de anastomosis, lesión intestinal o vascular, síndrome de intestino corto, abscesos, sepsis, falla orgánica múltiple, necesidad de ostomía, reintervención e incluso muerte."},
+  {id:"nissen",match:["Funduplicatura tipo Nissen"],dx:"ERGE",proc:"Funduplicatura tipo Nissen",desc:"Funduplicatura laparoscópica tipo Nissen con reparación de hernia hiatal y procedimientos adicionales necesarios.",ben:"Control del reflujo gastroesofágico, mejoría de síntomas y prevención de esofagitis y complicaciones del reflujo.",alt:"Tratamiento médico con inhibidores de bomba de protones, cambios dietéticos y vigilancia clínica.",freq:"Dolor, disfagia transitoria, distensión abdominal, incapacidad para eructar, náusea, infección y sangrado.",grave:"Lesión esofágica o gástrica, perforación, neumotórax, migración o falla de la funduplicatura, recurrencia del reflujo, tromboembolia pulmonar, reintervención e incluso muerte."},
+  {id:"toupet",match:["Funduplicatura tipo Toupet"],dx:"ERGE",proc:"Funduplicatura tipo Toupet",desc:"Funduplicatura laparoscópica posterior tipo Toupet con reparación de hernia hiatal.",ben:"Control del reflujo con menor riesgo de disfagia en pacientes seleccionados.",alt:"Tratamiento médico conservador y vigilancia.",freq:"Dolor, disfagia transitoria, distensión abdominal, infección y sangrado.",grave:"Lesión esofágica o gástrica, perforación, neumotórax, recurrencia del reflujo, falla de la funduplicatura, reintervención y complicaciones anestésicas severas."},
+  {id:"hernia_inguinal",match:["Plastia inguinal"],dx:"Hernia inguinal izquierda / derecha / bilateral",proc:"Plastia inguinal laparoscópica con malla",desc:"Plastia inguinal laparoscópica unilateral o bilateral con colocación de malla protésica.",ben:"Corrección del defecto herniario, alivio del dolor y prevención de incarceración o estrangulación intestinal.",alt:"Observación clínica en casos seleccionados y reparación abierta.",freq:"Dolor inguinal, hematoma, seroma, inflamación escrotal, infección, retención urinaria y recurrencia.",grave:"Lesión intestinal, vascular, vesical o del cordón espermático, dolor crónico, infección de malla, tromboembolia pulmonar, lesión testicular, reintervención e incluso muerte."},
+  {id:"hernia_umbilical",match:["Plastia umbilical"],dx:"Hernia umbilical",proc:"Plastia umbilical",desc:"Plastia umbilical abierta o laparoscópica con cierre primario y/o colocación de malla protésica.",ben:"Corrección del defecto herniario y prevención de incarceración o estrangulación.",alt:"Observación clínica en defectos pequeños y asintomáticos.",freq:"Dolor, seroma, hematoma, infección, inflamación local y recurrencia.",grave:"Lesión intestinal, infección de malla, necrosis umbilical, sangrado importante, reintervención y complicaciones anestésicas severas."},
+  {id:"hemorroidectomia",match:["Hemorroidectomía"],dx:"Enfermedad hemorroidal",proc:"Hemorroidectomía",desc:"Resección quirúrgica de paquetes hemorroidales internos y/o externos.",ben:"Control de dolor, sangrado, prolapso y mejoría de síntomas anorrectales.",alt:"Manejo médico, ligadura con banda elástica, escleroterapia o coagulación infrarroja.",freq:"Dolor postoperatorio, sangrado leve, edema, retención urinaria y estreñimiento.",grave:"Hemorragia importante, infección profunda, absceso, estenosis anal, incontinencia fecal, sepsis y necesidad de reintervención."},
+  {id:"absceso_anorrectal",match:["Absceso anorrectal","Exploración anal"],dx:"Absceso anorrectal",proc:"Drenaje quirúrgico de absceso anorrectal",desc:"Drenaje quirúrgico de absceso anorrectal con lavado y procedimientos adicionales según hallazgos.",ben:"Control de infección, alivio del dolor y prevención de progresión séptica.",alt:"Manejo médico temporal con antibióticos en casos seleccionados.",freq:"Dolor, sangrado leve, secreción persistente e infección local.",grave:"Fístula anal, recurrencia, extensión de infección, sepsis, lesión esfinteriana e incontinencia fecal."}
+];
+const RISK_OPTS = [
+  ["diabetes","Diabetes mellitus","puede incrementar el riesgo de infección, cicatrización retardada, descontrol glucémico y recuperación postoperatoria más lenta"],
+  ["hta","Hipertensión arterial","puede incrementar el riesgo de descontrol tensional, eventos cardiovasculares, sangrado y complicaciones anestésicas"],
+  ["obesidad","Obesidad","puede aumentar la dificultad técnica, el riesgo de infección, seroma, complicaciones respiratorias, tromboembolia y recurrencia en cirugía de hernia"],
+  ["tabaco","Tabaquismo","puede incrementar el riesgo de complicaciones respiratorias, infección, mala cicatrización y eventos cardiovasculares"],
+  ["cardio","Cardiopatía","puede aumentar el riesgo de arritmias, isquemia, insuficiencia cardiaca, eventos cardiovasculares y complicaciones anestésicas"],
+  ["pulmon","Enfermedad pulmonar / asma / EPOC","puede aumentar el riesgo de broncoespasmo, neumonía, atelectasia, dificultad ventilatoria y complicaciones anestésicas"],
+  ["anticoag","Anticoagulantes o antiagregantes","puede incrementar el riesgo de sangrado, hematoma, necesidad de transfusión, ajuste de medicamentos y eventos trombóticos"],
+  ["inmuno","Inmunosupresión","puede aumentar el riesgo de infección, mala cicatrización, progresión de procesos infecciosos y recuperación más lenta"],
+  ["previas","Cirugías abdominales previas","pueden incrementar el riesgo de adherencias, dificultad técnica, lesión intestinal, conversión a cirugía abierta y mayor tiempo quirúrgico"],
+  ["edad","Edad avanzada / fragilidad","puede aumentar el riesgo de descompensación, delirium, complicaciones cardiovasculares, pulmonares, infecciosas y recuperación prolongada"],
+  ["hepatica","Alteraciones hepáticas","pueden incrementar el riesgo de sangrado, infección, descompensación metabólica y complicaciones relacionadas con la vía biliar"],
+  ["renal","Enfermedad renal","puede aumentar el riesgo de alteraciones hidroelectrolíticas, ajuste de medicamentos, sangrado, infección y recuperación prolongada"],
+  ["embarazo","Embarazo","puede modificar el riesgo anestésico y quirúrgico, así como requerir vigilancia materno-fetal y ajustes en medicamentos o estudios"],
+  ["otro","Otra condición relevante","puede modificar el riesgo quirúrgico de acuerdo con sus características clínicas particulares"]
+];
+const HI=["08:00","07:00"], HC=["11:00","10:00","08:00","07:00"];
+const COLS=["#039be5","#33b679","#e67c73","#f6bf26","#8e24aa","#0b8043","#d50000","#3f51b5"];
+const PASOS=["Paciente","Fechas y Horas","Equipo","Materiales","Consentimiento","Resumen"];
 
-    <section class="workspace">
-      <form class="panel" id="form">
-        <div class="panel-head">
-          <h2>Datos para generar indicaciones</h2>
-          <button type="button" class="ghost-button" id="clearButton">Limpiar</button>
-        </div>
+// Estado global
+let S = {
+  paso:1, ok:false, env:false, err:"", vd:false,
+  f:{pac:"",nac:"",tel:"",cor:"",proc:"",hosp:"",
+     fing:"",hing:"",opfx:"1",fcxp:"",hcx:"",
+     color:"#039be5",anest:"",equip:[],ins:[],insex:"",
+     consentProc:"",conds:[],alergias:"",obsClin:"",apiKey:"",firmaData:"",
+     consent:{desc:"",ben:"",alt:"",freq:"",grave:"",part:""}}
+};
+window.S=S;
 
-        <label class="field">
-          <span>Nombre completo *</span>
-          <input id="patientName" autocomplete="name" placeholder="Apellidos, Nombre" required>
-        </label>
+// Helpers
+function edad(n){if(!n)return null;const h=new Date(),b=new Date(n+"T12:00:00");let e=h.getFullYear()-b.getFullYear();const m=h.getMonth()-b.getMonth();if(m<0||(m===0&&h.getDate()<b.getDate()))e--;return e;}
+function ff(s){if(!s)return"";const[y,m,d]=s.split("-");return`${d}/${m}/${y}`;}
+function ofx(s,d){if(!s)return"";const dt=new Date(s+"T12:00:00");dt.setDate(dt.getDate()+d);return dt.toISOString().split("T")[0];}
+function fleg(s){if(!s)return"";const[y,m,d]=s.split("-");const ms=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];return`${parseInt(d)} de ${ms[parseInt(m)-1]} de ${y}`;}
+function fcx(){const f=S.f;return f.opfx==="1"?f.fing:f.opfx==="2"?ofx(f.fing,1):f.fcxp;}
 
-        <div class="grid two">
-          <label class="field">
-            <span>Fecha de nacimiento *</span>
-            <input id="birthDate" type="date" required>
-          </label>
-          <div class="field">
-            <span>Edad</span>
-            <output id="ageOutput">Ingrese fecha de nacimiento</output>
-          </div>
-        </div>
+// Render pasos
+function rPasos(){
+  document.getElementById("pasos").innerHTML=PASOS.map((p,i)=>{
+    const n=i+1,a=S.paso===n,l=S.paso>n;
+    return`<div class="pi${a?" a":l?" l":""}" ${l?`onclick="goP(${n})"`:""}>
+      <div class="pn">${l?"✓":n}</div><div class="pl">${p}</div></div>`;
+  }).join("");
+}
 
-        <label class="field">
-          <span>Procedimiento quirúrgico *</span>
-          <select id="procedure" required></select>
-        </label>
+// Render completo (solo al cambiar de paso o acciones de botón)
+function render(){
+  document.getElementById("pasos").style.display=S.ok?"none":"flex";
+  rPasos();
+  const c=document.getElementById("card");
+  c.innerHTML=S.ok?rConf():rPaso();
+  setTimeout(autoGrowConsent,0);
+}
 
-        <label class="field" id="otherProcedureField" hidden>
-          <span>Otro procedimiento *</span>
-          <input id="otherProcedure" placeholder="Escriba el procedimiento quirúrgico">
-        </label>
+function rPaso(){
+  let h="";
+  if(S.paso===1)h=rP1();
+  if(S.paso===2)h=rP2();
+  if(S.paso===3)h=rP3();
+  if(S.paso===4)h=rP4();
+  if(S.paso===5)h=rP5();
+  if(S.paso===6)h=rP6();
+  return h+rNav();
+}
 
-        <label class="field">
-          <span>Diagnóstico de ingreso</span>
-          <select id="diagnosis"></select>
-        </label>
+// PASO 1 — campos con oninput inline (NO llaman a render)
+function rP1(){
+  const f=S.f, e=edad(f.nac);
+  return`<h2>📋 Datos del Paciente</h2>
+  <div class="campo"><label>Nombre completo <span class="req">*</span></label>
+    <input type="text" placeholder="Apellidos, Nombre" value="${f.pac}"
+      oninput="S.f.pac=this.value"></div>
+  <div class="g2">
+    <div class="campo"><label>Fecha de nacimiento <span class="req">*</span></label>
+      <input type="date" value="${f.nac}" onchange="S.f.nac=this.value;updEdad()"></div>
+    <div class="campo"><label>Edad (automática)</label>
+      <div id="edadBox" class="edad-box${e===null?" v":""}">${e!==null?e+" años":"← ingrese fecha de nac."}</div></div>
+  </div>
+  <div class="g2">
+    <div class="campo"><label>Teléfono</label>
+      <input type="tel" placeholder="55 1234 5678" value="${f.tel}" oninput="S.f.tel=this.value"></div>
+    <div class="campo"><label>Correo electrónico</label>
+      <input type="email" placeholder="correo@ejemplo.com" value="${f.cor}" oninput="S.f.cor=this.value"></div>
+  </div>
+  <div class="campo"><label>Procedimiento quirúrgico <span class="req">*</span></label>
+    <select onchange="chgProc(this.value)">
+      <option value="">— Seleccione procedimiento —</option>
+      ${PROCS.map(p=>`<option value="${p.n}"${f.proc===p.n?" selected":""}>${p.n}</option>`).join("")}
+    </select></div>
+  <div class="campo"><label>Hospital <span class="req">*</span></label>
+    <select onchange="chgHosp(this.value)">
+      <option value="">— Seleccione hospital —</option>
+      ${HOSP.map(h=>`<option value="${h.n}"${f.hosp===h.n?" selected":""}>${h.n}</option>`).join("")}
+    </select>
+    <div id="dirHint" class="hint">${f.hosp?(HOSP.find(h=>h.n===f.hosp)||{d:""}).d:"" }</div>
+  </div>`;
+}
 
-        <label class="field" id="otherDiagnosisField" hidden>
-          <span>Otro diagnóstico *</span>
-          <input id="otherDiagnosis" placeholder="Escriba el diagnóstico de ingreso">
-        </label>
+// PASO 2
+function rP2(){
+  const f=S.f, cx=fcx(), ay=f.fing?ff(ofx(f.fing,-1)):"";
+  const hiOtra = S.hiOtra || (!HI.includes(f.hing) && f.hing!=="");
+  const hcOtra = S.hcOtra || (!HC.includes(f.hcx) && f.hcx!=="");
 
-        <label class="field">
-          <span>Hospital *</span>
-          <select id="hospital" required></select>
-        </label>
+  const bhi=HI.map(h=>`<button class="hbtn${f.hing===h&&!hiOtra?" a":""}" onclick="selHI('${h}')">${h}</button>`).join("")+
+    `<button class="hbtn o${hiOtra?" a":""}" onclick="selHI('otra')">Otra</button>`;
+  const bhc=HC.map(h=>`<button class="hbtn${f.hcx===h&&!hcOtra?" a":""}" onclick="selHC('${h}')">${h}</button>`).join("")+
+    `<button class="hbtn o${hcOtra?" a":""}" onclick="selHC('otra')">Otra</button>`;
 
-        <div class="grid two">
-          <label class="field">
-            <span>Fecha de ingreso *</span>
-            <input id="admissionDate" type="date" required>
-          </label>
-          <label class="field">
-            <span>Hora de ingreso *</span>
-            <input id="admissionTime" type="time" value="08:00" required>
-          </label>
-        </div>
+  return`<h2>📅 Fechas y Horas</h2>
+  <div style="background:#eef7ff;border-radius:9px;padding:10px 14px;margin-bottom:18px;border:1px solid #cfe6ff;font-size:13px;color:#64748b">
+    <strong style="color:#0b1f3a">${f.pac}</strong> · ${f.proc}</div>
+  <div class="campo"><label>Fecha de ingreso <span class="req">*</span></label>
+    <input type="date" value="${f.fing}" onchange="S.f.fing=this.value;render()"></div>
+  <div class="campo"><label>Hora de ingreso <span class="req">*</span></label>
+    <div class="hbtns">${bhi}</div>
+    ${hiOtra?`<input type="text" style="margin-top:8px;width:100%;padding:11px 14px;border:1.5px solid #1266ff;border-radius:8px;font-size:15px;font-family:Georgia,serif" placeholder="HH:MM" value="${!HI.includes(f.hing)?f.hing:''}" oninput="S.f.hing=this.value" maxlength="5" autofocus>`:''}
+  </div>
+  <div class="campo"><label>Fecha de cirugía <span class="req">*</span></label>
+    <div class="fbtns">
+      <button class="fbtn${f.opfx==='1'?" a":""}" onclick="S.f.opfx='1';render()">Mismo día</button>
+      <button class="fbtn${f.opfx==='2'?" a":""}" onclick="S.f.opfx='2';render()">Día siguiente</button>
+      <button class="fbtn${f.opfx==='3'?" a":""}" onclick="S.f.opfx='3';render()">Otra fecha</button>
+    </div>
+    ${f.opfx==='3'?`<input type="date" value="${f.fcxp}" onchange="S.f.fcxp=this.value;render()">`:
+      cx?`<p class="hint">Fecha de cirugía: <strong>${ff(cx)}</strong></p>`:''}
+  </div>
+  <div class="campo"><label>Hora de cirugía <span class="req">*</span></label>
+    <div class="hbtns">${bhc}</div>
+    ${hcOtra?`<input type="text" style="margin-top:8px;width:100%;padding:11px 14px;border:1.5px solid #1266ff;border-radius:8px;font-size:15px;font-family:Georgia,serif" placeholder="HH:MM" value="${!HC.includes(f.hcx)?f.hcx:''}" oninput="S.f.hcx=this.value" maxlength="5" autofocus>`:''}
+  </div>
+  ${ay?`<div class="ayuno">Ayuno automatico: 23:30 hrs del dia ${ay} (No tomar ni agua)</div>`:''}
+  <div class="campo"><label>Color Google Calendar</label>
+    <div class="colores">${COLS.map(c=>`<button class="cbtn${f.color===c?" a":""}" style="background:${c}" onclick="S.f.color='${c}';render()"></button>`).join("")}</div>
+  </div>`;
+}
 
-        <div class="grid two">
-          <label class="field">
-            <span>Fecha del procedimiento *</span>
-            <input id="surgeryDate" type="date" required>
-          </label>
-          <label class="field">
-            <span>Hora del procedimiento *</span>
-            <input id="surgeryTime" type="time" value="11:00" required>
-          </label>
-        </div>
+// PASO 3
+function rP3(){
+  const f=S.f;
+  const eq=EQ.filter(m=>m.r!=="Anestesiólogo").map(m=>`
+    <label class="eitem${f.equip.includes(m.n)?" s":""}">
+      <input type="checkbox" ${f.equip.includes(m.n)?"checked":""} onchange="togEq('${m.n}')">
+      <span class="enombre">${m.n}</span><span class="erol">${m.r}</span></label>`).join("");
+  const inv=[f.anest&&`• ${f.anest}`,...f.equip.map(n=>`• ${n}`)].filter(Boolean);
+  return`<h2>👥 Equipo Quirúrgico</h2>
+  <div class="campo"><label>Anestesiólogo principal</label>
+    <select onchange="S.f.anest=this.value;render()">
+      <option value="">— Seleccione —</option>
+      ${EQ.filter(m=>m.r==="Anestesiólogo").map(m=>`<option value="${m.n}"${f.anest===m.n?" selected":""}>${m.n}</option>`).join("")}
+    </select></div>
+  <div class="campo"><label>Ayudantes y otros</label><div class="elista">${eq}</div></div>
+  ${inv.length?`<div class="invbox"><p>📧 Invitaciones de Google Calendar a:</p>${inv.map(i=>`<span>${i}</span>`).join("")}</div>`:''}`;
+}
 
-        <div class="grid two">
-          <label class="field">
-            <span>Fecha de inicio de ayuno</span>
-            <input id="fastingDate" type="date">
-          </label>
-          <label class="field">
-            <span>Hora de inicio de ayuno</span>
-            <input id="fastingTime" type="time" value="23:30">
-          </label>
-        </div>
+// PASO 4
+function rP4(){
+  const f=S.f;
+  const items=f.ins.map((x,i)=>`<div class="mitem"><span>📦 ${x}</span><button class="mquit" onclick="delIns(${i})">×</button></div>`).join("")||
+    `<p style="text-align:center;color:#64748b;font-size:13px;padding:8px 0">Sin insumos</p>`;
+  return`<h2>🧰 Lista de Materiales</h2>
+  <p style="font-size:13px;color:#64748b;margin-bottom:14px">Se incluirán en las <strong>notas del evento</strong> de Google Calendar.</p>
+  <div class="mlista">${items}</div>
+  <div class="campo"><label>Insumos adicionales</label>
+    <textarea placeholder="Materiales adicionales para este caso..." oninput="S.f.insex=this.value">${f.insex}</textarea></div>`;
+}
 
-        <div class="quick-actions">
-          <button type="button" class="ghost-button small-button" id="fastingPreviousButton">Ayuno día previo</button>
-          <button type="button" class="ghost-button small-button" id="fastingSameDayButton">Ayuno mismo día</button>
-        </div>
+// PASO 5
+function rP5(){
+  const f=S.f, base=consentBase();
+  if(!f.consentProc) f.consentProc=base.id;
+  if(!f.consent.desc) fillConsentTemplate();
+  const conds=RISK_OPTS.map(([id,lab])=>`
+    <label class="cond${f.conds.includes(id)?" s":""}">
+      <input type="checkbox" ${f.conds.includes(id)?"checked":""} onchange="togCond('${id}')">
+      <span>${lab}</span>
+    </label>`).join("");
+  return`<h2>📝 Consentimiento informado</h2>
+  <div class="consnote">El texto ya está generado en las cajas de abajo y puedes editarlo antes de descargar el PDF. La IA es opcional; si no pegas una API key, se usa la plantilla médica base.</div>
+  <div class="consbox">
+    <h3>Procedimiento para consentimiento</h3>
+    <div class="campo" style="margin-bottom:0">
+      <select onchange="S.f.consentProc=this.value;fillConsentTemplate();render()">
+        ${CONSENT_PROCS.map(p=>`<option value="${p.id}"${base.id===p.id?" selected":""}>${p.dx} — ${p.proc}</option>`).join("")}
+      </select>
+    </div>
+  </div>
+  <div class="campo"><label>Condiciones particulares del paciente</label>
+    <div class="condgrid">${conds}</div>
+  </div>
+  <div class="g2">
+    <div class="campo"><label>Alergias</label>
+      <input type="text" placeholder="Medicamentos, látex, contraste..." value="${f.alergias}" oninput="S.f.alergias=this.value"></div>
+    <div class="campo"><label>Observaciones clínicas</label>
+      <input type="text" placeholder="Dato relevante adicional" value="${f.obsClin}" oninput="S.f.obsClin=this.value"></div>
+  </div>
+  <div class="consactions">
+    <button class="mini fill" onclick="useConsentTemplate()">Usar plantilla</button>
+    <button class="mini" onclick="genConsentAI()">Generar con IA</button>
+    <button class="mini" onclick="downloadConsentPdf()">Descargar PDF</button>
+  </div>
+  <div class="campo">
+    <label>API key de OpenAI para IA (opcional, solo esta sesión)</label>
+    <div class="keyrow">
+      <input type="password" placeholder="sk-..." value="${f.apiKey}" oninput="S.f.apiKey=this.value">
+      <button class="mini" onclick="S.f.apiKey='';render()">Limpiar</button>
+    </div>
+    <div class="hint">Si no usas IA, la plantilla médica queda editable y se puede descargar igual.</div>
+  </div>
+  <div class="campo">
+    <label>Firma del médico</label>
+    <input type="file" accept="image/png,image/jpeg" onchange="loadFirma(this)">
+    <div class="hint">${f.firmaData?"Firma cargada y guardada en este navegador.":"Se usará tu firma predeterminada. Puedes cargar otra PNG/JPG si quieres cambiarla."}</div>
+    <img class="firma-preview" src="${f.firmaData||window.DEFAULT_SIGNATURE_DATA_URL||""}" alt="Firma cargada">
+    ${f.firmaData?`<button class="mini" style="margin-top:8px" onclick="clearFirma()">Usar firma predeterminada</button>`:""}
+  </div>
+  ${["desc","ben","alt","freq","grave","part"].map(k=>consTextArea(k)).join("")}
+  <div class="consactions">
+    <button class="mini fill" onclick="downloadConsentPdf()">Descargar PDF del consentimiento</button>
+    <button class="mini" onclick="goP(6)">Ir al resumen</button>
+  </div>`;
+}
 
-        <div class="grid two">
-          <label class="field">
-            <span>Solución al ingreso</span>
-            <select id="solutionRate">
-              <option value="40">Solución Hartmann a 40 ml/hora</option>
-              <option value="60">Solución Hartmann a 60 ml/hora</option>
-              <option value="80" selected>Solución Hartmann a 80 ml/hora</option>
-              <option value="100">Solución Hartmann a 100 ml/hora</option>
-              <option value="120">Solución Hartmann a 120 ml/hora</option>
-            </select>
-          </label>
-        </div>
+// PASO 6
+function rP6(){
+  const f=S.f, e=edad(f.nac), cx=fcx(), ay=f.fing?ff(ofx(f.fing,-1)):"";
+  const secs=[
+    {ic:"👤",t:"Paciente",rs:[f.pac,`${e} años · Nacido: ${ff(f.nac)}`,f.tel&&`Tel: ${f.tel}`,f.cor&&`Email: ${f.cor}`].filter(Boolean)},
+    {ic:"🔪",t:"Procedimiento",rs:[f.proc,f.hosp]},
+    {ic:"📅",t:"Fechas y Horas",rs:[`Ingreso: ${ff(f.fing)} a las ${f.hing} hrs`,`Cirugía: ${ff(cx)} a las ${f.hcx} hrs`,`Ayuno: 23:30 hrs del ${ay}`]},
+    {ic:"👥",t:"Equipo",rs:[f.anest?`Anestesiólogo: ${f.anest}`:null,...f.equip].filter(Boolean)},
+    {ic:"🧰",t:"Materiales",rs:[`${f.ins.length} insumos · en notas del calendario`]},
+    {ic:"📝",t:"Consentimiento",rs:[(consentBase().dx||"")+" — "+(consentBase().proc||""),`${f.conds.length} condiciones particulares seleccionadas`]},
+  ];
+  return`<h2>✅ Resumen y Confirmación</h2>
+  ${secs.map(s=>`<div class="rcard"><div class="rtit">${s.ic} ${s.t}</div>${s.rs.map(r=>`<div class="rfila">${r}</div>`).join("")}</div>`).join("")}
+  <p style="font-size:11px;font-weight:700;color:#1266ff;text-transform:uppercase;letter-spacing:0.07em;margin:16px 0 10px">📄 Vista previa — Indicaciones de Ingreso</p>
+  ${rDoc()}
+  <div class="aviso">⚡ Al confirmar: Google Calendar + invitaciones + Google Sheets + indicaciones por correo.</div>`;
+}
 
-        <fieldset class="checks">
-          <legend>Estudios al ingreso</legend>
-          <label><input type="checkbox" name="studies" value="Perfil Quirurgico XIII" checked> Perfil Quirurgico XIII</label>
-          <label><input type="checkbox" name="studies" value="Biometría hemática"> Biometría hemática</label>
-          <label><input type="checkbox" name="studies" value="Química sanguínea"> Química sanguínea</label>
-          <label><input type="checkbox" name="studies" value="Electrolitos séricos"> Electrolitos séricos</label>
-          <label><input type="checkbox" name="studies" value="Pruebas de función hepática"> Pruebas de función hepática</label>
-          <label><input type="checkbox" name="studies" value="Amilasa y lipasa"> Amilasa y lipasa</label>
-          <label><input type="checkbox" name="studies" value="Coagulograma"> Coagulograma</label>
-          <label><input type="checkbox" name="studies" value="Tele de Tórax"> Tele de Tórax</label>
-          <label><input type="checkbox" name="studies" value="Electrocardiograma"> Electrocardiograma</label>
-        </fieldset>
+// DOCUMENTO
+function rDoc(){
+  const f=S.f, e=edad(f.nac), cx=fcx(), h=HOSP.find(x=>x.n===f.hosp)||{n:"",d:""};
+  const ay=f.fing?fleg(ofx(f.fing,-1)):"";
+  return`<div class="doc">
+  <div class="doch"><p class="ds">Dr. Pablo Vidal González · Cirugía General y Laparoscópica</p>
+    <h3>Indicaciones Médicas para Ingreso a Cirugía General</h3></div>
+  <table class="dt">
+    <tr><td width="55%"><strong>Paciente:</strong> ${(f.pac||"").toUpperCase()}</td><td><strong>Edad:</strong> ${e||""} años</td></tr>
+    <tr><td><strong>Fecha de ingreso:</strong> ${ff(f.fing)}</td><td><strong>Hora de ingreso:</strong> ${f.hing} hrs</td></tr>
+    <tr><td colspan="2"><strong>Diagnóstico:</strong> ${(f.proc||"").toUpperCase()}</td></tr>
+  </table>
+  <p class="dsec">1. Ingreso:</p>
+  <p class="di">Ingresar por admisión:</p>
+  <p class="di"><strong>${h.n}</strong></p>
+  <p class="di" style="color:#64748b;font-size:12.5px">Dirección: ${h.d}</p>
+  <p class="dsec">2. Procedimiento Quirúrgico:</p>
+  <p class="di">Se opera de <strong>${(f.proc||"").toUpperCase()}</strong> el día <strong>${fleg(cx)}</strong> a las <strong>${f.hcx} hrs</strong>.</p>
+  <p class="dsec">3. Ayuno:</p>
+  <p class="di">Ayuno a partir de las <strong>23:30 horas</strong> del día <strong>${ay}</strong> (No tomar ni agua).</p>
+  <p class="dsec">A su ingreso:</p>
+  <p class="di"><strong>1. Soluciones:</strong> Canalizar con solución Hartmann a 80 ml/hora.</p>
+  <p class="di"><strong>2. Prevención antiembólica:</strong> Medias TED al muslo.</p>
+  <p class="di"><strong>3. Estudios:</strong> BH, QS, Coagulograma, Tele de Tórax, Electrocardiograma.</p>
+  <p class="di"><strong>4. Avisar a su ingreso:</strong> Dr. Pablo Vidal · 55 2271 5257</p>
+  </div>`;
+}
 
-        <fieldset class="checks">
-          <legend>Interconsultas</legend>
-          <label><input type="checkbox" name="interconsultations" value="Dr. Fernando Magaña"> Dr. Fernando Magaña</label>
-          <label><input type="checkbox" name="interconsultations" value="Dr. Omar Fueyo"> Dr. Omar Fueyo</label>
-          <label><input type="checkbox" name="interconsultations" value="Lic. Marcela Sawaya"> Lic. Marcela Sawaya</label>
-          <label><input type="checkbox" name="interconsultations" value="Dr. Jorge Guajardo"> Dr. Jorge Guajardo</label>
-          <label><input type="checkbox" name="interconsultations" value="Dr. Jon Mikel Iñarritu"> Dr. Jon Mikel Iñarritu</label>
-          <label><input type="checkbox" name="interconsultations" value="Dra. Ana María Serrano"> Dra. Ana María Serrano</label>
-          <label><input type="checkbox" id="otherInterconsultationCheck"> Otro</label>
-          <input id="otherInterconsultation" class="inline-extra" placeholder="Nombre de interconsulta" hidden>
-        </fieldset>
+function consentBase(){
+  const byId=CONSENT_PROCS.find(p=>p.id===S.f.consentProc);
+  if(byId)return byId;
+  return CONSENT_PROCS.find(p=>p.match.some(m=>S.f.proc.includes(m))) || CONSENT_PROCS[0];
+}
+function selectedRiskText(){
+  const parts=S.f.conds.map(id=>(RISK_OPTS.find(x=>x[0]===id)||[])[2]).filter(Boolean);
+  const extras=[S.f.alergias&&`alergias referidas: ${S.f.alergias}`,S.f.obsClin].filter(Boolean);
+  if(!parts.length && !extras.length)return"De acuerdo con las condiciones particulares conocidas del paciente, pueden presentarse riesgos adicionales no previsibles en su totalidad y relacionados con su estado clínico al momento de la cirugía.";
+  return`En virtud de las condiciones particulares del paciente, ${[...parts,...extras].join("; ")}.`;
+}
+function fillConsentTemplate(){
+  const b=consentBase();
+  S.f.consentProc=b.id;
+  S.f.consent={desc:b.desc,ben:b.ben,alt:b.alt,freq:b.freq,grave:b.grave,part:selectedRiskText()};
+}
+function useConsentTemplate(){S.err="";fillConsentTemplate();render();}
+function consTextArea(k){
+  const labels={desc:"El procedimiento consiste en",ben:"Beneficios",alt:"Alternativas de tratamiento",freq:"Riesgos típicos más frecuentes",grave:"Riesgos graves menos frecuentes",part:"Riesgos particulares del paciente"};
+  const v=(S.f.consent&&S.f.consent[k])||"";
+  return`<div class="campo"><label>${labels[k]}</label>
+    <textarea class="consarea" oninput="S.f.consent.${k}=this.value;autoGrowOne(this)">${v}</textarea></div>`;
+}
+function autoGrowOne(el){el.style.height="auto";el.style.height=(el.scrollHeight+4)+"px";}
+function autoGrowConsent(){document.querySelectorAll("textarea.consarea").forEach(autoGrowOne);}
 
-        <label class="field">
-          <span>Indicaciones adicionales</span>
-          <textarea id="extraNotes" rows="3" placeholder="Ej. reservar hemoderivados, valoración específica, traer estudios previos"></textarea>
-        </label>
-      </form>
+// CONFIRMACIÓN
+function rConf(){
+  const f=S.f, cx=fcx();
+  return`<div class="conf">
+  <div class="chk">✓</div>
+  <h2>Cirugía programada</h2>
+  <p class="cdato"><strong>${f.pac}</strong></p>
+  <p class="cdato">${f.proc}</p><p class="cdato">${f.hosp}</p>
+  <p class="cdato">${ff(cx)} · ${f.hcx} hrs</p>
+  <div class="acbox"><p>✅ Acciones ejecutadas:</p>
+    <span>• Evento creado en Google Calendar con materiales en notas</span>
+    <span>• Invitaciones enviadas al equipo quirúrgico</span>
+    <span>• Registro guardado en Google Sheets</span>
+    <span>• Indicaciones de ingreso enviadas por correo</span>
+  </div>
+  <button class="bs bfull" onclick="S.vd=!S.vd;render()">${S.vd?"▲ Ocultar documento":"📄 Ver indicaciones de ingreso"}</button>
+  <button class="bp bfull" onclick="reset()">+ Programar otra cirugía</button>
+  ${S.vd?rDoc():""}
+  </div>`;
+}
 
-      <section class="preview-panel">
-        <div class="toolbar no-print">
-          <button type="button" id="copyButton">Copiar texto</button>
-          <button type="button" id="downloadPdfButton">Descargar PDF</button>
-          <button type="button" id="sharePdfButton">WhatsApp / compartir</button>
-          <button type="button" id="emailPdfButton">Correo PDF</button>
-          <button type="button" id="printButton">Imprimir</button>
-        </div>
-        <article class="document" id="documentPreview"></article>
-      </section>
-    </section>
-  </main>
+// NAV
+function rNav(){
+  const v=valid(), u=S.paso===6;
+  const ba=S.paso>1?`<button class="bs" onclick="goP(${S.paso-1})">← Anterior</button>`:`<button class="bs inv">←</button>`;
+  const bs=u?`<button class="bp bconf" onclick="conf()" ${S.env?"disabled":""}>${S.env?"⏳ Procesando...":"✅ Confirmar Cirugía"}</button>`:
+    `<button class="bp" onclick="goP(${S.paso+1})" ${!v?"disabled":""}">Siguiente →</button>`;
+  return`<div class="nav">${ba}<span class="nc">${S.paso} de 6</span>${bs}</div>
+  ${S.err?`<div class="errbox">❌ ${S.err}</div>`:""}`;
+}
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="app.js"></script>
+function valid(){
+  const f=S.f;
+  if(S.paso===1)return f.pac&&f.nac&&f.proc&&f.hosp;
+  if(S.paso===2)return f.fing&&f.hing&&f.hcx&&(f.opfx!=="3"||f.fcxp);
+  if(S.paso===5)return f.consent.desc&&f.consent.ben&&f.consent.alt&&f.consent.freq&&f.consent.grave&&f.consent.part;
+  return true;
+}
+
+// Acciones
+function goP(n){S.paso=n;render();window.scrollTo(0,0);}
+function updEdad(){const e=edad(S.f.nac),b=document.getElementById("edadBox");if(b){b.className="edad-box"+(e===null?" v":"");b.textContent=e!==null?e+" años":"← ingrese fecha de nac.";}}
+function chgProc(v){S.f.proc=v;const p=PROCS.find(x=>x.n===v);S.f.ins=p?[...p.i]:[];S.f.consentProc="";fillConsentTemplate();render();}
+function chgHosp(v){S.f.hosp=v;const d=document.getElementById("dirHint");if(d){const h=HOSP.find(x=>x.n===v);d.textContent=h?"📍 "+h.d:"";};}
+function selHI(h){if(h==="otra"){S.hiOtra=true;S.f.hing="";}else{S.hiOtra=false;S.f.hing=h;}render();}
+function selHC(h){if(h==="otra"){S.hcOtra=true;S.f.hcx="";}else{S.hcOtra=false;S.f.hcx=h;}render();}
+function togEq(n){S.f.equip=S.f.equip.includes(n)?S.f.equip.filter(x=>x!==n):[...S.f.equip,n];render();}
+function delIns(i){S.f.ins.splice(i,1);render();}
+function togCond(id){S.f.conds=S.f.conds.includes(id)?S.f.conds.filter(x=>x!==id):[...S.f.conds,id];if(S.f.consent.part)S.f.consent.part=selectedRiskText();render();}
+function loadFirma(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    S.f.firmaData=reader.result;
+    try{localStorage.setItem("firmaMedicoPabloVidal",S.f.firmaData);}catch(e){}
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+function clearFirma(){
+  S.f.firmaData="";
+  try{localStorage.removeItem("firmaMedicoPabloVidal");}catch(e){}
+  render();
+}
+
+async function genConsentAI(){
+  if(!S.f.apiKey){S.err="Para usar IA pega tu API key. Mientras tanto, el texto de plantilla ya está generado y editable.";render();return;}
+  S.env=true;S.err="";render();
+  try{
+    const b=consentBase();
+    const conds=S.f.conds.map(id=>(RISK_OPTS.find(x=>x[0]===id)||[])[1]).filter(Boolean).join(", ") || "sin condiciones seleccionadas";
+    const prompt=`Redacta un consentimiento informado medico-quirurgico en español de México, claro, formal y conciso. No inventes garantías. Devuelve solo JSON con keys desc, ben, alt, freq, grave, part. Paciente: ${S.f.pac}. Edad: ${edad(S.f.nac)||""}. Diagnóstico: ${b.dx}. Procedimiento: ${b.proc}. Procedimiento base: ${b.desc}. Condiciones particulares: ${conds}. Alergias: ${S.f.alergias||"no referidas"}. Observaciones: ${S.f.obsClin||"ninguna"}. Usa como base estos textos: beneficios: ${b.ben}; alternativas: ${b.alt}; riesgos frecuentes: ${b.freq}; riesgos graves: ${b.grave}.`;
+    const r=await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+S.f.apiKey},body:JSON.stringify({model:"gpt-4.1-mini",input:prompt,text:{format:{type:"json_object"}}})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error&&d.error.message?d.error.message:"No se pudo generar con IA.");
+    const txt=d.output_text || (d.output&&d.output.map(o=>(o.content||[]).map(c=>c.text||"").join("")).join(""));
+    S.f.consent=JSON.parse(txt);
+  }catch(e){S.err="IA: "+e.message;}
+  S.env=false;render();
+}
+
+async function downloadConsentPdf(){
+  if(!window.PDFLib){S.err="No cargó la librería para PDF. Verifica internet e intenta de nuevo.";render();return;}
+  fillEmptyConsent();
+  try{
+    const {PDFDocument, StandardFonts, rgb}=PDFLib;
+    const bytes=await getConsentPdfBytes();
+    const pdf=await PDFDocument.load(bytes);
+    const font=await pdf.embedFont(StandardFonts.Helvetica);
+    const italicFont=await pdf.embedFont(StandardFonts.HelveticaOblique);
+    const form=pdf.getForm();
+    const f=S.f, b=consentBase(), cx=fcx(), dt=cx?new Date(cx+"T12:00:00"):new Date();
+    const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const vals={Texto1:f.pac,Texto26:String(dt.getDate()),Texto2:meses[dt.getMonth()],Texto4:String(dt.getFullYear()).slice(2),Texto5:"",Texto6:"",
+      Texto7:"PABLO VIDAL GONZALEZ",Texto8:b.proc,Texto23:""};
+    Object.entries(vals).forEach(([k,v])=>setPdfField(form,k,v,9));
+    const sections=[
+      {fields:["Texto8","Texto9"],text:b.proc},
+      {fields:["Texto10","Texto11","Texto12"],text:f.consent.desc},
+      {fields:["Texto14","Texto13"],text:f.consent.ben},
+      {fields:["Texto15","Texto16"],text:f.consent.alt},
+      {fields:["Texto17","Texto18"],text:f.consent.freq},
+      {fields:["Texto19","Texto20"],text:f.consent.grave},
+      {fields:["Texto21","Texto22"],text:f.consent.part}
+    ];
+    const pdfSize=consentPdfFontSize(form,sections);
+    sections.forEach(s=>fillSectionFieldsFull(form,s.fields,s.text,pdfSize));
+    try{form.getCheckBox("Check Box24").check();}catch(e){}
+    try{form.flatten();}catch(e){}
+    await drawDoctorSignature(pdf,font,italicFont,f,rgb);
+    const out=await pdf.save();
+    const blob=new Blob([out],{type:"application/pdf"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`Consentimiento_${(f.pac||"paciente").replace(/[^a-z0-9áéíóúñ]+/gi,"_")}.pdf`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){S.err="PDF: "+e.message;render();}
+}
+function fillEmptyConsent(){if(!S.f.consent.desc)fillConsentTemplate();}
+async function getConsentPdfBytes(){
+  if(window.CONSENT_PDF_BASE64){
+    const bin=atob(window.CONSENT_PDF_BASE64);
+    const bytes=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+  return fetch("consentimiento-observatorio.pdf").then(r=>{
+    if(!r.ok)throw new Error("No se pudo cargar el PDF base.");
+    return r.arrayBuffer();
+  });
+}
+function splitForPdf(text,width,size){
+  const avg=size*0.52;
+  const max=Math.max(18,Math.floor(width/avg));
+  const words=String(text||"").replace(/\s+/g," ").trim().split(" ");
+  const lines=[]; let line="";
+  words.forEach(w=>{
+    if(!w)return;
+    const next=line?line+" "+w:w;
+    if(next.length>max && line){lines.push(line);line=w;}else{line=next;}
+  });
+  if(line)lines.push(line);
+  return lines;
+}
+function setPdfField(form,name,value,size){
+  try{
+    const field=form.getTextField(name);
+    field.setText(String(value||""));
+    try{field.setFontSize(size);}catch(e){}
+  }catch(e){}
+}
+function fillPdfLines(form,names,text,size){
+  const fields=names.map(name=>{
+    try{
+      const field=form.getTextField(name);
+      const rect=field.acroField.getWidgets()[0].getRectangle();
+      return {name,field,width:rect.width};
+    }catch(e){return null;}
+  }).filter(Boolean);
+  const lines=[];
+  String(text||"").split(/\n+/).forEach(part=>{
+    const source=part.trim();
+    if(!source)return;
+    splitForPdf(source,520,size).forEach(line=>lines.push(line));
+  });
+  fields.forEach((item,i)=>{
+    item.field.setText(lines[i]||"");
+    try{item.field.setFontSize(size);}catch(e){}
+  });
+}
+function fillSectionFields(form,names,text,size){
+  const remaining=String(text||"").replace(/\s+/g," ").trim().split(" ");
+  names.forEach(name=>{
+    let field, width=480;
+    try{
+      field=form.getTextField(name);
+      width=field.acroField.getWidgets()[0].getRectangle().width;
+    }catch(e){return;}
+    const max=Math.max(8,Math.floor(width/(size*0.49)));
+    let line="";
+    while(remaining.length){
+      const next=line?line+" "+remaining[0]:remaining[0];
+      if(next.length>max && line)break;
+      line=next;
+      remaining.shift();
+    }
+    field.setText(line);
+    try{field.setFontSize(size);}catch(e){}
+  });
+}
+function fillSectionFieldsFull(form,names,text,size){
+  const remaining=String(text||"").replace(/\s+/g," ").trim().split(" ");
+  names.forEach((name,index)=>{
+    let field, width=480;
+    try{
+      field=form.getTextField(name);
+      width=field.acroField.getWidgets()[0].getRectangle().width;
+    }catch(e){return;}
+    if(index===names.length-1){
+      field.setText(remaining.join(" "));
+      try{field.setFontSize(size);}catch(e){}
+      return;
+    }
+    const max=Math.max(8,Math.floor(width/(size*0.49)));
+    let line="";
+    while(remaining.length){
+      const next=line?line+" "+remaining[0]:remaining[0];
+      if(next.length>max && line)break;
+      line=next;
+      remaining.shift();
+    }
+    field.setText(line);
+    try{field.setFontSize(size);}catch(e){}
+  });
+}
+function consentPdfFontSize(form,sections){
+  let size=5.8;
+  sections.forEach(section=>{
+    const textLength=String(section.text||"").replace(/\s+/g," ").trim().length;
+    const totalWidth=section.fields.reduce((sum,name)=>{
+      try{return sum+form.getTextField(name).acroField.getWidgets()[0].getRectangle().width;}
+      catch(e){return sum;}
+    },0);
+    if(textLength>0 && totalWidth>0){
+      size=Math.min(size,totalWidth/(textLength*0.49));
+    }
+  });
+  return Math.max(3.8,Math.min(5.8,size));
+}
+async function drawDoctorSignature(pdf,font,italicFont,f,rgb){
+  const pages=pdf.getPages();
+  if(pages.length<2)return;
+  const page=pages[1];
+  const name="PABLO VIDAL GONZALEZ";
+  const signatureData=f.firmaData||window.DEFAULT_SIGNATURE_DATA_URL;
+  if(signatureData){
+    try{
+      const bytes=dataUrlBytes(signatureData);
+      const img=signatureData.includes("image/png")?await pdf.embedPng(bytes):await pdf.embedJpg(bytes);
+      const dims=img.scale(1);
+      const w=145, h=w*(dims.height/dims.width);
+      page.drawImage(img,{x:375,y:180,width:w,height:Math.min(h,52)});
+    }catch(e){}
+  }
+  page.drawText(name,{x:385,y:174,size:9.5,font,color:rgb(0,0,0)});
+}
+function dataUrlBytes(dataUrl){
+  const b64=dataUrl.split(",")[1]||"";
+  const bin=atob(b64);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+function addConsentAnnex(pdf,font,f,b,rgb){
+  const page=pdf.addPage([612,792]);
+  const margin=54, width=504;
+  let y=738;
+  const draw=(text,size=10,lead=14)=>{
+    splitForPdf(text,width,size).forEach(line=>{
+      if(y<64){ y=738; }
+      page.drawText(line,{x:margin,y,size,font,color:rgb(0,0,0)});
+      y-=lead;
+    });
+  };
+  page.drawText("ANEXO DE CONSENTIMIENTO INFORMADO",{x:margin,y,size:14,font,color:rgb(0,0,0)}); y-=24;
+  draw(`Paciente: ${f.pac||""}`,10); draw(`Procedimiento: ${b.proc||""}`,10); draw(`Diagnóstico: ${b.dx||""}`,10); y-=8;
+  [["El procedimiento consiste en",f.consent.desc],["Beneficios",f.consent.ben],["Alternativas de tratamiento",f.consent.alt],["Riesgos típicos más frecuentes",f.consent.freq],["Riesgos graves menos frecuentes",f.consent.grave],["Riesgos particulares del paciente",f.consent.part]].forEach(([t,v])=>{
+    page.drawText(t,{x:margin,y,size:11,font,color:rgb(0,0,0)}); y-=16;
+    draw(v,9.5,13); y-=8;
+  });
+  y=Math.max(y,110);
+  page.drawText("Nombre y firma del médico: PABLO VIDAL GONZALEZ",{x:margin,y,size:10,font,color:rgb(0,0,0)});
+  page.drawText("Nombre y firma del paciente: "+(f.pac||""),{x:margin,y:y-22,size:10,font,color:rgb(0,0,0)});
+}
+
+async function conf(){
+  S.env=true;S.err="";render();
+  try{
+    const f=S.f;
+    const r=await fetch(URL_AS,{method:"POST",body:JSON.stringify({...f,edad:edad(f.nac),fechaCirugia:fcx(),
+      paciente:f.pac,fechaNac:f.nac,telefono:f.tel,correo:f.cor,procedimiento:f.proc,hospital:f.hosp,
+      fechaIngreso:f.fing,horaIngreso:f.hing,horaCirugia:f.hcx,colorCalendario:f.color,
+      anestesiologo:f.anest,equipo:f.equip,insumos:f.ins,insumosExtra:f.insex})});
+    const d=await r.json();
+    if(d.ok){S.ok=true;}else{S.err="Error: "+(d.error||"Intenta de nuevo");}
+  }catch(e){S.err="Error de conexión. Verifica tu internet e intenta de nuevo.";}
+  S.env=false;render();window.scrollTo(0,0);
+}
+
+function reset(){
+  S={paso:1,ok:false,env:false,err:"",vd:false,hiOtra:false,hcOtra:false,
+    f:{pac:"",nac:"",tel:"",cor:"",proc:"",hosp:"",fing:"",hing:"",opfx:"1",fcxp:"",hcx:"",color:"#039be5",anest:"",equip:[],ins:[],insex:"",
+      consentProc:"",conds:[],alergias:"",obsClin:"",apiKey:"",firmaData:"",consent:{desc:"",ben:"",alt:"",freq:"",grave:"",part:""}}};
+  window.S=S;
+  render();window.scrollTo(0,0);
+}
+
+render();
+try{
+  const savedFirma=localStorage.getItem("firmaMedicoPabloVidal");
+  if(savedFirma){S.f.firmaData=savedFirma;render();}
+}catch(e){}
+</script>
 </body>
 </html>
