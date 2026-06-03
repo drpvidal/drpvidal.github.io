@@ -55,6 +55,22 @@ textarea{min-height:65px;resize:vertical;}
 .bv{background:none;color:#fff;border:1.5px solid rgba(255,255,255,0.4);padding:11px;border-radius:10px;font-family:Arial,sans-serif;font-size:0.88rem;font-weight:700;cursor:pointer;text-align:center;}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a3a2a;color:#7ecba1;padding:9px 20px;border-radius:20px;font-family:Arial,sans-serif;font-size:0.82rem;font-weight:700;z-index:999;transition:transform 0.3s;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
+:root{--sync-blue:#1266ff;--sync-cyan:#08c7c7;--sync-navy:#0b1f3a;--sync-bg:#eef7ff;--sync-card:#ffffff;--sync-muted:#64748b;}
+body{background:linear-gradient(180deg,#eef7ff 0%,#f8fcff 45%,#eef7ff 100%);color:var(--sync-navy);}
+.ah{background:linear-gradient(135deg,#0b1f3a 0%,#1266ff 58%,#08c7c7 100%);padding:14px 18px;box-shadow:0 8px 26px rgba(18,102,255,.22);}
+.ah .t{font-size:1.08rem;font-weight:800;color:#fff;letter-spacing:.01em;display:flex;align-items:center;gap:9px;}
+.ah .t:before{content:'';width:30px;height:30px;display:inline-block;background:url('assets/syncmed-one-logo.png') center/contain no-repeat;border-radius:9px;background-color:rgba(255,255,255,.96);box-shadow:0 4px 14px rgba(0,0,0,.14);}
+.ah .s{font-size:.62rem;color:rgba(255,255,255,.82);text-transform:uppercase;letter-spacing:.11em;margin-left:41px;}
+.card{border:1px solid rgba(18,102,255,.10);box-shadow:0 10px 28px rgba(11,31,58,.08);}
+.ct{color:var(--sync-blue);border-bottom:2px solid rgba(8,199,199,.45);}
+input:focus,textarea:focus,select:focus{border-color:var(--sync-blue);box-shadow:0 0 0 3px rgba(18,102,255,.12);}
+.eb{background:#eef7ff;border-color:rgba(18,102,255,.5);}
+.eb .n{color:var(--sync-blue);}.eb .u,label{color:var(--sync-muted);}
+.btn-gen{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%);color:#fff;box-shadow:0 10px 24px rgba(18,102,255,.24);}
+.bc{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%);box-shadow:0 8px 20px rgba(18,102,255,.22);}
+.bc[style*="128C7E"],.bc[style*="2a7d4f"]{background:linear-gradient(135deg,#0b1f3a 0%,#1266ff 100%)!important;}
+.toast{background:#0b1f3a;color:#fff;box-shadow:0 8px 24px rgba(11,31,58,.25);}
+
 </style>
 </head>
 <body>
