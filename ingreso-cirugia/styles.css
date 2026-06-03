@@ -575,3 +575,73 @@ input:focus,textarea:focus,select:focus{
   outline:none !important;
 }
 label,.muted,.subtitle,.help-text{color:var(--sync-muted) !important;}
+
+
+/* Clean SyncMed header — ingreso-cirugia */
+.topbar{
+  position:relative;
+  display:flex!important;
+  align-items:center!important;
+  gap:16px!important;
+  padding:16px 20px!important;
+  margin-bottom:22px!important;
+  border-radius:18px!important;
+  background:linear-gradient(135deg,#0b1f3a 0%,#1266ff 58%,#08c7c7 100%)!important;
+  box-shadow:0 12px 32px rgba(18,102,255,.22)!important;
+}
+.brand-mark{
+  width:56px!important;
+  height:56px!important;
+  min-width:56px!important;
+  border-radius:16px!important;
+  background:rgba(255,255,255,.96)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:0!important;
+}
+.brand-mark img{
+  width:42px!important;
+  height:42px!important;
+  object-fit:contain!important;
+  display:block!important;
+}
+.brand-copy{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  min-width:0!important;
+}
+.topbar h1{
+  color:#fff!important;
+  font-size:clamp(24px,3.2vw,38px)!important;
+  line-height:1.02!important;
+  letter-spacing:-.03em!important;
+  font-weight:850!important;
+  display:block!important;
+}
+.topbar h1:before,
+.topbar .title:before,
+header h1:before,
+header .title:before{
+  content:none!important;
+  display:none!important;
+}
+.topbar p{
+  color:rgba(255,255,255,.78)!important;
+  font-size:clamp(12px,1.35vw,15px)!important;
+  font-weight:600!important;
+  margin:0!important;
+}
+@media(min-width:760px){
+  .topbar{justify-content:flex-start!important;}
+  .brand-copy{width:100%;}
+  .topbar p{text-align:left;}
+}
+@media(max-width:520px){
+  .topbar{padding:14px!important;gap:12px!important;}
+  .brand-mark{width:48px!important;height:48px!important;min-width:48px!important;border-radius:14px!important;}
+  .brand-mark img{width:36px!important;height:36px!important;}
+  .topbar h1{font-size:25px!important;}
+}
