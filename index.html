@@ -63,7 +63,7 @@ textarea{resize:vertical}
 <div class="app">
   <div class="header">
     <h1>Registro Quirúrgico</h1>
-    <p>Dr. Pablo Vidal — Sistema de gestión de cirugías</p>
+    <p>SyncMed One — Sistema de gestión de cirugías · Dr. Pablo Vidal</p>
   </div>
   <div class="nav">
     <button class="nav-btn active" onclick="showSection('nueva')">Nueva cirugía</button>
@@ -533,7 +533,7 @@ async function enviarSecretaria(adjuntosExtra=[]){
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
   if(status)status.textContent='';
   try{
-    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',indicacionesPostoperatorias:postTextoGenerado||'',adjuntosExtra:adjuntosExtra||[],timestamp:new Date().toISOString(),origen:'App Registro Quirúrgico Dr. Pablo Vidal'};
+    const payload={...ultimoRegistro,notaOperatoria:notaGenerada||'No generada aún',indicacionesPostoperatorias:postTextoGenerado||'',adjuntosExtra:adjuntosExtra||[],timestamp:new Date().toISOString(),origen:'SyncMed One - Registro Quirúrgico Dr. Pablo Vidal'};
     const res=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(res.ok||res.status===200){if(status)status.innerHTML='<span style="color:#16a34a">✓ Enviado a secretaria</span>';showToast('Paquete enviado correctamente');}
     else{if(status)status.innerHTML='<span style="color:#dc2626">Error al enviar</span>';showToast('Error al enviar');}

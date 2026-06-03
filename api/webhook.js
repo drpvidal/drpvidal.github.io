@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const html = `
       <div style="font-family:Arial,sans-serif;max-width:700px;margin:0 auto;color:#1a1a1a">
-        <h2 style="border-bottom:2px solid #1a1a1a;padding-bottom:8px">Registro Quirurgico - Dr. Pablo Vidal</h2>
+        <h2 style="border-bottom:2px solid #1a1a1a;padding-bottom:8px">SyncMed One - Registro Quirurgico Dr. Pablo Vidal</h2>
         <table cellpadding="7" cellspacing="0" border="1" style="border-collapse:collapse;width:100%;font-size:13px;border-color:#e0e0e0">
           <tr style="background:#f5f5f0"><td style="width:160px"><b>Paciente</b></td><td>${b.paciente || '-'}</td></tr>
           <tr><td><b>Fecha de cirugia</b></td><td>${b.fechaCirugia || '-'}</td></tr>
