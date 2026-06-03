@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro Quirúrgico</title>
+<title>SyncMed One | Registro Quirúrgico</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f5f5f0;min-height:100vh}
@@ -57,13 +57,39 @@ textarea{resize:vertical}
 .nota-preview{background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:10px;font-size:12px;color:#78350f;margin-top:8px}
 .nota-preview.libre{background:#f5f3ff;border-color:#c4b5fd;color:#4c1d95}
 @media(max-width:480px){.grid2{grid-template-columns:1fr}.equipo-row{grid-template-columns:1fr}.equipo-label{padding-top:0}}
+
+
+/* SyncMed One visual identity */
+:root{--sync-blue:#1266ff;--sync-cyan:#08c7c7;--sync-navy:#0b1f3a;--sync-bg:#eef7ff;--sync-muted:#64748b;}
+body{background:linear-gradient(180deg,#eef7ff 0%,#f8fcff 45%,#eef7ff 100%)!important;color:var(--sync-navy)!important;}
+.app{max-width:760px;}
+.header{background:linear-gradient(135deg,#0b1f3a 0%,#1266ff 58%,#08c7c7 100%)!important;color:#fff!important;border-radius:18px;padding:18px;box-shadow:0 12px 32px rgba(18,102,255,.22);display:flex;align-items:center;gap:12px;}
+.header-logo{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 8px 22px rgba(18,102,255,.18);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.header-logo img{width:34px;height:34px;object-fit:contain;display:block;}
+.header h1{font-size:20px!important;font-weight:800!important;color:#fff!important;margin-bottom:2px!important;}
+.header p{font-size:12px!important;color:rgba(255,255,255,.84)!important;margin:0!important;}
+.nav{background:rgba(255,255,255,.72)!important;border:1px solid rgba(18,102,255,.12);box-shadow:0 10px 28px rgba(11,31,58,.06);}
+.nav-btn{color:var(--sync-muted)!important;}
+.nav-btn.active{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%)!important;color:#fff!important;box-shadow:0 8px 20px rgba(18,102,255,.22)!important;}
+.card{border:1px solid rgba(18,102,255,.12)!important;box-shadow:0 10px 28px rgba(11,31,58,.08)!important;}
+.card-title{color:var(--sync-blue)!important;}
+.form-label,.equipo-label{color:var(--sync-muted)!important;}
+input:focus,select:focus,textarea:focus{border-color:var(--sync-blue)!important;box-shadow:0 0 0 3px rgba(18,102,255,.12)!important;}
+.btn-primary,.tab-mini.active{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%)!important;color:#fff!important;box-shadow:0 8px 20px rgba(18,102,255,.18);}
+.btn{border-color:rgba(18,102,255,.18)!important;}
+.upload-zone{background:#f8fcff!important;border-color:#cfe6ff!important;}
+.toast{background:#0b1f3a!important;color:#fff!important;box-shadow:0 8px 24px rgba(11,31,58,.25);}
+
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <h1>Registro Quirúrgico</h1>
-    <p>SyncMed One — Sistema de gestión de cirugías · Dr. Pablo Vidal</p>
+    <div class="header-logo"><img src="assets/syncmed-one-logo.png" alt="SyncMed One"></div>
+    <div>
+      <h1>SyncMed One</h1>
+      <p>Registro Quirúrgico · Dr. Pablo Vidal</p>
+    </div>
   </div>
   <div class="nav">
     <button class="nav-btn active" onclick="showSection('nueva')">Nueva cirugía</button>
