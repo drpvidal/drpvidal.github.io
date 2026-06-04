@@ -154,7 +154,7 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 
   <div class="actions">
     <button class="btn sec" onclick="verPDF()">Ver PDF</button>
-    <button class="btn sec" onclick="generarPDFManual()">Generar PDF</button>
+    <button class="btn sec" onclick="generarPDFManual()">Descargar PDF</button>
     <button id="btnEnviar" class="btn" onclick="enviarAlta(false)">Enviar por correo</button>
     <button class="btn" onclick="enviarAlta(true)">Generar PDF y enviar correo</button>
   </div>
@@ -285,31 +285,117 @@ async function verPDF(){
   window._modoPDFAlta='';
   status('PDF generado para revisión.','ok');
 }
-async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d);status('PDF generado.','ok')}
-function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
-async function imgToData(url){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);resolve(c.toDataURL('image/png'))};im.onerror=reject;im.src=url})}
-async function generarPDF(d){const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'pt',format:'letter'});const W=612,H=792;let header=null,footer=null,firma=null;try{header=await imgToData('assets/header.jpg');footer=await imgToData('assets/footer.jpg');firma=await imgToData('assets/firma.png')}catch(e){}
-if(header)pdf.addImage(header,'JPEG',0,0,W,105);if(footer)pdf.addImage(footer,'JPEG',0,H-88,W,88);
-pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-54,130,{align:'right'});
-pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('Paciente: '+d.nombre,54,155);pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text('Edad: '+d.edad+' años        FN: '+d.fn,54,172);
-pdf.setFont('helvetica','normal');let y=205;y=addWrapped(pdf,'Indicaciones médicas para paciente post-operado de '+d.procedimiento.toUpperCase(),54,y,500,14);y+=18;
-pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('MEDICAMENTOS:',54,y);y+=18;pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
-['ULSEN (omeprazol) cápsulas 40 mg. Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.','BIOMICS (cefixima) cápsulas 400 mg. Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.','TYLEX (paracetamol) tabletas 750 mg. Tomar una tableta vía oral cada 8 horas por 5 días.','DOLAC (ketorolaco) tableta 10 mg. Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.'].forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,70,y,470,13);y+=7});
-y+=8;pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('MEDIDAS GENERALES:',54,y);y+=18;pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
-['Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.','No realizar esfuerzos físicos grandes ni cargar objetos de más de 5 kg.','Lavado de heridas con agua y jabón durante el baño. No usar Isodine ni merthiolate.','No manejar automóvil por 7 días.','No sumergirse en tinas, jacuzzi o albercas.','Hielo intermitente en heridas quirúrgicas y pared abdominal.'].forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,70,y,470,13);y+=6});
-y+=10;y=addWrapped(pdf,'Solicitar cita de revisión en consultorio para el '+fechaCorta(d.fechaCita)+'.',54,y,500,14);if(d.extra){y+=12;y=addWrapped(pdf,'Cambios / notas: '+d.extra,54,y,500,13)}if(d.especiales){y+=12;y=addWrapped(pdf,'Indicaciones especiales: '+d.especiales,54,y,500,13)}
-if(firma)pdf.addImage(firma,'PNG',345,610,130,70);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
-const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
-ultimoPDF=pdf.output('blob');
-if(window._modoPDFAlta==='ver'){
-  const url=URL.createObjectURL(ultimoPDF);
-  const card=document.getElementById('pdfCard');
-  const viewer=document.getElementById('pdfViewer');
-  if(card&&viewer){viewer.src=url;card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{window.open(url,'_blank');}
-}else{
-  pdf.save(nombre);
+async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'download');status('PDF descargado.','ok')}
+async function verPDF(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'ver');status('PDF generado para revisión.','ok')}
+async function compartirPDF(){
+  const d=datos();const err=validar(d);if(err){status(err,'err');return}
+  const blob=await generarPDF(d,'blob');
+  const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
+  const file=new File([blob],nombre,{type:'application/pdf'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    await navigator.share({files:[file],title:nombre,text:'Indicaciones de alta'});
+    status('PDF listo para compartir.','ok');
+  }else{
+    await generarPDF(d,'download');
+    status('Este navegador no permite compartir directo; descargué el PDF.','ok');
+  }
 }
-return ultimoPDF}
+function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
+function drawUnderlined(pdf,txt,x,y){pdf.text(txt,x,y);const w=pdf.getTextWidth(txt);pdf.line(x,y+1.6,x+w,y+1.6)}
+function medPDF(pdf,num,nombre,instruccion,x,y,w){
+  pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.setFontSize(8.8);
+  drawUnderlined(pdf,num+'.- '+nombre,x,y);
+  y += 10.5;
+  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.setFontSize(8.2);
+  y = addWrapped(pdf,instruccion,x+28,y,w-28,9.5);
+  return y + 7;
+}
+async function generarPDF(d,modo){
+  const {jsPDF}=window.jspdf;
+  const pdf=new jsPDF({unit:'pt',format:'letter'});
+  const W=612;
+  const azul=[54,95,145];
+  const x=34;
+  let y=42;
+
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);pdf.setTextColor(0,0,0);
+  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-34,y,{align:'right'});
+
+  y += 26;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
+  pdf.text('Paciente:',x,y);
+  pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
+  pdf.text((d.nombre||'').toUpperCase(),x+45,y);
+
+  y += 12;
+  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
+  pdf.text('Edad: '+(d.edad||'-')+' años',x,y);
+  pdf.text('FN: '+(d.fn||'-'),360,y);
+
+  y += 24;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.6);pdf.setTextColor(0,0,0);
+  const intro='Indicaciones médicas para paciente post-operado de ';
+  pdf.text(intro,x,y);
+  pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
+  pdf.text((d.procedimiento||'').toUpperCase(),x+pdf.getTextWidth(intro),y,{maxWidth:350});
+
+  y += 20;
+  pdf.setFont('helvetica','bold');pdf.setFontSize(9.2);pdf.setTextColor(...azul);
+  pdf.text('MEDICAMENTOS:',x,y);
+  y += 15;
+
+  y=medPDF(pdf,1,'ULSEN (omeprazol) cápsulas 40 mg.','Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.',x+18,y,500);
+  y=medPDF(pdf,2,'BIOMICS (cefixima) cápsulas 400 mg.','Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.',x+18,y,500);
+  y=medPDF(pdf,3,'TYLEX (paracetamol) tabletas 750 mg.','Tomar una tableta vía oral cada 8 horas por 5 días.',x+18,y,500);
+  y=medPDF(pdf,4,'DOLAC (ketorolaco) tableta 10 mg.','Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.',x+18,y,500);
+
+  y += 6;
+  pdf.setFont('helvetica','bold');pdf.setFontSize(9.2);pdf.setTextColor(...azul);
+  pdf.text('MEDIDAS GENERALES:',x,y);
+  y += 12;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.2);pdf.setTextColor(0,0,0);
+  const medidas=[
+    'Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.',
+    'No realizar esfuerzos físicos grandes, PROHIBIDO cargar, empujar y jalar objetos de más de 5 kg.',
+    'No usar Isodine, merthiolate etc. en las heridas, solo lavado con agua y jabón durante el baño.',
+    'No manejar automóvil por 7 días.',
+    'No sumergirse en tinas, jacuzzi o albercas.',
+    'Pueden existir moretones alrededor de las heridas, esto se considera normal.',
+    'Hielo intermitente en heridas quirúrgicas y pared abdominal.'
+  ];
+  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,520,9.2);y+=1.5});
+
+  y += 8;
+  pdf.setFont('helvetica','bold');pdf.setFontSize(9.2);pdf.setTextColor(...azul);
+  pdf.text('AVISAR DE INMEDIATO EN CASO DE:',x,y);
+  y += 12;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.2);pdf.setTextColor(0,0,0);
+  const avisar=['Fiebre.','Dolor abdominal importante, distensión, náusea o vómito.','Salida de secreción fétida, sangre o pus por las heridas.','Alguna duda con algún síntoma o algún medicamento.'];
+  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,520,9.2);y+=1.5});
+
+  y += 20;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.7);pdf.setTextColor(0,0,0);
+  const citaTxt='Solicitar cita de revisión en consultorio para el ';
+  pdf.text(citaTxt,x,y);
+  pdf.setFont('helvetica','bold');
+  pdf.text(fechaCorta(d.fechaCita)+'.',x+pdf.getTextWidth(citaTxt),y);
+
+  pdf.setFont('helvetica','bold');pdf.setFontSize(8.8);pdf.setTextColor(...azul);
+  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-34,742,{align:'right'});
+
+  const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
+  ultimoPDF=pdf.output('blob');
+  if(modo==='ver'){
+    const url=URL.createObjectURL(ultimoPDF);
+    const card=document.getElementById('pdfCard');const viewer=document.getElementById('pdfViewer');
+    if(card&&viewer){viewer.src=url;card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{window.open(url,'_blank');}
+  }else if(modo==='blob'){
+    return ultimoPDF;
+  }else{
+    pdf.save(nombre);
+  }
+  return ultimoPDF;
+}
 
 document.getElementById('fechaAlta').value=hoy();setCita(7);procedimientoCambio();['nombre','procedimientoOtro','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
 </script>
