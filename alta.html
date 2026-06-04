@@ -114,7 +114,7 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
     <h2>Ajustes opcionales</h2>
     <div class="fg"><label>Cambios de medicamentos</label><textarea id="indicacionesExtra" placeholder="Ej. Suspender ketorolaco, cambiar antibiótico, agregar laxante..." oninput="preview()"></textarea><div class="small">Estos cambios pueden aplicarse con IA antes de enviar.</div></div>
     <div class="fg"><label>Indicaciones especiales</label><textarea id="indicacionesEspeciales" placeholder="Ej. Agregar cuidados especiales por hernia, drenaje, dieta, heridas..." oninput="preview()"></textarea><div class="small">Puede generar una hoja adicional de indicaciones específicas.</div></div>
-    <button class="btn sec" type="button" onclick="generarCambiosPreview()">Vista previa / generar cambios</button>
+    <button class="btn sec" type="button" onclick="generarCambiosPreview()">Generar cambios</button>
     <label class="check"><input id="hacerPDF" type="checkbox"><span><b>También generar PDF tamaño carta</b><br>El correo siempre se enviará. El PDF es opcional para descargar o compartir.</span></label>
   </div>
 
@@ -124,12 +124,16 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
   </div>
 
   <div class="actions">
-    <button class="btn sec" onclick="generarCambiosPreview()">Vista previa</button>
+    <button class="btn sec" onclick="verPDF()">Ver PDF</button>
     <button class="btn sec" onclick="generarPDFManual()">Generar PDF</button>
     <button id="btnEnviar" class="btn" onclick="enviarAlta(false)">Enviar por correo</button>
     <button class="btn" onclick="enviarAlta(true)">Generar PDF y enviar correo</button>
   </div>
   <div id="status" class="status"></div>
+  <div class="card" id="pdfCard" style="display:none;margin-top:16px">
+    <h2>PDF generado</h2>
+    <iframe id="pdfViewer" title="PDF de alta" style="width:100%;height:680px;border:1px solid #ddd6fe;border-radius:14px;background:#fff"></iframe>
+  </div>
 </div>
 
 <script>
@@ -210,6 +214,15 @@ function preview(){const d=datos();renderHojaPreview(seccionesPreview, hojaEspec
 function validar(d){if(!d.nombre)return'Falta el nombre del paciente.';if(!d.fn)return'Falta fecha de nacimiento.';if(!d.procedimiento)return'Falta procedimiento.';if(!d.fechaAlta)return'Falta fecha de alta.';if(!d.fechaCita)return'Falta próxima consulta.';return''}
 function status(t,cls){const s=document.getElementById('status');s.className='status '+(cls||'');s.textContent=t}
 async function enviarAlta(generarPdfDespues){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(generarPdfDespues || document.getElementById('hacerPDF').checked){await generarPDF(d);status('Correo enviado y PDF generado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
+async function verPDF(){
+  const d=datos();
+  const err=validar(d);
+  if(err){status(err,'err');return}
+  window._modoPDFAlta='ver';
+  await generarPDF(d);
+  window._modoPDFAlta='';
+  status('PDF generado para revisión.','ok');
+}
 async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d);status('PDF generado.','ok')}
 function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
 async function imgToData(url){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);resolve(c.toDataURL('image/png'))};im.onerror=reject;im.src=url})}
@@ -224,7 +237,17 @@ y+=8;pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('MEDID
 ['Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.','No realizar esfuerzos físicos grandes ni cargar objetos de más de 5 kg.','Lavado de heridas con agua y jabón durante el baño. No usar Isodine ni merthiolate.','No manejar automóvil por 7 días.','No sumergirse en tinas, jacuzzi o albercas.','Hielo intermitente en heridas quirúrgicas y pared abdominal.'].forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,70,y,470,13);y+=6});
 y+=10;y=addWrapped(pdf,'Solicitar cita de revisión en consultorio para el '+fechaCorta(d.fechaCita)+'.',54,y,500,14);if(d.extra){y+=12;y=addWrapped(pdf,'Cambios / notas: '+d.extra,54,y,500,13)}if(d.especiales){y+=12;y=addWrapped(pdf,'Indicaciones especiales: '+d.especiales,54,y,500,13)}
 if(firma)pdf.addImage(firma,'PNG',345,610,130,70);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
-const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';pdf.save(nombre);ultimoPDF=pdf.output('blob');return ultimoPDF}
+const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
+ultimoPDF=pdf.output('blob');
+if(window._modoPDFAlta==='ver'){
+  const url=URL.createObjectURL(ultimoPDF);
+  const card=document.getElementById('pdfCard');
+  const viewer=document.getElementById('pdfViewer');
+  if(card&&viewer){viewer.src=url;card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{window.open(url,'_blank');}
+}else{
+  pdf.save(nombre);
+}
+return ultimoPDF}
 
 document.getElementById('fechaAlta').value=hoy();setCita(7);procedimientoCambio();['nombre','procedimientoOtro','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
 </script>
