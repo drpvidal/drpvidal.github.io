@@ -123,6 +123,8 @@ button,.btn,.mini.fill,.navbtn,.submit{background:linear-gradient(135deg,#1266ff
 </div>
 <script>
 const URL_AS = "https://script.google.com/macros/s/AKfycbxhOJevaVUuttmyDXS9DyquBRLBcsJD_aao-g9E3-VOHekc-7xpCiSV6BLV7fIhDUEU/exec";
+const URL_API_PROGRAMACION = "https://drpvidal-github-io.vercel.app/api/programacion-cirugia";
+const URL_API_ALTA = "https://drpvidal-github-io.vercel.app/api/generar-alta";
 const HOSP = [
   {n:"Centro Médico ABC Observatorio",d:"Sur 136 No. 116, Col. Las Américas, Álvaro Obregón, Ciudad de México, C.P. 01120."},
   {n:"Centro Médico ABC Santa Fe",d:"Av. Carlos Graef Fernández 154, Col. Santa Fe, Cuajimalpa, Ciudad de México, C.P. 05300."},
@@ -145,9 +147,11 @@ const PROCS = [
   {n:"Colecistectomía por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Bolsa de extracción Endo Catch (1ª opción) / Endo-Pouch (2ª opción)","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
   {n:"Colecistectomía por laparoscopia más colangiografía transoperatoria",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Catéter periférico largo tipo Arrow","Engrapadora de 10 mm","Llave de tres vías","Jeringas de 20 ml x2","Medio de contraste","Fluoroscopía","Bolsa de extracción","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
   {n:"Colecistectomía por laparoscopia más colangiografía transoperatoria más identificación de tejidos por fluorescencia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Catéter periférico largo tipo Arrow","Engrapadora de 10 mm","Llave de tres vías","Jeringas de 20 ml x2","Medio de contraste","Fluoroscopía","Bolsa de extracción","Verde de indocianina (ICG)","Torre de fluorescencia","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
-  {n:"Plastia inguinal bilateral por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x2 (1ª opción) / 15 cm x2 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
-  {n:"Plastia inguinal derecha por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm (1ª opción) / 15 cm (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
-  {n:"Plastia inguinal izquierda por laparoscopia tipo TAPP",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm (1ª opción) / 15 cm (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hernia inguinal derecha – Hernioplastia inguinal por laparoscopia TAPP más colocación de malla",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x1 (1ª opción) / 15 cm x1 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hernia inguinal izquierda – Hernioplastia inguinal por laparoscopia TAPP más colocación de malla",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x1 (1ª opción) / 15 cm x1 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hernia inguinal bilateral – Hernioplastia inguinal bilateral por laparoscopia TAPP más colocación de mallas",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x2 (1ª opción) / 15 cm x2 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hernia femoral derecha – Hernioplastia femoral por laparoscopia TAPP más colocación de malla",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x1 (1ª opción) / 15 cm x1 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
+  {n:"Hernia femoral izquierda – Hernioplastia femoral por laparoscopia TAPP más colocación de malla",i:["Trócar 11 mm x1","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Progrip 16 cm x1 (1ª opción) / 15 cm x1 (alternativa)","V-Loc 2-0","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
   {n:"Plastia ventral por laparoscopia más colocación de malla (IPOM Plus)",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Malla Proceed 15x15 o 20x15 / Symbotex 20x15","Securestrap (mín. 30 fijaciones o 2 dispositivos)","Endo Close","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
   {n:"Funduplicatura tipo Toupet por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Separador Nathanson + brazo","Ethibond 2-0 doble armado x10","Bajanudos x2","Energía ultrasónica","Calibrador esofágico 60 Fr","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
   {n:"Funduplicatura tipo Nissen por laparoscopia",i:["Trócar 11 mm x2","Trócar 5 mm x2","Sistema de irrigación-succión","Solución salina","Separador Nathanson + brazo","Ethibond 2-0 doble armado x10","Bajanudos x2","Energía ultrasónica","Calibrador esofágico 60 Fr","Monomax 0","Prolene 0","Monocryl 3-0","Monocryl 4-0"]},
@@ -170,7 +174,7 @@ const CONSENT_PROCS = [
   {id:"obstruccion",match:["Obstrucción intestinal"],dx:"Obstrucción intestinal",proc:"Laparotomía / laparoscopía exploradora",desc:"Laparoscopía o laparotomía exploradora con liberación de adherencias, resección intestinal, anastomosis, ostomía y procedimientos adicionales según hallazgos.",ben:"Resolución de la obstrucción intestinal y prevención de isquemia intestinal, perforación, peritonitis y sepsis.",alt:"Manejo conservador con ayuno, sonda nasogástrica, líquidos intravenosos y vigilancia en casos seleccionados.",freq:"Dolor, infección de heridas, sangrado, íleo prolongado, adherencias, seroma, hematoma y necesidad de conversión quirúrgica.",grave:"Fuga de anastomosis, lesión intestinal o vascular, síndrome de intestino corto, abscesos, sepsis, falla orgánica múltiple, necesidad de ostomía, reintervención e incluso muerte."},
   {id:"nissen",match:["Funduplicatura tipo Nissen"],dx:"ERGE",proc:"Funduplicatura tipo Nissen",desc:"Funduplicatura laparoscópica tipo Nissen con reparación de hernia hiatal y procedimientos adicionales necesarios.",ben:"Control del reflujo gastroesofágico, mejoría de síntomas y prevención de esofagitis y complicaciones del reflujo.",alt:"Tratamiento médico con inhibidores de bomba de protones, cambios dietéticos y vigilancia clínica.",freq:"Dolor, disfagia transitoria, distensión abdominal, incapacidad para eructar, náusea, infección y sangrado.",grave:"Lesión esofágica o gástrica, perforación, neumotórax, migración o falla de la funduplicatura, recurrencia del reflujo, tromboembolia pulmonar, reintervención e incluso muerte."},
   {id:"toupet",match:["Funduplicatura tipo Toupet"],dx:"ERGE",proc:"Funduplicatura tipo Toupet",desc:"Funduplicatura laparoscópica posterior tipo Toupet con reparación de hernia hiatal.",ben:"Control del reflujo con menor riesgo de disfagia en pacientes seleccionados.",alt:"Tratamiento médico conservador y vigilancia.",freq:"Dolor, disfagia transitoria, distensión abdominal, infección y sangrado.",grave:"Lesión esofágica o gástrica, perforación, neumotórax, recurrencia del reflujo, falla de la funduplicatura, reintervención y complicaciones anestésicas severas."},
-  {id:"hernia_inguinal",match:["Plastia inguinal"],dx:"Hernia inguinal izquierda / derecha / bilateral",proc:"Plastia inguinal laparoscópica con malla",desc:"Plastia inguinal laparoscópica unilateral o bilateral con colocación de malla protésica.",ben:"Corrección del defecto herniario, alivio del dolor y prevención de incarceración o estrangulación intestinal.",alt:"Observación clínica en casos seleccionados y reparación abierta.",freq:"Dolor inguinal, hematoma, seroma, inflamación escrotal, infección, retención urinaria y recurrencia.",grave:"Lesión intestinal, vascular, vesical o del cordón espermático, dolor crónico, infección de malla, tromboembolia pulmonar, lesión testicular, reintervención e incluso muerte."},
+  {id:"hernia_inguinal_femoral",match:["Hernia inguinal","Hernia femoral","Hernioplastia inguinal","Hernioplastia femoral","TAPP"],dx:"Hernia inguinal o femoral derecha / izquierda / bilateral",proc:"Hernioplastia laparoscópica tipo TAPP con colocación de malla",desc:"Hernioplastia inguinal o femoral por laparoscopia tipo TAPP, unilateral o bilateral, con colocación de malla protésica según el lado afectado.",ben:"Corrección del defecto herniario, alivio del dolor y prevención de incarceración o estrangulación intestinal.",alt:"Observación clínica en casos seleccionados y reparación abierta.",freq:"Dolor inguinal, hematoma, seroma, inflamación escrotal, infección, retención urinaria y recurrencia.",grave:"Lesión intestinal, vascular, vesical o del cordón espermático, dolor crónico, infección de malla, tromboembolia pulmonar, lesión testicular, reintervención e incluso muerte."},
   {id:"hernia_umbilical",match:["Plastia umbilical"],dx:"Hernia umbilical",proc:"Plastia umbilical",desc:"Plastia umbilical abierta o laparoscópica con cierre primario y/o colocación de malla protésica.",ben:"Corrección del defecto herniario y prevención de incarceración o estrangulación.",alt:"Observación clínica en defectos pequeños y asintomáticos.",freq:"Dolor, seroma, hematoma, infección, inflamación local y recurrencia.",grave:"Lesión intestinal, infección de malla, necrosis umbilical, sangrado importante, reintervención y complicaciones anestésicas severas."},
   {id:"hemorroidectomia",match:["Hemorroidectomía"],dx:"Enfermedad hemorroidal",proc:"Hemorroidectomía",desc:"Resección quirúrgica de paquetes hemorroidales internos y/o externos.",ben:"Control de dolor, sangrado, prolapso y mejoría de síntomas anorrectales.",alt:"Manejo médico, ligadura con banda elástica, escleroterapia o coagulación infrarroja.",freq:"Dolor postoperatorio, sangrado leve, edema, retención urinaria y estreñimiento.",grave:"Hemorragia importante, infección profunda, absceso, estenosis anal, incontinencia fecal, sepsis y necesidad de reintervención."},
   {id:"absceso_anorrectal",match:["Absceso anorrectal","Exploración anal"],dx:"Absceso anorrectal",proc:"Drenaje quirúrgico de absceso anorrectal",desc:"Drenaje quirúrgico de absceso anorrectal con lavado y procedimientos adicionales según hallazgos.",ben:"Control de infección, alivio del dolor y prevención de progresión séptica.",alt:"Manejo médico temporal con antibióticos en casos seleccionados.",freq:"Dolor, sangrado leve, secreción persistente e infección local.",grave:"Fístula anal, recurrencia, extensión de infección, sepsis, lesión esfinteriana e incontinencia fecal."}
@@ -486,6 +490,7 @@ function rConf(){
     <span>• Invitaciones enviadas al equipo quirúrgico</span>
     <span>• Registro guardado en Google Sheets</span>
     <span>• Indicaciones de ingreso enviadas por correo</span>
+    <span>• Indicaciones de alta enviadas por correo</span>
   </div>
   <button class="bs bfull" onclick="S.vd=!S.vd;render()">${S.vd?"▲ Ocultar documento":"📄 Ver indicaciones de ingreso"}</button>
   <button class="bp bfull" onclick="reset()">+ Programar otra cirugía</button>
@@ -749,16 +754,46 @@ function addConsentAnnex(pdf,font,f,b,rgb){
   page.drawText("Nombre y firma del paciente: "+(f.pac||""),{x:margin,y:y-22,size:10,font,color:rgb(0,0,0)});
 }
 
+
+function fechaLargaHoy(){
+  const d=new Date();
+  const meses=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+}
+function programacionPayload(){
+  const f=S.f;
+  return {...f,edad:edad(f.nac),fechaCirugia:fcx(),paciente:f.pac,fechaNac:f.nac,telefono:f.tel,correo:f.cor,
+    procedimiento:f.proc,hospital:f.hosp,fechaIngreso:f.fing,horaIngreso:f.hing,horaCirugia:f.hcx,colorCalendario:f.color,
+    anestesiologo:f.anest,equipo:f.equip,insumos:f.ins,insumosExtra:f.insex,indicacionesIngresoHtml:rDoc()};
+}
+async function postJson(url,payload){
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const ct=r.headers.get("content-type")||"";
+  const d=ct.includes("application/json")?await r.json():{ok:r.ok,text:await r.text()};
+  if(!r.ok || d.ok===false || d.status==="error")throw new Error(d.error||d.message||"Error en servidor");
+  return d;
+}
+async function enviarCorreoIngreso(){return postJson(URL_API_PROGRAMACION,programacionPayload());}
+async function enviarCorreoAlta(){
+  const f=S.f;
+  return postJson(URL_API_ALTA,{nombre:f.pac,edad:edad(f.nac)||"",fechaNacimiento:f.nac,procedimiento:f.proc,
+    fecha:fechaLargaHoy(),fechaCita:"Por definir",indicacionesExtra:"",indicacionesEspeciales:""});
+}
+
 async function conf(){
   S.env=true;S.err="";render();
   try{
     const f=S.f;
-    const r=await fetch(URL_AS,{method:"POST",body:JSON.stringify({...f,edad:edad(f.nac),fechaCirugia:fcx(),
-      paciente:f.pac,fechaNac:f.nac,telefono:f.tel,correo:f.cor,procedimiento:f.proc,hospital:f.hosp,
-      fechaIngreso:f.fing,horaIngreso:f.hing,horaCirugia:f.hcx,colorCalendario:f.color,
-      anestesiologo:f.anest,equipo:f.equip,insumos:f.ins,insumosExtra:f.insex})});
-    const d=await r.json();
-    if(d.ok){S.ok=true;}else{S.err="Error: "+(d.error||"Intenta de nuevo");}
+    const payload=programacionPayload();
+    const tareas=[
+      fetch(URL_AS,{method:"POST",body:JSON.stringify(payload)}).then(async r=>{const d=await r.json();if(!d.ok)throw new Error(d.error||"Google Calendar/Sheets");return d;}),
+      enviarCorreoIngreso(),
+      enviarCorreoAlta()
+    ];
+    const resultados=await Promise.allSettled(tareas);
+    const fallas=resultados.filter(x=>x.status==="rejected").map(x=>x.reason&&x.reason.message?x.reason.message:String(x.reason));
+    if(fallas.length===3){S.err="No se pudo completar el envío: "+fallas.join(" · ");}
+    else{S.ok=true;if(fallas.length)S.err="Programada, pero revisar: "+fallas.join(" · ");}
   }catch(e){S.err="Error de conexión. Verifica tu internet e intenta de nuevo.";}
   S.env=false;render();window.scrollTo(0,0);
 }
