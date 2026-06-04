@@ -42,7 +42,7 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
     <h2>Datos del paciente</h2>
     <div class="fg"><label>Nombre completo</label><input id="nombre" placeholder="Nombre Apellidos" autocomplete="off" autocapitalize="words"></div>
     <div class="grid">
-      <div class="fg"><label>Fecha de nacimiento</label><input id="fn" type="date" oninput="actualizarEdad();preview()"></div>
+      <div class="fg"><label>Fecha de nacimiento</label><input id="fn" type="date" oninput="actualizarEdad();preview()" onchange="actualizarEdad();preview()"></div>
       <div class="fg"><label>Edad automática</label><div id="edadBox" class="age input-like">Ingrese fecha de nacimiento</div></div>
     </div>
     <div class="fg"><label>Procedimiento</label><select id="procedimientoSelect" onchange="procedimientoCambio();preview()"><option value="otro">Otro / escribir manualmente</option>
@@ -203,7 +203,7 @@ function hoy(){return iso(new Date())}
 function fechaLarga(v){if(!v)return'';const [y,m,d]=v.split('-');return parseInt(d)+' de '+MESES[parseInt(m)-1]+' de '+y}
 function fechaCorta(v){if(!v)return'';const [y,m,d]=v.split('-');return d+'/'+m+'/'+y}
 function edad(){const v=document.getElementById('fn').value;if(!v)return'';const h=new Date(),b=new Date(v+'T12:00:00');let e=h.getFullYear()-b.getFullYear();const m=h.getMonth()-b.getMonth();if(m<0||(m===0&&h.getDate()<b.getDate()))e--;return e}
-function actualizarEdad(){const e=edad();document.getElementById('edadBox').textContent=e?e+' años':'Ingrese fecha de nacimiento'}
+function actualizarEdad(){const e=edad();const b=document.getElementById('edadBox');if(!b)return;b.textContent=e!==''?e+' años':'Ingrese fecha de nacimiento';}
 function setCita(dias){const d=new Date();d.setDate(d.getDate()+dias);document.getElementById('fechaCita').value=iso(d);preview()}
 function datos(){return{nombre:document.getElementById('nombre').value.trim(),fn:document.getElementById('fn').value,edad:edad(),procedimiento:getProcedimiento(),fechaAlta:document.getElementById('fechaAlta').value,fechaCita:document.getElementById('fechaCita').value,extra:document.getElementById('indicacionesExtra').value.trim(),especiales:document.getElementById('indicacionesEspeciales').value.trim()}}
 function preview(){const d=datos();renderHojaPreview(seccionesPreview, hojaEspecialPreview);document.getElementById('resumen').innerHTML=`<b>Paciente:</b> ${d.nombre||'-'}<br><b>Edad:</b> ${d.edad?d.edad+' años':'-'} &nbsp; <b>FN:</b> ${d.fn||'-'}<br><b>Procedimiento:</b> ${d.procedimiento||'-'}<br><b>Fecha de alta:</b> ${fechaLarga(d.fechaAlta)||'-'}<br><b>Próxima cita:</b> ${fechaCorta(d.fechaCita)||'-'}<ul><li>Se enviará correo con indicaciones de alta y receta.</li><li>PDF opcional si está marcado.</li></ul>`}
