@@ -283,7 +283,15 @@ async function generarPDFManual(){
   await generarPDF(d,'download');
   status('PDF descargado.','ok');
 }
-async function verPDF(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'ver');status('PDF generado para revisión.','ok')}
+async function verPDF(){
+  const d=datos();
+  const err=validar(d);
+  if(err){status(err,'err');return}
+  const win = window.open('about:blank','_blank');
+  if(win) win.document.write('<p style="font-family:Arial;padding:20px">Generando PDF...</p>');
+  await generarPDF(d,'ver',win);
+  status('PDF generado para revisión.','ok');
+}
 async function compartirPDF(){
   const d=datos();const err=validar(d);if(err){status(err,'err');return}
   const blob=await generarPDF(d,'blob');
@@ -319,7 +327,7 @@ function medPDF(pdf,num,nombre,instruccion,x,y,w){
   y = addWrapped(pdf,instruccion,x+28,y,w-28,10.5);
   return y + 12;
 }
-async function generarPDF(d,modo){
+async function generarPDF(d,modo,previewWin){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'pt',format:'letter'});
   const W=612,H=792;
@@ -399,15 +407,18 @@ async function generarPDF(d,modo){
   pdf.setFont('helvetica','bold');
   pdf.text(fechaCorta(d.fechaCita)+'.',x+citaW+2,y);
 
-  if(firma)pdf.addImage(firma,'PNG',335,575,160,80);
+  if(firma)pdf.addImage(firma,'PNG',320,575,160,80);
   pdf.setFont('helvetica','bold');pdf.setFontSize(9.5);pdf.setTextColor(...azul);
-  pdf.text('DR. PABLO VIDAL GONZÁLEZ',415,668,{align:'center'});
+  pdf.text('DR. PABLO VIDAL GONZÁLEZ',400,668,{align:'center'});
 
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   ultimoPDF=pdf.output('blob');
   if(modo==='ver'){
     const url = URL.createObjectURL(ultimoPDF);
     window._altaPdfUrl = url;
+    if(previewWin && !previewWin.closed){
+      previewWin.location.href = url;
+    }
     const card=document.getElementById('pdfCard');
     const viewer=document.getElementById('pdfViewer');
     if(card&&viewer){
@@ -415,7 +426,7 @@ async function generarPDF(d,modo){
       setTimeout(()=>{viewer.src=url+'#view=FitH&toolbar=1';},50);
       card.style.display='block';
       card.scrollIntoView({behavior:'smooth',block:'start'});
-    }else{
+    }else if(!previewWin || previewWin.closed){
       window.open(url,'_blank');
     }
   }else if(modo==='blob'){
