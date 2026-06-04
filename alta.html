@@ -297,65 +297,80 @@ async function compartirPDF(){
     status('Este navegador no permite compartir directo; descargué el PDF.','ok');
   }
 }
-async function imgToData(url){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);resolve(c.toDataURL('image/jpeg',0.92))};im.onerror=reject;im.src=url})}
+async function imgToData(url){
+  const abs = new URL(url, window.location.href).href + '?v=' + Date.now();
+  const res = await fetch(abs);
+  if(!res.ok) throw new Error('No pude cargar imagen: '+url);
+  const blob = await res.blob();
+  return await new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=reject;
+    r.readAsDataURL(blob);
+  });
+}
 function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
-function drawUnderlined(pdf,txt,x,y){pdf.text(txt,x,y);const w=pdf.getTextWidth(txt);pdf.line(x,y+1.6,x+w,y+1.6)}
+function drawUnderlined(pdf,txt,x,y){pdf.text(txt,x,y);const w=pdf.getTextWidth(txt);pdf.line(x,y+1.7,x+w,y+1.7)}
 function medPDF(pdf,num,nombre,instruccion,x,y,w){
-  pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.setFontSize(10.2);
+  pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.setFontSize(9.8);
   drawUnderlined(pdf,num+'.- '+nombre,x,y);
-  y += 13;
-  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.setFontSize(9.4);
-  y = addWrapped(pdf,instruccion,x+30,y,w-30,11);
-  return y + 10;
+  y += 12.5;
+  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.setFontSize(9.0);
+  y = addWrapped(pdf,instruccion,x+30,y,w-30,10.5);
+  return y + 8;
 }
 async function generarPDF(d,modo){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'pt',format:'letter'});
   const W=612,H=792;
-  let header=null,footer=null;
-  try{header=await imgToData('assets/header.jpg');footer=await imgToData('assets/footer.jpg')}catch(e){}
-  if(header)pdf.addImage(header,'JPEG',0,0,W,105);
-  if(footer)pdf.addImage(footer,'JPEG',0,H-82,W,82);
   const azul=[54,95,145];
-  const x=34;
-  let y=126;
+  const x=54;
+  let y=128;
+
+  let header=null,footer=null,firma=null;
+  try{header=await imgToData('assets/header.jpg')}catch(e){console.warn(e)}
+  try{footer=await imgToData('assets/footer.jpg')}catch(e){console.warn(e)}
+  try{firma=await imgToData('assets/firma.png')}catch(e){console.warn(e)}
+
+  if(header)pdf.addImage(header,'JPEG',0,0,W,112);
+  if(footer)pdf.addImage(footer,'JPEG',0,H-88,W,88);
 
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
-  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-34,y,{align:'right'});
+  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-54,y,{align:'right'});
 
-  y += 26;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.6);pdf.setTextColor(0,0,0);
+  y += 24;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
   pdf.text('Paciente:',x,y);
   pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
-  pdf.text((d.nombre||'').toUpperCase(),x+45,y);
+  pdf.text((d.nombre||'').toUpperCase(),x+48,y);
 
-  y += 14;
+  y += 13;
   pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
   pdf.text('Edad: '+(d.edad||'-')+' años',x,y);
-  pdf.text('FN: '+(d.fn||'-'),360,y);
+  pdf.text('FN: '+(d.fn||'-'),330,y);
 
-  y += 26;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.4);pdf.setTextColor(0,0,0);
+  y += 24;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
   const intro='Indicaciones médicas para paciente post-operado de ';
   pdf.text(intro,x,y);
   pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
-  pdf.text((d.procedimiento||'').toUpperCase(),x+pdf.getTextWidth(intro),y,{maxWidth:350});
+  pdf.text((d.procedimiento||'').toUpperCase(),x+pdf.getTextWidth(intro),y,{maxWidth:330});
 
   y += 22;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
   pdf.text('MEDICAMENTOS:',x,y);
-  y += 18;
+  y += 17;
 
   y=medPDF(pdf,1,'ULSEN (omeprazol) cápsulas 40 mg.','Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.',x+18,y,500);
   y=medPDF(pdf,2,'BIOMICS (cefixima) cápsulas 400 mg.','Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.',x+18,y,500);
   y=medPDF(pdf,3,'TYLEX (paracetamol) tabletas 750 mg.','Tomar una tableta vía oral cada 8 horas por 5 días.',x+18,y,500);
   y=medPDF(pdf,4,'DOLAC (ketorolaco) tableta 10 mg.','Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.',x+18,y,500);
 
-  y += 6;
+  y += 4;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
   pdf.text('MEDIDAS GENERALES:',x,y);
-  y += 14;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
+  y += 13;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
   const medidas=[
     'Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.',
     'No realizar esfuerzos físicos grandes, PROHIBIDO cargar, empujar y jalar objetos de más de 5 kg.',
@@ -365,25 +380,26 @@ async function generarPDF(d,modo){
     'Pueden existir moretones alrededor de las heridas, esto se considera normal.',
     'Hielo intermitente en heridas quirúrgicas y pared abdominal.'
   ];
-  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,520,10.5);y+=3});
+  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,500,9.8);y+=2});
 
-  y += 8;
+  y += 6;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
   pdf.text('AVISAR DE INMEDIATO EN CASO DE:',x,y);
-  y += 14;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
+  y += 13;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
   const avisar=['Fiebre.','Dolor abdominal importante, distensión, náusea o vómito.','Salida de secreción fétida, sangre o pus por las heridas.','Alguna duda con algún síntoma o algún medicamento.'];
-  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,520,10.5);y+=3});
+  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,500,9.8);y+=2});
 
-  y += 22;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
+  y += 18;
+  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
   const citaTxt='Solicitar cita de revisión en consultorio para el ';
   pdf.text(citaTxt,x,y);
   pdf.setFont('helvetica','bold');
   pdf.text(fechaCorta(d.fechaCita)+'.',x+pdf.getTextWidth(citaTxt),y);
 
-  pdf.setFont('helvetica','bold');pdf.setFontSize(9.8);pdf.setTextColor(...azul);
-  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-34,742,{align:'right'});
+  if(firma)pdf.addImage(firma,'PNG',350,618,130,65);
+  pdf.setFont('helvetica','bold');pdf.setFontSize(9.5);pdf.setTextColor(...azul);
+  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
 
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   ultimoPDF=pdf.output('blob');
@@ -391,26 +407,13 @@ async function generarPDF(d,modo){
     const dataUrl = pdf.output('datauristring');
     const card=document.getElementById('pdfCard');
     const viewer=document.getElementById('pdfViewer');
-    if(card&&viewer){
-      viewer.removeAttribute('src');
-      setTimeout(()=>{ viewer.src=dataUrl; }, 50);
-      card.style.display='block';
-      card.scrollIntoView({behavior:'smooth',block:'start'});
-    } else {
-      const win = window.open();
-      if(win) win.document.write('<iframe width="100%" height="100%" style="border:0" src="'+dataUrl+'"></iframe>');
-    }
+    if(card&&viewer){viewer.removeAttribute('src');setTimeout(()=>{viewer.src=dataUrl;},50);card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{const win=window.open();if(win)win.document.write('<iframe width="100%" height="100%" style="border:0" src="'+dataUrl+'"></iframe>');}
   }else if(modo==='blob'){
     return ultimoPDF;
   }else{
     const url=URL.createObjectURL(ultimoPDF);
     const a=document.createElement('a');
-    a.href=url;
-    a.download=nombre;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    a.href=url;a.download=nombre;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
   return ultimoPDF;
 }
