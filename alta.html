@@ -302,7 +302,7 @@ async function generarCambiosPreview(){
   const btn=document.querySelector('button[onclick="generarCambiosPreview()"]');
   const oldTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.textContent='Generando cambios...'}
-  status('Generando cambios de indicaciones...');
+  status('Generando cambios...');
   try{
     const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({previewOnly:true,nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});
     const data=await res.json();
