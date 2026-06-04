@@ -63,7 +63,7 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 
 /* Alta PDF reset: una sola plantilla HTML para preview y PDF */
 .alta-page{position:relative;width:612px;height:792px;background:#fff;overflow:hidden;font-family:Arial,sans-serif;color:#111;box-shadow:0 0 0 1px #dbe4ef}
-.alta-page *{box-sizing:border-box}.alta-page .hdr{position:absolute;left:0;top:0;width:612px;height:auto}.alta-page .ftr{position:absolute;left:0;bottom:0;width:612px;height:auto}.alta-page .body{position:absolute;left:58px;right:58px;top:126px;bottom:102px;font-size:9.2px;line-height:1.22}.alta-page .date{text-align:right;margin-bottom:18px}.alta-page .row{margin:3px 0}.alta-page .blue{color:#365F91;font-weight:800}.alta-page .proc{margin:16px 0 14px}.alta-page .section{color:#365F91;font-weight:800;margin:13px 0 7px;text-transform:uppercase;font-size:10px}.alta-page .med{margin:0 0 11px 18px}.alta-page .med-name{display:block;color:#365F91;font-weight:800;text-decoration:underline;font-size:9.4px}.alta-page .med-inst{display:block;margin-left:29px;color:#111;font-weight:400;font-size:8.7px;line-height:1.2}.alta-page ol{margin:0;padding-left:14px}.alta-page li{margin:2px 0;font-size:8.6px;line-height:1.18}.alta-page .cita{margin-top:16px;font-size:9px}.alta-page .firma{position:absolute;right:105px;bottom:120px;width:155px;height:auto}.alta-page .doctor{position:absolute;right:72px;bottom:102px;width:230px;text-align:center;color:#365F91;font-size:9.2px;font-weight:800}.preview .alta-page{transform-origin:top left;max-width:100%}#hojaPreview{overflow:auto}.pdf-note{font-size:12px;color:#64748b;margin-top:8px}
+.alta-page *{box-sizing:border-box}.alta-page .hdr{position:absolute;left:0;top:0;width:612px;height:auto}.alta-page .ftr{position:absolute;left:0;bottom:0;width:612px;height:auto}.alta-page .body{position:absolute;left:58px;right:58px;top:126px;bottom:102px;font-size:9.2px;line-height:1.22}.alta-page .date{text-align:right;margin-bottom:18px}.alta-page .row{margin:3px 0}.alta-page .blue{color:#365F91;font-weight:800}.alta-page .proc{margin:16px 0 14px;line-height:1.25}.alta-page .section{color:#365F91;font-weight:800;margin:13px 0 7px;text-transform:uppercase;font-size:10px}.alta-page .med{margin:0 0 11px 18px}.alta-page .med-name{display:block;color:#365F91;font-weight:800;text-decoration:underline;font-size:9.4px}.alta-page .med-inst{display:block;margin-left:29px;color:#111;font-weight:400;font-size:8.7px;line-height:1.2}.alta-page ol{margin:0;padding-left:14px}.alta-page li{margin:2px 0;font-size:8.6px;line-height:1.18}.alta-page .cita{margin-top:16px;font-size:9px}.alta-page .firma{position:absolute;right:105px;bottom:120px;width:155px;height:auto}.alta-page .doctor{position:absolute;right:72px;bottom:102px;width:230px;text-align:center;color:#365F91;font-size:9.2px;font-weight:800}.preview .alta-page{transform-origin:top left;max-width:100%}#hojaPreview{overflow:auto}.pdf-note{font-size:12px;color:#64748b;margin-top:8px}
 
 </style>
 </head>
@@ -230,7 +230,7 @@ function buildAltaPageHTML(d,secciones,especial){
       <div class="date">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>
       <div class="row"><span class="blue">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>
       <div class="row"><span class="blue">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} <span style="display:inline-block;width:185px"></span><span class="blue">FN:</span> ${esc(d.fn||'-')}</div>
-      <div class="proc">Indicaciones médicas para paciente post-operado de<br><span class="blue">${esc((d.procedimiento||'-').toUpperCase())}</span></div>`;
+      <div class="proc">Indicaciones médicas para paciente post-operado de <span class="blue">${esc((d.procedimiento||'-').toUpperCase())}</span></div>`;
   secs.forEach(sec=>{
     const titulo=String(sec.seccion||'').toUpperCase();
     h+=`<div class="section">${esc(titulo)}:</div>`;
@@ -267,10 +267,42 @@ function getProcedimiento(){
   if(!sel) return '';
   return sel.value==='otro' ? document.getElementById('procedimientoOtro').value.trim() : sel.value;
 }
+function aplicarCambiosLocales(secciones, texto){
+  const t=String(texto||'').trim();
+  const copia=JSON.parse(JSON.stringify(secciones||INDICACIONES_BASE_CLIENTE));
+  if(!t)return copia;
+  const medSec=copia.find(s=>String(s.seccion||'').toUpperCase()==='MEDICAMENTOS');
+  if(!medSec)return copia;
+
+  // Intento básico: "cambiar BIOMICS por AUGMENTIN..." / "sustituir X por Y"
+  const lower=t.toLowerCase();
+  const conocidos=['ulsen','biomics','tylex','dolac'];
+  const objetivo=conocidos.find(k=>lower.includes(k));
+  const por=t.match(/\bpor\b\s+(.+)/i);
+  if(objetivo && por){
+    const idx=medSec.items.findIndex(i=>String(i.nombre||'').toLowerCase().includes(objetivo));
+    if(idx>=0){
+      let nuevo=por[1].trim().replace(/[.;]\s*$/,'');
+      let instruccion='Tomar según indicación médica.';
+      const tomar=nuevo.match(/(.+?)\b(tomar\b.+)$/i);
+      if(tomar){nuevo=tomar[1].trim().replace(/[.,;]\s*$/,'');instruccion=tomar[2].trim();}
+      medSec.items[idx]={nombre:nuevo,instruccion};
+      return copia;
+    }
+  }
+
+  // Si no se pudo interpretar, mostrar los cambios como nota visible dentro de medicamentos.
+  medSec.items.push({nombre:'CAMBIOS SOLICITADOS',instruccion:t});
+  return copia;
+}
+
 async function generarCambiosPreview(){
   const d=datos();
   const err=validar(d); if(err){status(err,'err');return}
-  status('Generando vista previa de indicaciones...');
+  const btn=document.querySelector('button[onclick="generarCambiosPreview()"]');
+  const oldTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='Generando cambios...'}
+  status('Generando cambios de indicaciones...');
   try{
     const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({previewOnly:true,nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});
     const data=await res.json();
@@ -278,8 +310,15 @@ async function generarCambiosPreview(){
     seccionesPreview=data.secciones||INDICACIONES_BASE_CLIENTE;
     hojaEspecialPreview=data.hojaEspecial||'';
     renderHojaPreview(seccionesPreview, hojaEspecialPreview);
-    status('Vista previa lista. Revisa antes de enviar.','ok');
-  }catch(e){status('Error: '+e.message,'err')}
+    status('Cambios generados. Revisa la hoja antes de enviar.','ok');
+  }catch(e){
+    seccionesPreview=aplicarCambiosLocales(INDICACIONES_BASE_CLIENTE,d.extra);
+    hojaEspecialPreview=d.especiales||'';
+    renderHojaPreview(seccionesPreview, hojaEspecialPreview);
+    status('No pude usar IA; apliqué/mostré los cambios dictados para revisión.','ok');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=oldTxt||'Generar cambios'}
+  }
 }
 
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
