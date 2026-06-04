@@ -65,6 +65,10 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 .alta-page{position:relative;width:612px;height:792px;background:#fff;overflow:hidden;font-family:Arial,sans-serif;color:#111;box-shadow:0 0 0 1px #dbe4ef}
 .alta-page *{box-sizing:border-box}.alta-page .hdr{position:absolute;left:0;top:0;width:612px;height:auto}.alta-page .ftr{position:absolute;left:0;bottom:0;width:612px;height:auto}.alta-page .body{position:absolute;left:58px;right:58px;top:126px;bottom:102px;font-size:9.2px;line-height:1.22}.alta-page .date{text-align:right;margin-bottom:18px}.alta-page .row{margin:3px 0}.alta-page .blue{color:#365F91;font-weight:800}.alta-page .proc{margin:16px 0 14px;line-height:1.25}.alta-page .section{color:#365F91;font-weight:800;margin:13px 0 7px;text-transform:uppercase;font-size:10px}.alta-page .med{margin:0 0 11px 18px}.alta-page .med-name{display:block;color:#365F91;font-weight:800;text-decoration:underline;font-size:9.4px}.alta-page .med-inst{display:block;margin-left:29px;color:#111;font-weight:400;font-size:8.7px;line-height:1.2}.alta-page ol{margin:0;padding-left:14px}.alta-page li{margin:2px 0;font-size:8.6px;line-height:1.18}.alta-page .cita{margin-top:16px;font-size:9px}.alta-page .firma{position:absolute;right:105px;bottom:120px;width:155px;height:auto}.alta-page .doctor{position:absolute;right:72px;bottom:102px;width:230px;text-align:center;color:#365F91;font-size:9.2px;font-weight:800}.preview .alta-page{transform-origin:top left;max-width:100%}#hojaPreview{overflow:auto}.pdf-note{font-size:12px;color:#64748b;margin-top:8px}
 
+
+/* Alta PDF multipagina: indicaciones generales, dieta y receta */
+.alta-page .body.general{font-size:10px;line-height:1.45;top:126px;bottom:95px}.alta-page .body.general .title{color:#365F91;font-weight:800;text-align:center;font-size:13px;margin-bottom:18px;text-transform:uppercase}.alta-page .body.general p{margin:0 0 10px}.alta-page .body.general .sub{color:#365F91;font-weight:800;text-decoration:underline;margin-top:10px}.alta-page .body.general ul{margin:4px 0 8px 18px;padding:0}.alta-page .body.general li{margin:3px 0;font-size:9.4px;line-height:1.28}.alta-page .rxbody{position:absolute;left:68px;right:68px;top:128px;bottom:102px;font-size:10px;line-height:1.35}.alta-page .rxbody .date{text-align:right;margin-bottom:22px}.alta-page .rxbody .blue{color:#365F91;font-weight:800}.alta-page .rx-med{margin-top:42px;margin-left:16px}.alta-page .rx-med .med-name{display:block;color:#365F91;font-weight:800;text-decoration:underline;font-size:10.5px;margin-bottom:8px}.alta-page .rx-med .med-inst{display:block;margin-left:28px;color:#111;font-size:9.8px}.alta-page .rx-med .surtir{display:block;margin-left:28px;margin-top:12px;color:#111;font-size:9.8px}.alta-page .rx-firma{position:absolute;right:105px;bottom:124px;width:155px;height:auto}.alta-page .rx-doctor{position:absolute;right:72px;bottom:104px;width:230px;text-align:center;color:#365F91;font-size:9.2px;font-weight:800}
+
 </style>
 </head>
 <body>
@@ -252,6 +256,59 @@ function buildAltaPageHTML(d,secciones,especial){
   </div>`;
   return h;
 }
+function buildIndicacionesGeneralesPageHTML(){
+  return `<div class="alta-page">
+    <img class="hdr" src="assets/header.jpg"><img class="ftr" src="assets/footer.jpg">
+    <div class="body general">
+      <div class="title">Indicaciones generales posteriores a procedimiento de laparoscopia</div>
+      <p>Después de un procedimiento de laparoscopia, es normal sentir cierta incomodidad y requerir reposo para recuperarse. Siga estas indicaciones generales:</p>
+      <div class="sub">Descanso:</div><p>En los primeros días después de la cirugía, descanse y evite actividades físicas extenuantes. No levante objetos pesados.</p>
+      <div class="sub">Alimentación:</div><p>Inicie con líquidos y alimentos suaves, avanzando gradualmente a su dieta normal según tolerancia. Manténgase bien hidratado.</p>
+      <div class="sub">Manejo del dolor:</div><p>Tome el medicamento indicado para dolor según las instrucciones.</p>
+      <div class="sub">Cuidado de la herida:</div><p>Mantenga la zona limpia y seca. Lave durante el baño con agua y jabón, sin frotar, y seque posteriormente.</p>
+      <div class="sub">Seguimiento:</div><p>Asista a sus citas de revisión para valorar cicatrización y recuperación.</p>
+      <div class="sub">Síntomas para tener en cuenta:</div><p>Si presenta fiebre, enrojecimiento o hinchazón de heridas, dolor que no mejora, vómitos persistentes, dificultad para orinar, falta de aire o síntomas inusuales, contacte de inmediato.</p>
+      <div class="sub">Actividad física:</div><p>Caminar ayuda a prevenir complicaciones. Evite ejercicio intenso hasta nueva indicación.</p>
+      <div class="sub">Soporte emocional:</div><p>Puede haber cansancio, sueño o menor energía los primeros días. Si no mejora, coméntelo para buscar solución.</p>
+    </div>
+  </div>`;
+}
+function buildDietaPageHTML(){
+  return `<div class="alta-page">
+    <img class="hdr" src="assets/header.jpg"><img class="ftr" src="assets/footer.jpg">
+    <div class="body general">
+      <div class="title">Indicaciones dieta saludable para paciente postoperado de cirugía abdominal</div>
+      <div class="sub">1. Hidratación:</div><ul><li>Beber al menos 8-10 vasos de agua al día.</li><li>Incluir caldos claros, té de hierbas y jugos diluidos.</li></ul>
+      <div class="sub">2. Alimentos permitidos:</div><ul><li>Proteínas magras: pollo, pavo sin piel, pescado blanco, huevos, tofu y legumbres bien cocidas.</li><li>Carbohidratos complejos: arroz integral, quinoa, avena, cereales integrales sin azúcar, pan o tortillas integrales.</li><li>Verduras cocidas y fáciles de digerir: zanahoria, calabacita, espinaca, calabaza, brócoli y coliflor bien cocidos.</li><li>Frutas: manzana y pera sin piel, plátano maduro, papaya y jugos naturales sin pulpa.</li><li>Lácteos bajos en grasa: yogurt natural, queso cottage, leche descremada o de almendras.</li></ul>
+      <div class="sub">3. Alimentos a evitar:</div><ul><li>Alimentos grasos y fritos, embutidos, cortes grasos de carne y lácteos enteros.</li><li>Dulces, pasteles, bollería industrial, snacks salados y alimentos enlatados altos en sodio.</li><li>Alimentos que producen gases: coles, repollo, cebolla, ajo, bebidas carbonatadas y chicles.</li><li>Irritantes: comida picante, café, alcohol, bebidas con cafeína y chocolate.</li></ul>
+      <div class="sub">4. Recomendaciones generales:</div><ul><li>Comer 5-6 porciones pequeñas al día en lugar de 3 comidas grandes.</li><li>Masticar bien y comer despacio.</li><li>Preferir alimentos cocidos, al vapor, a la parrilla o al horno.</li><li>Evitar alimentos crudos o poco cocidos.</li></ul>
+      <div class="sub">5. Seguimiento:</div><ul><li>Monitorizar tolerancia a los alimentos y ajustar la dieta según evolución.</li></ul>
+    </div>
+  </div>`;
+}
+function getAntibioticoItem(secciones){
+  const medSec=(secciones||seccionesPreview||INDICACIONES_BASE_CLIENTE).find(s=>String(s.seccion||'').toUpperCase()==='MEDICAMENTOS');
+  if(medSec&&medSec.items&&medSec.items[1])return medSec.items[1];
+  return {nombre:'BIOMICS (cefixima) cápsulas 400 mg.',instruccion:'Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.'};
+}
+function buildRecetaAntibioticoPageHTML(d,secciones){
+  const ab=getAntibioticoItem(secciones);
+  return `<div class="alta-page">
+    <img class="hdr" src="assets/header.jpg"><img class="ftr" src="assets/footer.jpg">
+    <div class="rxbody">
+      <div class="date">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>
+      <div><span class="blue">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>
+      <div style="margin-top:8px"><span class="blue">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} <span style="display:inline-block;width:185px"></span><span class="blue">FN:</span> ${esc(d.fn||'-')}</div>
+      <div class="rx-med"><span class="med-name">1.- ${formatoMedicamentoPreview(ab.nombre)}</span><span class="med-inst">${esc(ab.instruccion)}</span><span class="surtir">Favor de surtir una caja con 6 cápsulas.</span></div>
+    </div>
+    <img class="rx-firma" src="assets/firma.png"><div class="rx-doctor">DR. PABLO VIDAL GONZÁLEZ</div>
+  </div>`;
+}
+function buildAltaPdfPagesHTML(d){
+  const primera=buildAltaPageHTML(d,seccionesPreview,hojaEspecialPreview);
+  return [primera, primera, buildIndicacionesGeneralesPageHTML(), buildDietaPageHTML(), buildRecetaAntibioticoPageHTML(d,seccionesPreview)];
+}
+
 function renderHojaPreview(secciones, especial){
   const box=document.getElementById('hojaPreview');if(!box)return;
   const d=datos ? datos() : {};
@@ -363,17 +420,21 @@ function waitImages(el){
   return Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=res;img.onerror=res;})));
 }
 async function generarPDF(d,modo,previewWin){
-  const page=document.createElement('div');
-  page.style.position='fixed';page.style.left='-10000px';page.style.top='0';page.style.width='612px';page.style.height='792px';page.style.background='#fff';page.style.zIndex='-1';
-  page.innerHTML=buildAltaPageHTML(d,seccionesPreview,hojaEspecialPreview);
-  document.body.appendChild(page);
-  const el=page.firstElementChild;
-  await waitImages(el);
-  const canvas=await html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',width:612,height:792,windowWidth:800,windowHeight:900,scrollX:0,scrollY:0});
-  document.body.removeChild(page);
+  const pages=buildAltaPdfPagesHTML(d);
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'px',format:[612,792]});
-  pdf.addImage(canvas.toDataURL('image/jpeg',0.98),'JPEG',0,0,612,792);
+  const host=document.createElement('div');
+  host.style.position='fixed';host.style.left='-10000px';host.style.top='0';host.style.width='612px';host.style.background='#fff';host.style.zIndex='-1';
+  document.body.appendChild(host);
+  for(let i=0;i<pages.length;i++){
+    host.innerHTML=pages[i];
+    const el=host.firstElementChild;
+    await waitImages(el);
+    const canvas=await html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',width:612,height:792,windowWidth:800,windowHeight:900,scrollX:0,scrollY:0});
+    if(i>0)pdf.addPage([612,792]);
+    pdf.addImage(canvas.toDataURL('image/jpeg',0.98),'JPEG',0,0,612,792);
+  }
+  document.body.removeChild(host);
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   const blob=pdf.output('blob');ultimoPDF=blob;
   if(modo==='blob')return blob;
