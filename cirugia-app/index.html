@@ -110,6 +110,26 @@ body{font-family:Georgia,serif;background:linear-gradient(160deg,#eef7ff 0%,#f8f
 button,.btn,.mini.fill,.navbtn,.submit{background:linear-gradient(135deg,#1266ff 0%,#08c7c7 100%)!important;color:#fff!important}
 .card,.pasos{box-shadow:0 10px 28px rgba(11,31,58,.08)!important}
 .campo input:focus,.campo select:focus,.campo textarea:focus{border-color:#1266ff!important;box-shadow:0 0 0 3px rgba(18,102,255,.12)!important}
+
+
+/* SyncMed One — tema morado/violeta + paleta real de Google Calendar */
+:root{
+  --sync-purple:#7c3aed;
+  --sync-violet:#8e24aa;
+  --sync-deep:#2e1065;
+  --sync-soft:#f5f0ff;
+  --sync-border:#ddd6fe;
+}
+.header{background:linear-gradient(135deg,var(--sync-deep) 0%,var(--sync-purple) 58%,#a855f7 100%)!important;box-shadow:0 12px 32px rgba(124,58,237,.22)!important}
+.pi.a,.bp,.mini.fill,.bconf{background:linear-gradient(135deg,var(--sync-purple),var(--sync-violet))!important;color:#fff!important}
+.hbtn.a,.fbtn.a,.cond.s{border-color:var(--sync-purple)!important;background:var(--sync-soft)!important;color:var(--sync-purple)!important}
+.pi.l .pn,.pi.l .pl,.campo label,.rtit,.bs,.mini{color:var(--sync-purple)!important}
+.bs,.mini{border-color:var(--sync-purple)!important}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--sync-purple)!important;box-shadow:0 0 0 3px rgba(124,58,237,.14)!important}
+.eitem input,.cond input{accent-color:var(--sync-purple)!important}
+.cbtn{background:var(--c)!important;border:3px solid transparent!important}
+.cbtn.a{border-color:var(--sync-deep)!important;box-shadow:0 0 0 3px rgba(124,58,237,.22)!important;transform:scale(1.08)}
+
 </style>
 </head>
 <body>
@@ -196,7 +216,7 @@ const RISK_OPTS = [
   ["otro","Otra condición relevante","puede modificar el riesgo quirúrgico de acuerdo con sus características clínicas particulares"]
 ];
 const HI=["08:00","07:00"], HC=["11:00","10:00","08:00","07:00"];
-const COLS=["#039be5","#33b679","#e67c73","#f6bf26","#8e24aa","#0b8043","#d50000","#3f51b5"];
+const COLS=["#8e24aa","#7c3aed","#039be5","#33b679","#e67c73","#f6bf26","#0b8043","#d50000","#3f51b5"];
 const PASOS=["Paciente","Fechas y Horas","Equipo","Materiales","Consentimiento","Resumen"];
 
 // Estado global
@@ -204,7 +224,7 @@ let S = {
   paso:1, ok:false, env:false, err:"", vd:false,
   f:{pac:"",nac:"",tel:"",cor:"",proc:"",hosp:"",
      fing:"",hing:"",opfx:"1",fcxp:"",hcx:"",
-     color:"#039be5",anest:"",equip:[],ins:[],insex:"",
+     color:"#8e24aa",anest:"",equip:[],ins:[],insex:"",
      consentProc:"",conds:[],alergias:"",obsClin:"",apiKey:"",firmaData:"",
      consent:{desc:"",ben:"",alt:"",freq:"",grave:"",part:""}}
 };
@@ -314,7 +334,7 @@ function rP2(){
   </div>
   ${ay?`<div class="ayuno">Ayuno automatico: 23:30 hrs del dia ${ay} (No tomar ni agua)</div>`:''}
   <div class="campo"><label>Color Google Calendar</label>
-    <div class="colores">${COLS.map(c=>`<button class="cbtn${f.color===c?" a":""}" style="background:${c}" onclick="S.f.color='${c}';render()"></button>`).join("")}</div>
+    <div class="colores">${COLS.map(c=>`<button class="cbtn${f.color===c?" a":""}" style="--c:${c};background:${c}" onclick="S.f.color='${c}';render()"></button>`).join("")}</div>
   </div>`;
 }
 
@@ -801,7 +821,7 @@ async function conf(){
 
 function reset(){
   S={paso:1,ok:false,env:false,err:"",vd:false,hiOtra:false,hcOtra:false,
-    f:{pac:"",nac:"",tel:"",cor:"",proc:"",hosp:"",fing:"",hing:"",opfx:"1",fcxp:"",hcx:"",color:"#039be5",anest:"",equip:[],ins:[],insex:"",
+    f:{pac:"",nac:"",tel:"",cor:"",proc:"",hosp:"",fing:"",hing:"",opfx:"1",fcxp:"",hcx:"",color:"#8e24aa",anest:"",equip:[],ins:[],insex:"",
       consentProc:"",conds:[],alergias:"",obsClin:"",apiKey:"",firmaData:"",consent:{desc:"",ben:"",alt:"",freq:"",grave:"",part:""}}};
   window.S=S;
   render();window.scrollTo(0,0);
