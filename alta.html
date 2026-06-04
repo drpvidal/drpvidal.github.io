@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SyncMed One | Indicaciones de Alta</title>
 <!-- alta-pdf-medPDF-version-final -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -58,6 +59,11 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 .alta-sheet .medinstr{display:block!important;color:#111!important;font-weight:400!important;font-size:13px!important;line-height:1.3!important;margin-left:28px!important}
 .alta-sheet ol{padding-left:20px!important;margin:0!important;color:#111!important}
 .alta-sheet li{margin:5px 0!important;font-size:13px!important;color:#111!important;font-weight:400!important;line-height:1.3!important}
+
+
+/* Alta PDF reset: una sola plantilla HTML para preview y PDF */
+.alta-page{position:relative;width:612px;height:792px;background:#fff;overflow:hidden;font-family:Arial,sans-serif;color:#111;box-shadow:0 0 0 1px #dbe4ef}
+.alta-page *{box-sizing:border-box}.alta-page .hdr{position:absolute;left:0;top:0;width:612px;height:auto}.alta-page .ftr{position:absolute;left:0;bottom:0;width:612px;height:auto}.alta-page .body{position:absolute;left:58px;right:58px;top:126px;bottom:102px;font-size:9.2px;line-height:1.22}.alta-page .date{text-align:right;margin-bottom:18px}.alta-page .row{margin:3px 0}.alta-page .blue{color:#365F91;font-weight:800}.alta-page .proc{margin:16px 0 14px}.alta-page .section{color:#365F91;font-weight:800;margin:13px 0 7px;text-transform:uppercase;font-size:10px}.alta-page .med{margin:0 0 11px 18px}.alta-page .med-name{display:block;color:#365F91;font-weight:800;text-decoration:underline;font-size:9.4px}.alta-page .med-inst{display:block;margin-left:29px;color:#111;font-weight:400;font-size:8.7px;line-height:1.2}.alta-page ol{margin:0;padding-left:14px}.alta-page li{margin:2px 0;font-size:8.6px;line-height:1.18}.alta-page .cita{margin-top:16px;font-size:9px}.alta-page .firma{position:absolute;right:105px;bottom:120px;width:155px;height:auto}.alta-page .doctor{position:absolute;right:72px;bottom:102px;width:230px;text-align:center;color:#365F91;font-size:9.2px;font-weight:800}.preview .alta-page{transform-origin:top left;max-width:100%}#hojaPreview{overflow:auto}.pdf-note{font-size:12px;color:#64748b;margin-top:8px}
 
 </style>
 </head>
@@ -209,33 +215,47 @@ function formatoMedicamentoPreview(nombre){
   }
   return esc(n.toUpperCase());
 }
-function renderHojaPreview(secciones, especial){
-  const box=document.getElementById('hojaPreview');
-  if(!box)return;
-  const d = datos ? datos() : {};
-  const secs = secciones || seccionesPreview || INDICACIONES_BASE_CLIENTE;
-  let h = '<div class="alta-sheet">';
-  h += `<div class="fecha">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>`;
-  h += `<div class="linea"><span class="azul">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>`;
-  h += `<div class="linea"><span class="azul">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} &nbsp;&nbsp;&nbsp; <span class="azul">FN:</span> ${esc(d.fn||'-')}</div>`;
-  h += `<div class="proc">Indicaciones médicas para paciente post-operado de <b>${esc((d.procedimiento||'-').toUpperCase())}</b></div>`;
+function formatoMedicamentoPreview(nombre){
+  let n=String(nombre||'').trim().replace(/\s+/g,' ');
+  const m=n.match(/^([^()]+)\(([^)]+)\)(.*)$/);
+  if(m){return `${esc(m[1].trim().toUpperCase())} (${esc(m[2].trim().toLowerCase())}) ${esc(m[3].trim())}`;}
+  return esc(n.toUpperCase());
+}
+function buildAltaPageHTML(d,secciones,especial){
+  const secs=secciones||seccionesPreview||INDICACIONES_BASE_CLIENTE;
+  let h=`<div class="alta-page">
+    <img class="hdr" src="assets/header.jpg">
+    <img class="ftr" src="assets/footer.jpg">
+    <div class="body">
+      <div class="date">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>
+      <div class="row"><span class="blue">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>
+      <div class="row"><span class="blue">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} <span style="display:inline-block;width:185px"></span><span class="blue">FN:</span> ${esc(d.fn||'-')}</div>
+      <div class="proc">Indicaciones médicas para paciente post-operado de<br><span class="blue">${esc((d.procedimiento||'-').toUpperCase())}</span></div>`;
   secs.forEach(sec=>{
     const titulo=String(sec.seccion||'').toUpperCase();
-    h += `<div class="sec">${esc(titulo)}:</div>`;
+    h+=`<div class="section">${esc(titulo)}:</div>`;
     if(titulo==='MEDICAMENTOS'){
       (sec.items||[]).forEach((item,i)=>{
-        h += `<div class="medblock"><span class="medtitle">${i+1}.- ${formatoMedicamentoPreview(item.nombre)}</span><span class="medinstr">${esc(item.instruccion)}</span></div>`;
+        h+=`<div class="med"><span class="med-name">${i+1}.- ${formatoMedicamentoPreview(item.nombre)}</span><span class="med-inst">${esc(item.instruccion)}</span></div>`;
       });
     }else{
-      h += '<ol>';
-      (sec.items||[]).forEach(item=>{h += `<li>${esc(item.instruccion)}</li>`});
-      h += '</ol>';
+      h+='<ol>';
+      (sec.items||[]).forEach(item=>{h+=`<li>${esc(item.instruccion)}</li>`});
+      h+='</ol>';
     }
   });
-  if(especial){h += `<div class="note"><b>Indicaciones especiales:</b><br>${esc(especial).replace(/\n/g,'<br>')}</div>`}
-  h += `<div class="proc">Solicitar cita de revisión en consultorio para el <b><u>${esc(fechaCorta(d.fechaCita)||'-')}</u></b>.</div>`;
-  h += '</div>';
-  box.innerHTML = h;
+  if(especial){h+=`<div class="note"><b>Indicaciones especiales:</b><br>${esc(especial).replace(/\n/g,'<br>')}</div>`}
+  h+=`<div class="cita">Solicitar cita de revisión en consultorio para el <b>${esc(fechaCorta(d.fechaCita)||'-')}</b>.</div>
+    </div>
+    <img class="firma" src="assets/firma.png">
+    <div class="doctor">DR. PABLO VIDAL GONZÁLEZ</div>
+  </div>`;
+  return h;
+}
+function renderHojaPreview(secciones, especial){
+  const box=document.getElementById('hojaPreview');if(!box)return;
+  const d=datos ? datos() : {};
+  box.innerHTML=buildAltaPageHTML(d,secciones,especial);
 }
 function procedimientoCambio(){
   const sel=document.getElementById('procedimientoSelect');
@@ -275,20 +295,20 @@ function datos(){return{nombre:document.getElementById('nombre').value.trim(),fn
 function preview(){const d=datos();renderHojaPreview(seccionesPreview, hojaEspecialPreview);document.getElementById('resumen').innerHTML=`<b>Paciente:</b> ${d.nombre||'-'}<br><b>Edad:</b> ${d.edad?d.edad+' años':'-'} &nbsp; <b>FN:</b> ${d.fn||'-'}<br><b>Procedimiento:</b> ${d.procedimiento||'-'}<br><b>Fecha de alta:</b> ${fechaLarga(d.fechaAlta)||'-'}<br><b>Próxima cita:</b> ${fechaCorta(d.fechaCita)||'-'}<ul><li>Se enviará correo con indicaciones de alta y receta.</li><li>PDF opcional si está marcado.</li></ul>`}
 function validar(d){if(!d.nombre)return'Falta el nombre del paciente.';if(!d.fn)return'Falta fecha de nacimiento.';if(!d.procedimiento)return'Falta procedimiento.';if(!d.fechaAlta)return'Falta fecha de alta.';if(!d.fechaCita)return'Falta próxima consulta.';return''}
 function status(t,cls){const s=document.getElementById('status');s.className='status '+(cls||'');s.textContent=t}
-async function enviarAlta(generarPdfDespues){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(generarPdfDespues){await generarPDF(d,'download');status('Correo enviado y PDF descargado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
-async function generarPDFManual(){
-  const d=datos();
-  const err=validar(d);
-  if(err){status(err,'err');return}
-  await generarPDF(d,'download');
-  status('PDF descargado.','ok');
+async function enviarAlta(generarPdfDespues){
+  const d=datos();const err=validar(d);if(err){status(err,'err');return}
+  const btn=document.getElementById('btnEnviar');if(btn)btn.disabled=true;status('Enviando correo de alta...');
+  try{
+    const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});
+    const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');
+    if(generarPdfDespues){await generarPDF(d,'download');status('Correo enviado y PDF descargado.','ok')}else{status('Correo enviado con indicaciones de alta y receta.','ok')}
+  }catch(e){status('Error: '+e.message,'err')}finally{if(btn)btn.disabled=false}
 }
+async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'download');status('PDF descargado.','ok')}
 async function verPDF(){
-  const d=datos();
-  const err=validar(d);
-  if(err){status(err,'err');return}
-  const win = window.open('about:blank','_blank');
-  if(win) win.document.write('<p style="font-family:Arial;padding:20px">Generando PDF...</p>');
+  const d=datos();const err=validar(d);if(err){status(err,'err');return}
+  const win=window.open('about:blank','_blank');
+  if(win)win.document.write('<p style="font-family:Arial;padding:20px">Generando PDF...</p>');
   await generarPDF(d,'ver',win);
   status('PDF generado para revisión.','ok');
 }
@@ -297,146 +317,36 @@ async function compartirPDF(){
   const blob=await generarPDF(d,'blob');
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   const file=new File([blob],nombre,{type:'application/pdf'});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    await navigator.share({files:[file],title:nombre,text:'Indicaciones de alta'});
-    status('PDF listo para compartir.','ok');
-  }else{
-    await generarPDF(d,'download');
-    status('Este navegador no permite compartir directo; descargué el PDF.','ok');
-  }
+  if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:nombre,text:'Indicaciones de alta'});status('PDF listo para compartir.','ok')}else{await generarPDF(d,'download');status('Este navegador no permite compartir directo; descargué el PDF.','ok')}
 }
-async function imgToData(url){
-  const abs = new URL(url, window.location.href).href + '?v=' + Date.now();
-  const res = await fetch(abs);
-  if(!res.ok) throw new Error('No pude cargar imagen: '+url);
-  const blob = await res.blob();
-  return await new Promise((resolve,reject)=>{
-    const r=new FileReader();
-    r.onload=()=>resolve(r.result);
-    r.onerror=reject;
-    r.readAsDataURL(blob);
-  });
-}
-function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
-function drawUnderlined(pdf,txt,x,y){pdf.text(txt,x,y);const w=pdf.getTextWidth(txt);pdf.line(x,y+1.7,x+w,y+1.7)}
-function medPDF(pdf,num,nombre,instruccion,x,y,w){
-  pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.setFontSize(9.8);
-  drawUnderlined(pdf,num+'.- '+nombre,x,y);
-  y += 12.5;
-  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.setFontSize(9.0);
-  y = addWrapped(pdf,instruccion,x+28,y,w-28,10.5);
-  return y + 12;
+function waitImages(el){
+  const imgs=[...el.querySelectorAll('img')];
+  return Promise.all(imgs.map(img=>img.complete?Promise.resolve():new Promise(res=>{img.onload=res;img.onerror=res;})));
 }
 async function generarPDF(d,modo,previewWin){
+  const page=document.createElement('div');
+  page.style.position='fixed';page.style.left='-10000px';page.style.top='0';page.style.width='612px';page.style.height='792px';page.style.background='#fff';page.style.zIndex='-1';
+  page.innerHTML=buildAltaPageHTML(d,seccionesPreview,hojaEspecialPreview);
+  document.body.appendChild(page);
+  const el=page.firstElementChild;
+  await waitImages(el);
+  const canvas=await html2canvas(el,{scale:3,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',width:612,height:792,windowWidth:800,windowHeight:900,scrollX:0,scrollY:0});
+  document.body.removeChild(page);
   const {jsPDF}=window.jspdf;
-  const pdf=new jsPDF({unit:'pt',format:'letter'});
-  const W=612,H=792;
-  const azul=[54,95,145];
-  const x=68;
-  let y=142;
-
-  let header=null,footer=null,firma=null;
-  try{header=await imgToData('assets/header.jpg')}catch(e){console.warn(e)}
-  try{footer=await imgToData('assets/footer.jpg')}catch(e){console.warn(e)}
-  try{firma=await imgToData('assets/firma.png')}catch(e){console.warn(e)}
-
-  if(header)pdf.addImage(header,'JPEG',0,0,W,112);
-  if(footer)pdf.addImage(footer,'JPEG',0,H-88,W,88);
-
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
-  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-68,y,{align:'right'});
-
-  y += 24;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
-  pdf.text('Paciente:',x,y);
-  pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
-  pdf.text((d.nombre||'').toUpperCase(),x+48,y);
-
-  y += 13;
-  pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
-  pdf.text('Edad: '+(d.edad||'-')+' años',x,y);
-  pdf.text('FN: '+(d.fn||'-'),335,y);
-
-  y += 34;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
-  const intro='Indicaciones médicas para paciente post-operado de';
-  pdf.text(intro,x,y);
-  y += 12;
-  pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
-  pdf.text((d.procedimiento||'').toUpperCase(),x,y,{maxWidth:470});
-
-  y += 24;
-  pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
-  pdf.text('MEDICAMENTOS:',x,y);
-  y += 17;
-
-  y=medPDF(pdf,1,'ULSEN (omeprazol) cápsulas 40 mg.','Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.',x+14,y,455);
-  y=medPDF(pdf,2,'BIOMICS (cefixima) cápsulas 400 mg.','Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.',x+14,y,455);
-  y=medPDF(pdf,3,'TYLEX (paracetamol) tabletas 750 mg.','Tomar una tableta vía oral cada 8 horas por 5 días.',x+14,y,455);
-  y=medPDF(pdf,4,'DOLAC (ketorolaco) tableta 10 mg.','Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.',x+14,y,455);
-
-  y += 4;
-  pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
-  pdf.text('MEDIDAS GENERALES:',x,y);
-  y += 13;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
-  const medidas=[
-    'Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.',
-    'No realizar esfuerzos físicos grandes, PROHIBIDO cargar, empujar y jalar objetos de más de 5 kg.',
-    'No usar Isodine, merthiolate etc. en las heridas, solo lavado con agua y jabón durante el baño.',
-    'No manejar automóvil por 7 días.',
-    'No sumergirse en tinas, jacuzzi o albercas.',
-    'Pueden existir moretones alrededor de las heridas, esto se considera normal.',
-    'Hielo intermitente en heridas quirúrgicas y pared abdominal.'
-  ];
-  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,470,9.8);y+=2});
-
-  y += 6;
-  pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
-  pdf.text('AVISAR DE INMEDIATO EN CASO DE:',x,y);
-  y += 13;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
-  const avisar=['Fiebre.','Dolor abdominal importante, distensión, náusea o vómito.','Salida de secreción fétida, sangre o pus por las heridas.','Alguna duda con algún síntoma o algún medicamento.'];
-  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,470,9.8);y+=2});
-
-  y += 18;
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
-  const citaTxt='Solicitar cita de revisión en consultorio para el ';
-  pdf.text(citaTxt,x,y);
-  const citaW=pdf.getTextWidth(citaTxt);
-  pdf.setFont('helvetica','bold');
-  pdf.text(fechaCorta(d.fechaCita)+'.',x+citaW+2,y);
-
-  if(firma)pdf.addImage(firma,'PNG',320,575,160,80);
-  pdf.setFont('helvetica','bold');pdf.setFontSize(9.5);pdf.setTextColor(...azul);
-  pdf.text('DR. PABLO VIDAL GONZÁLEZ',400,668,{align:'center'});
-
+  const pdf=new jsPDF({unit:'px',format:[612,792]});
+  pdf.addImage(canvas.toDataURL('image/jpeg',0.98),'JPEG',0,0,612,792);
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
-  ultimoPDF=pdf.output('blob');
+  const blob=pdf.output('blob');ultimoPDF=blob;
+  if(modo==='blob')return blob;
+  const url=URL.createObjectURL(blob);window._altaPdfUrl=url;
   if(modo==='ver'){
-    const url = URL.createObjectURL(ultimoPDF);
-    window._altaPdfUrl = url;
-    if(previewWin && !previewWin.closed){
-      previewWin.location.href = url;
-    }
-    const card=document.getElementById('pdfCard');
-    const viewer=document.getElementById('pdfViewer');
-    if(card&&viewer){
-      viewer.removeAttribute('src');
-      setTimeout(()=>{viewer.src=url+'#view=FitH&toolbar=1';},50);
-      card.style.display='block';
-      card.scrollIntoView({behavior:'smooth',block:'start'});
-    }else if(!previewWin || previewWin.closed){
-      window.open(url,'_blank');
-    }
-  }else if(modo==='blob'){
-    return ultimoPDF;
+    if(previewWin&&!previewWin.closed){previewWin.location.href=url;}else{window.open(url,'_blank')}
+    const card=document.getElementById('pdfCard'),viewer=document.getElementById('pdfViewer');
+    if(card&&viewer){viewer.src=url+'#view=FitH&toolbar=1';card.style.display='block';}
   }else{
-    const url=URL.createObjectURL(ultimoPDF);
-    const a=document.createElement('a');
-    a.href=url;a.download=nombre;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),60000);
+    const a=document.createElement('a');a.href=url;a.download=nombre;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(url),60000);
   }
-  return ultimoPDF;
+  return blob;
 }
 
 document.getElementById('fechaAlta').value=hoy();setCita(7);procedimientoCambio();['nombre','procedimientoOtro','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
