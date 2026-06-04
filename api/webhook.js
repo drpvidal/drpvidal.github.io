@@ -24,6 +24,13 @@ module.exports = async (req, res) => {
           <tr><td><b>Anestesiologo</b></td><td>${b.anestesiologo || '-'}</td></tr>
         </table>
         ${b.notaOperatoria && b.notaOperatoria !== 'No generada aun' ? `
+        ${b.indicacionesPostoperatorias ? `
+          <h3 style="margin-top:22px;color:#365F91">Indicaciones postoperatorias</h3>
+          <div style="font-size:13px;line-height:1.45;background:#f7fbff;border:1px solid #d7e6f5;padding:12px;border-radius:8px;white-space:pre-wrap">
+            ${String(b.indicacionesPostoperatorias || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+          </div>
+        ` : ''}
+
         <h3 style="margin-top:24px">Nota Operatoria</h3>
         <div style="background:#f9f9f9;border:1px solid #e0e0e0;border-radius:6px;padding:16px;font-size:13px;line-height:1.8;white-space:pre-wrap">${b.notaOperatoria}</div>
         ` : '<p style="font-size:12px;color:#999;margin-top:16px">Nota operatoria no generada.</p>'}
