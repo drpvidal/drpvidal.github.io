@@ -316,15 +316,15 @@ function medPDF(pdf,num,nombre,instruccion,x,y,w){
   drawUnderlined(pdf,num+'.- '+nombre,x,y);
   y += 12.5;
   pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.setFontSize(9.0);
-  y = addWrapped(pdf,instruccion,x+30,y,w-30,10.5);
-  return y + 8;
+  y = addWrapped(pdf,instruccion,x+28,y,w-28,10.5);
+  return y + 12;
 }
 async function generarPDF(d,modo){
   const {jsPDF}=window.jspdf;
   const pdf=new jsPDF({unit:'pt',format:'letter'});
   const W=612,H=792;
   const azul=[54,95,145];
-  const x=54;
+  const x=68;
   let y=128;
 
   let header=null,footer=null,firma=null;
@@ -336,7 +336,7 @@ async function generarPDF(d,modo){
   if(footer)pdf.addImage(footer,'JPEG',0,H-88,W,88);
 
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
-  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-54,y,{align:'right'});
+  pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-68,y,{align:'right'});
 
   y += 24;
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);pdf.setTextColor(0,0,0);
@@ -347,24 +347,25 @@ async function generarPDF(d,modo){
   y += 13;
   pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
   pdf.text('Edad: '+(d.edad||'-')+' años',x,y);
-  pdf.text('FN: '+(d.fn||'-'),330,y);
+  pdf.text('FN: '+(d.fn||'-'),335,y);
 
   y += 24;
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
-  const intro='Indicaciones médicas para paciente post-operado de ';
+  const intro='Indicaciones médicas para paciente post-operado de';
   pdf.text(intro,x,y);
+  y += 12;
   pdf.setFont('helvetica','bold');pdf.setTextColor(...azul);
-  pdf.text((d.procedimiento||'').toUpperCase(),x+pdf.getTextWidth(intro),y,{maxWidth:330});
+  pdf.text((d.procedimiento||'').toUpperCase(),x,y,{maxWidth:470});
 
-  y += 22;
+  y += 24;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
   pdf.text('MEDICAMENTOS:',x,y);
   y += 17;
 
-  y=medPDF(pdf,1,'ULSEN (omeprazol) cápsulas 40 mg.','Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.',x+18,y,500);
-  y=medPDF(pdf,2,'BIOMICS (cefixima) cápsulas 400 mg.','Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.',x+18,y,500);
-  y=medPDF(pdf,3,'TYLEX (paracetamol) tabletas 750 mg.','Tomar una tableta vía oral cada 8 horas por 5 días.',x+18,y,500);
-  y=medPDF(pdf,4,'DOLAC (ketorolaco) tableta 10 mg.','Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.',x+18,y,500);
+  y=medPDF(pdf,1,'ULSEN (omeprazol) cápsulas 40 mg.','Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.',x+14,y,455);
+  y=medPDF(pdf,2,'BIOMICS (cefixima) cápsulas 400 mg.','Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.',x+14,y,455);
+  y=medPDF(pdf,3,'TYLEX (paracetamol) tabletas 750 mg.','Tomar una tableta vía oral cada 8 horas por 5 días.',x+14,y,455);
+  y=medPDF(pdf,4,'DOLAC (ketorolaco) tableta 10 mg.','Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.',x+14,y,455);
 
   y += 4;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
@@ -380,7 +381,7 @@ async function generarPDF(d,modo){
     'Pueden existir moretones alrededor de las heridas, esto se considera normal.',
     'Hielo intermitente en heridas quirúrgicas y pared abdominal.'
   ];
-  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,500,9.8);y+=2});
+  medidas.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,470,9.8);y+=2});
 
   y += 6;
   pdf.setFont('helvetica','bold');pdf.setFontSize(10.2);pdf.setTextColor(...azul);
@@ -388,18 +389,19 @@ async function generarPDF(d,modo){
   y += 13;
   pdf.setFont('helvetica','normal');pdf.setFontSize(8.8);pdf.setTextColor(0,0,0);
   const avisar=['Fiebre.','Dolor abdominal importante, distensión, náusea o vómito.','Salida de secreción fétida, sangre o pus por las heridas.','Alguna duda con algún síntoma o algún medicamento.'];
-  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,500,9.8);y+=2});
+  avisar.forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,x,y,470,9.8);y+=2});
 
   y += 18;
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
   const citaTxt='Solicitar cita de revisión en consultorio para el ';
   pdf.text(citaTxt,x,y);
+  const citaW=pdf.getTextWidth(citaTxt);
   pdf.setFont('helvetica','bold');
-  pdf.text(fechaCorta(d.fechaCita)+'.',x+pdf.getTextWidth(citaTxt),y);
+  pdf.text(fechaCorta(d.fechaCita)+'.',x+citaW+2,y);
 
-  if(firma)pdf.addImage(firma,'PNG',350,618,130,65);
+  if(firma)pdf.addImage(firma,'PNG',345,590,150,75);
   pdf.setFont('helvetica','bold');pdf.setFontSize(9.5);pdf.setTextColor(...azul);
-  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
+  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-68,682,{align:'right'});
 
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   ultimoPDF=pdf.output('blob');
