@@ -277,16 +277,6 @@ function preview(){const d=datos();renderHojaPreview(seccionesPreview, hojaEspec
 function validar(d){if(!d.nombre)return'Falta el nombre del paciente.';if(!d.fn)return'Falta fecha de nacimiento.';if(!d.procedimiento)return'Falta procedimiento.';if(!d.fechaAlta)return'Falta fecha de alta.';if(!d.fechaCita)return'Falta próxima consulta.';return''}
 function status(t,cls){const s=document.getElementById('status');s.className='status '+(cls||'');s.textContent=t}
 async function enviarAlta(generarPdfDespues){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(generarPdfDespues || document.getElementById('hacerPDF').checked){await generarPDF(d);status('Correo enviado y PDF generado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
-async function verPDF(){
-  const d=datos();
-  const err=validar(d);
-  if(err){status(err,'err');return}
-  window._modoPDFAlta='ver';
-  await generarPDF(d);
-  window._modoPDFAlta='';
-  status('PDF generado para revisión.','ok');
-}
-async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'download');status('PDF descargado.','ok')}
 async function verPDF(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d,'ver');status('PDF generado para revisión.','ok')}
 async function compartirPDF(){
   const d=datos();const err=validar(d);if(err){status(err,'err');return}
@@ -387,9 +377,18 @@ async function generarPDF(d,modo){
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   ultimoPDF=pdf.output('blob');
   if(modo==='ver'){
-    const url=URL.createObjectURL(ultimoPDF);
-    const card=document.getElementById('pdfCard');const viewer=document.getElementById('pdfViewer');
-    if(card&&viewer){viewer.src=url;card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{window.open(url,'_blank');}
+    const dataUrl = pdf.output('datauristring');
+    const card=document.getElementById('pdfCard');
+    const viewer=document.getElementById('pdfViewer');
+    if(card&&viewer){
+      viewer.removeAttribute('src');
+      setTimeout(()=>{ viewer.src=dataUrl; }, 50);
+      card.style.display='block';
+      card.scrollIntoView({behavior:'smooth',block:'start'});
+    } else {
+      const win = window.open();
+      if(win) win.document.write('<iframe width="100%" height="100%" style="border:0" src="'+dataUrl+'"></iframe>');
+    }
   }else if(modo==='blob'){
     return ultimoPDF;
   }else{
