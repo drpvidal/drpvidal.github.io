@@ -16,7 +16,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { nombre, edad, fechaNacimiento, procedimiento, fecha, fechaCita, indicacionesExtra, indicacionesEspeciales } = req.body;
+    const { nombre, edad, fechaNacimiento, procedimiento, fecha, fechaCita, indicacionesExtra, indicacionesEspeciales, previewOnly } = req.body;
 
     const INDICACIONES_BASE = [
       {
@@ -94,6 +94,11 @@ module.exports = async (req, res) => {
       });
       const aiData2 = await aiRes2.json();
       hojaEspecial = aiData2.content.map(i => i.text || '').join('').trim();
+    }
+
+
+    if (previewOnly) {
+      return res.status(200).json({ status: 'ok', secciones: seccionesFinales, hojaEspecial });
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -26,6 +26,9 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 .status{font-size:14px;font-weight:700;margin-top:12px;min-height:22px;color:#475569}.ok{color:#15803d}.err{color:#b91c1c}
 .small{font-size:12px;color:#64748b;line-height:1.35;margin-top:5px}
 @media(max-width:620px){.grid{grid-template-columns:1fr}.header{align-items:flex-start}.actions{display:block}.btn{width:100%;margin-bottom:10px}h1{font-size:23px}}
+
+.sheet{background:#fff;border:1px solid #dbe4ef;border-radius:14px;padding:16px 18px;margin-top:8px;box-shadow:inset 4px 0 0 #7c3aed}
+.sheet h3{font-size:15px;color:#2e1065;margin-bottom:8px}.sheet h4{font-size:12px;color:#7c3aed;margin:14px 0 6px;letter-spacing:.05em}.sheet ol{padding-left:20px}.sheet li{margin:6px 0}.sheet .med{font-weight:800;color:#365F91}.sheet .note{background:#fff8e8;border:1px solid #f0d080;border-radius:10px;padding:9px 11px;margin-top:12px;color:#76520a;font-size:13px}
 </style>
 </head>
 <body>
@@ -42,7 +45,55 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
       <div class="fg"><label>Fecha de nacimiento</label><input id="fn" type="date" oninput="actualizarEdad();preview()"></div>
       <div class="fg"><label>Edad automática</label><div id="edadBox" class="age input-like">Ingrese fecha de nacimiento</div></div>
     </div>
-    <div class="fg"><label>Procedimiento</label><input id="procedimiento" placeholder="Ej. Colecistectomía laparoscópica" oninput="preview()"></div>
+    <div class="fg"><label>Procedimiento</label><select id="procedimientoSelect" onchange="procedimientoCambio();preview()"><option value="otro">Otro / escribir manualmente</option>
+<option value="Plastia inguinal bilateral indirecta por laparoscopía">Plastia inguinal bilateral indirecta por laparoscopía</option>
+<option value="Plastia inguinal bilateral directa por laparoscopía">Plastia inguinal bilateral directa por laparoscopía</option>
+<option value="Plastia inguinal derecha indirecta por laparoscopía">Plastia inguinal derecha indirecta por laparoscopía</option>
+<option value="Plastia inguinal izquierda indirecta por laparoscopía">Plastia inguinal izquierda indirecta por laparoscopía</option>
+<option value="Plastia inguinal izquierda directa por laparoscopía">Plastia inguinal izquierda directa por laparoscopía</option>
+<option value="Colecistectomía laparoscópica">Colecistectomía laparoscópica</option>
+<option value="Colecistectomía laparoscópica + ICG + colangiografía transoperatoria">Colecistectomía laparoscópica + ICG + colangiografía transoperatoria</option>
+<option value="Funduplicatura tipo Toupet por laparoscopía">Funduplicatura tipo Toupet por laparoscopía</option>
+<option value="Funduplicatura tipo Nissen por laparoscopía">Funduplicatura tipo Nissen por laparoscopía</option>
+<option value="Tiroidectomía total con neuromonitoreo">Tiroidectomía total con neuromonitoreo</option>
+<option value="Hemitiroidectomía derecha con neuromonitoreo">Hemitiroidectomía derecha con neuromonitoreo</option>
+<option value="Hemitiroidectomía izquierda con neuromonitoreo">Hemitiroidectomía izquierda con neuromonitoreo</option>
+<option value="Hemorroidectomía tipo Ferguson 3 paquetes">Hemorroidectomía tipo Ferguson 3 paquetes</option>
+<option value="Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar">Hemorroidectomía tipo Ferguson 3 paquetes con energía bipolar</option>
+<option value="Resección de quiste pilonidal">Resección de quiste pilonidal</option>
+<option value="Plastía umbilical abierta con malla">Plastía umbilical abierta con malla</option>
+<option value="Plastía umbilical abierta con Ventral Patch 6cm">Plastía umbilical abierta con Ventral Patch 6cm</option>
+<option value="Plastía ventral laparoscópica IPOM Plus">Plastía ventral laparoscópica IPOM Plus</option>
+<option value="Otro...">Otro...</option>
+<option value="Centro Médico ABC Observatorio">Centro Médico ABC Observatorio</option>
+<option value="Centro Médico ABC Santa Fe">Centro Médico ABC Santa Fe</option>
+<option value="Star Médica Santa Fe">Star Médica Santa Fe</option>
+<option value="San Ángel Inn Patriotismo">San Ángel Inn Patriotismo</option>
+<option value="San Ángel Inn Universidad">San Ángel Inn Universidad</option>
+<option value="San Ángel Inn Chapultepec">San Ángel Inn Chapultepec</option>
+<option value="Centro Quirúrgico Medici">Centro Quirúrgico Medici</option>
+<option value="Hospital Ángeles Lomas">Hospital Ángeles Lomas</option>
+<option value="Otra...">Otra...</option>
+<option value="Dr. Enrique Stoopen Margain">Dr. Enrique Stoopen Margain</option>
+<option value="Dr. Natan Sarue Saed">Dr. Natan Sarue Saed</option>
+<option value="Dr. Jonathan Chernitzky Camaño">Dr. Jonathan Chernitzky Camaño</option>
+<option value="Dr. Alejandro Jiménez Casillas">Dr. Alejandro Jiménez Casillas</option>
+<option value="Dr. Juvenal Franco">Dr. Juvenal Franco</option>
+<option value="Dr. Paulo López Reymundo">Dr. Paulo López Reymundo</option>
+<option value="Dra. Giselle Uribe">Dra. Giselle Uribe</option>
+<option value="Dra. Andrea Figueroa">Dra. Andrea Figueroa</option>
+<option value="✏️ Dictado libre con IA — cualquier procedimiento">✏️ Dictado libre con IA — cualquier procedimiento</option>
+<option value="Ayudante">Ayudante</option>
+<option value="Anestesiólogo">Anestesiólogo</option>
+<option value="40 cc/hora">40 cc/hora</option>
+<option value="60 cc/hora">60 cc/hora</option>
+<option value="80 cc/hora">80 cc/hora</option>
+<option value="100 cc/hora">100 cc/hora</option>
+<option value="125 cc/hora">125 cc/hora</option>
+<option value="Ayuno hasta nueva orden">Ayuno hasta nueva orden</option>
+<option value="Líquidos claros">Líquidos claros</option>
+<option value="Líquidos claros y dieta blanda al tolerar">Líquidos claros y dieta blanda al tolerar</option>
+<option value="Dieta blanda">Dieta blanda</option></select><input id="procedimientoOtro" placeholder="Escribir procedimiento" oninput="preview()" style="margin-top:8px"></div>
   </div>
 
   <div class="card">
@@ -54,9 +105,16 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
   </div>
 
   <div class="card">
+    <h2>Hoja de indicaciones y medicamentos</h2>
+    <div class="preview" id="hojaPreview"></div>
+    <div class="small">Esta es la vista previa antes de enviar. Si escribes cambios, presiona “Generar cambios / Vista previa” para revisarlos primero.</div>
+  </div>
+
+  <div class="card">
     <h2>Ajustes opcionales</h2>
-    <div class="fg"><label>Cambios de medicamentos</label><textarea id="indicacionesExtra" placeholder="Ej. Suspender ketorolaco, cambiar antibiótico, agregar laxante..." oninput="preview()"></textarea><div class="small">Si lo dejas vacío, se usan las indicaciones base.</div></div>
-    <div class="fg"><label>Indicaciones especiales</label><textarea id="indicacionesEspeciales" placeholder="Ej. Agregar cuidados especiales por hernia, drenaje, dieta, heridas..." oninput="preview()"></textarea><div class="small">Si escribes aquí, el sistema puede generar una hoja adicional de indicaciones específicas.</div></div>
+    <div class="fg"><label>Cambios de medicamentos</label><textarea id="indicacionesExtra" placeholder="Ej. Suspender ketorolaco, cambiar antibiótico, agregar laxante..." oninput="preview()"></textarea><div class="small">Estos cambios pueden aplicarse con IA antes de enviar.</div></div>
+    <div class="fg"><label>Indicaciones especiales</label><textarea id="indicacionesEspeciales" placeholder="Ej. Agregar cuidados especiales por hernia, drenaje, dieta, heridas..." oninput="preview()"></textarea><div class="small">Puede generar una hoja adicional de indicaciones específicas.</div></div>
+    <button class="btn sec" type="button" onclick="generarCambiosPreview()">Vista previa / generar cambios</button>
     <label class="check"><input id="hacerPDF" type="checkbox"><span><b>También generar PDF tamaño carta</b><br>El correo siempre se enviará. El PDF es opcional para descargar o compartir.</span></label>
   </div>
 
@@ -66,13 +124,78 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
   </div>
 
   <div class="actions">
-    <button id="btnEnviar" class="btn" onclick="enviarAlta()">Enviar alta por correo</button>
-    <button class="btn sec" onclick="generarPDFManual()">Solo generar PDF</button>
+    <button class="btn sec" onclick="generarCambiosPreview()">Vista previa</button>
+    <button class="btn sec" onclick="generarPDFManual()">Generar PDF</button>
+    <button id="btnEnviar" class="btn" onclick="enviarAlta(false)">Enviar por correo</button>
+    <button class="btn" onclick="enviarAlta(true)">Generar PDF y enviar correo</button>
   </div>
   <div id="status" class="status"></div>
 </div>
 
 <script>
+
+const INDICACIONES_BASE_CLIENTE = [
+  {seccion:'MEDICAMENTOS',items:[
+    {nombre:'ULSEN (Omeprazol) cápsulas 40mg.',instruccion:'Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.'},
+    {nombre:'BIOMICS (Cefixima) cápsulas 400 mg.',instruccion:'Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.'},
+    {nombre:'TYLEX (Paracetamol) tabletas 750 mg.',instruccion:'Tomar una tableta vía oral cada 8 horas por 5 días.'},
+    {nombre:'DOLAC (Ketorolaco) tableta 10 mg.',instruccion:'Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.'}
+  ]},
+  {seccion:'MEDIDAS GENERALES',items:[
+    {instruccion:'Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.'},
+    {instruccion:'No realizar esfuerzos físicos grandes, PROHIBIDO cargar, empujar y jalar objetos de más de 5 kg.'},
+    {instruccion:'No usar Isodine, merthiolate etc. en las heridas, solo lavado con agua y jabón durante el baño.'},
+    {instruccion:'No manejar automóvil por 7 días.'},
+    {instruccion:'No sumergirse en tinas, jacuzzi o albercas.'},
+    {instruccion:'Hielo intermitente en heridas quirúrgicas y pared abdominal.'}
+  ]},
+  {seccion:'AVISAR DE INMEDIATO EN CASO DE',items:[
+    {instruccion:'Fiebre.'},
+    {instruccion:'Dolor abdominal importante, distensión, náusea o vómito.'},
+    {instruccion:'Salida de secreción fétida, sangre o pus por las heridas.'},
+    {instruccion:'Alguna duda con algún síntoma o medicamento.'}
+  ]}
+];
+let seccionesPreview = INDICACIONES_BASE_CLIENTE;
+let hojaEspecialPreview = '';
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function renderHojaPreview(secciones, especial){
+  const d = datos ? datos() : {};
+  let h = `<div class="sheet"><h3>Indicaciones de alta</h3><div><b>Paciente:</b> ${esc(d.nombre||'-')} &nbsp; <b>Procedimiento:</b> ${esc(d.procedimiento||'-')}</div>`;
+  (secciones||INDICACIONES_BASE_CLIENTE).forEach(sec=>{
+    h += `<h4>${esc(sec.seccion)}</h4><ol>`;
+    (sec.items||[]).forEach(item=>{h += `<li>${item.nombre?`<span class="med">${esc(item.nombre)}</span> `:''}${esc(item.instruccion)}</li>`});
+    h += `</ol>`;
+  });
+  if(especial){h += `<div class="note"><b>Hoja especial:</b><br>${esc(especial).replace(/\n/g,'<br>')}</div>`}
+  h += `</div>`;
+  document.getElementById('hojaPreview').innerHTML = h;
+}
+function procedimientoCambio(){
+  const sel=document.getElementById('procedimientoSelect');
+  const otro=document.getElementById('procedimientoOtro');
+  otro.style.display = sel.value==='otro' ? 'block' : 'none';
+}
+function getProcedimiento(){
+  const sel=document.getElementById('procedimientoSelect');
+  if(!sel) return '';
+  return sel.value==='otro' ? document.getElementById('procedimientoOtro').value.trim() : sel.value;
+}
+async function generarCambiosPreview(){
+  const d=datos();
+  const err=validar(d); if(err){status(err,'err');return}
+  status('Generando vista previa de indicaciones...');
+  try{
+    const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({previewOnly:true,nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});
+    const data=await res.json();
+    if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo generar vista previa');
+    seccionesPreview=data.secciones||INDICACIONES_BASE_CLIENTE;
+    hojaEspecialPreview=data.hojaEspecial||'';
+    renderHojaPreview(seccionesPreview, hojaEspecialPreview);
+    status('Vista previa lista. Revisa antes de enviar.','ok');
+  }catch(e){status('Error: '+e.message,'err')}
+}
+
 const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 let ultimoPDF=null;
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -82,11 +205,11 @@ function fechaCorta(v){if(!v)return'';const [y,m,d]=v.split('-');return d+'/'+m+
 function edad(){const v=document.getElementById('fn').value;if(!v)return'';const h=new Date(),b=new Date(v+'T12:00:00');let e=h.getFullYear()-b.getFullYear();const m=h.getMonth()-b.getMonth();if(m<0||(m===0&&h.getDate()<b.getDate()))e--;return e}
 function actualizarEdad(){const e=edad();document.getElementById('edadBox').textContent=e?e+' años':'Ingrese fecha de nacimiento'}
 function setCita(dias){const d=new Date();d.setDate(d.getDate()+dias);document.getElementById('fechaCita').value=iso(d);preview()}
-function datos(){return{nombre:document.getElementById('nombre').value.trim(),fn:document.getElementById('fn').value,edad:edad(),procedimiento:document.getElementById('procedimiento').value.trim(),fechaAlta:document.getElementById('fechaAlta').value,fechaCita:document.getElementById('fechaCita').value,extra:document.getElementById('indicacionesExtra').value.trim(),especiales:document.getElementById('indicacionesEspeciales').value.trim()}}
-function preview(){const d=datos();document.getElementById('resumen').innerHTML=`<b>Paciente:</b> ${d.nombre||'-'}<br><b>Edad:</b> ${d.edad?d.edad+' años':'-'} &nbsp; <b>FN:</b> ${d.fn||'-'}<br><b>Procedimiento:</b> ${d.procedimiento||'-'}<br><b>Fecha de alta:</b> ${fechaLarga(d.fechaAlta)||'-'}<br><b>Próxima cita:</b> ${fechaCorta(d.fechaCita)||'-'}<ul><li>Se enviará correo con indicaciones de alta y receta.</li><li>PDF opcional si está marcado.</li></ul>`}
+function datos(){return{nombre:document.getElementById('nombre').value.trim(),fn:document.getElementById('fn').value,edad:edad(),procedimiento:getProcedimiento(),fechaAlta:document.getElementById('fechaAlta').value,fechaCita:document.getElementById('fechaCita').value,extra:document.getElementById('indicacionesExtra').value.trim(),especiales:document.getElementById('indicacionesEspeciales').value.trim()}}
+function preview(){const d=datos();renderHojaPreview(seccionesPreview, hojaEspecialPreview);document.getElementById('resumen').innerHTML=`<b>Paciente:</b> ${d.nombre||'-'}<br><b>Edad:</b> ${d.edad?d.edad+' años':'-'} &nbsp; <b>FN:</b> ${d.fn||'-'}<br><b>Procedimiento:</b> ${d.procedimiento||'-'}<br><b>Fecha de alta:</b> ${fechaLarga(d.fechaAlta)||'-'}<br><b>Próxima cita:</b> ${fechaCorta(d.fechaCita)||'-'}<ul><li>Se enviará correo con indicaciones de alta y receta.</li><li>PDF opcional si está marcado.</li></ul>`}
 function validar(d){if(!d.nombre)return'Falta el nombre del paciente.';if(!d.fn)return'Falta fecha de nacimiento.';if(!d.procedimiento)return'Falta procedimiento.';if(!d.fechaAlta)return'Falta fecha de alta.';if(!d.fechaCita)return'Falta próxima consulta.';return''}
 function status(t,cls){const s=document.getElementById('status');s.className='status '+(cls||'');s.textContent=t}
-async function enviarAlta(){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(document.getElementById('hacerPDF').checked){await generarPDF(d);status('Correo enviado y PDF generado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
+async function enviarAlta(generarPdfDespues){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(generarPdfDespues || document.getElementById('hacerPDF').checked){await generarPDF(d);status('Correo enviado y PDF generado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
 async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d);status('PDF generado.','ok')}
 function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
 async function imgToData(url){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);resolve(c.toDataURL('image/png'))};im.onerror=reject;im.src=url})}
@@ -103,7 +226,7 @@ y+=10;y=addWrapped(pdf,'Solicitar cita de revisión en consultorio para el '+fec
 if(firma)pdf.addImage(firma,'PNG',345,610,130,70);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
 const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';pdf.save(nombre);ultimoPDF=pdf.output('blob');return ultimoPDF}
 
-document.getElementById('fechaAlta').value=hoy();setCita(7);['nombre','procedimiento','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
+document.getElementById('fechaAlta').value=hoy();setCita(7);procedimientoCambio();['nombre','procedimientoOtro','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
 </script>
 </body>
 </html>
