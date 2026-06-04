@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SyncMed One | Indicaciones de Alta</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:linear-gradient(160deg,#f5f0ff 0%,#ffffff 58%,#eef7ff 100%);min-height:100vh;color:#152033;padding:16px}
+.wrap{max-width:760px;margin:0 auto}
+.header{background:linear-gradient(135deg,#2e1065 0%,#7c3aed 58%,#a855f7 100%);border-radius:22px;padding:22px;display:flex;gap:15px;align-items:center;color:#fff;box-shadow:0 18px 44px rgba(124,58,237,.24);margin-bottom:18px}
+.logo{width:58px;height:58px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 26px rgba(46,16,101,.2);overflow:hidden;flex-shrink:0}
+.logo img{width:42px;height:42px;object-fit:contain}
+h1{font-size:26px;line-height:1.05;font-weight:800}.sub{font-size:13px;opacity:.9;margin-top:5px}
+.card{background:#fff;border:1.5px solid #ddd6fe;border-radius:18px;padding:20px;box-shadow:0 10px 32px rgba(46,16,101,.08);margin-bottom:16px}
+.card h2{font-size:17px;color:#2e1065;margin-bottom:16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.fg{margin-bottom:14px}
+label{display:block;font-size:12px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;color:#7c3aed;margin-bottom:6px}
+input,select,textarea{width:100%;border:1.5px solid #ddd6fe;border-radius:12px;padding:12px 13px;font-size:16px;background:#fbfaff;color:#152033;outline:none;font-family:Arial,sans-serif}
+input:focus,select:focus,textarea:focus{border-color:#7c3aed;box-shadow:0 0 0 4px rgba(124,58,237,.13)}
+textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0ff;color:#2e1065;font-weight:800;min-height:48px;display:flex;align-items:center}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.qbtn{border:1.5px solid #7c3aed;background:#fff;color:#7c3aed;border-radius:999px;padding:8px 13px;font-weight:800;cursor:pointer}.qbtn:hover{background:#f5f0ff}
+.check{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px 14px;margin-top:4px}.check input{width:18px;height:18px;margin-top:2px;accent-color:#7c3aed}.check span{font-size:14px;line-height:1.35;color:#475569}
+.preview{background:#fff;border:1.5px dashed #c4b5fd;border-radius:16px;padding:16px;font-size:14px;line-height:1.5;color:#334155}.preview b{color:#2e1065}.preview ul{padding-left:20px;margin-top:6px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{flex:1;min-width:190px;border:none;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:16px;font-weight:800;padding:14px 18px;cursor:pointer;box-shadow:0 10px 22px rgba(124,58,237,.18)}.btn.sec{background:#fff;color:#7c3aed;border:1.5px solid #7c3aed;box-shadow:none}.btn:disabled{opacity:.55;cursor:not-allowed}
+.status{font-size:14px;font-weight:700;margin-top:12px;min-height:22px;color:#475569}.ok{color:#15803d}.err{color:#b91c1c}
+.small{font-size:12px;color:#64748b;line-height:1.35;margin-top:5px}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.header{align-items:flex-start}.actions{display:block}.btn{width:100%;margin-bottom:10px}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo"><img src="assets/syncmed-one-logo.png" alt="SyncMed One"></div>
+    <div><h1>Indicaciones de Alta</h1><div class="sub">SyncMed One · Dr. Pablo Vidal González</div></div>
+  </div>
+
+  <div class="card">
+    <h2>Datos del paciente</h2>
+    <div class="fg"><label>Nombre completo</label><input id="nombre" placeholder="Nombre Apellidos" autocomplete="off" autocapitalize="words"></div>
+    <div class="grid">
+      <div class="fg"><label>Fecha de nacimiento</label><input id="fn" type="date" oninput="actualizarEdad();preview()"></div>
+      <div class="fg"><label>Edad automática</label><div id="edadBox" class="age input-like">Ingrese fecha de nacimiento</div></div>
+    </div>
+    <div class="fg"><label>Procedimiento</label><input id="procedimiento" placeholder="Ej. Colecistectomía laparoscópica" oninput="preview()"></div>
+  </div>
+
+  <div class="card">
+    <h2>Fechas</h2>
+    <div class="grid">
+      <div class="fg"><label>Fecha de alta</label><input id="fechaAlta" type="date" oninput="preview()"></div>
+      <div class="fg"><label>Próxima consulta</label><input id="fechaCita" type="date" oninput="preview()"><div class="quick"><button class="qbtn" onclick="setCita(7)">7 días</button><button class="qbtn" onclick="setCita(8)">8 días</button><button class="qbtn" onclick="setCita(15)">15 días</button><button class="qbtn" onclick="setCita(21)">21 días</button><button class="qbtn" onclick="setCita(30)">30 días</button></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ajustes opcionales</h2>
+    <div class="fg"><label>Cambios de medicamentos</label><textarea id="indicacionesExtra" placeholder="Ej. Suspender ketorolaco, cambiar antibiótico, agregar laxante..." oninput="preview()"></textarea><div class="small">Si lo dejas vacío, se usan las indicaciones base.</div></div>
+    <div class="fg"><label>Indicaciones especiales</label><textarea id="indicacionesEspeciales" placeholder="Ej. Agregar cuidados especiales por hernia, drenaje, dieta, heridas..." oninput="preview()"></textarea><div class="small">Si escribes aquí, el sistema puede generar una hoja adicional de indicaciones específicas.</div></div>
+    <label class="check"><input id="hacerPDF" type="checkbox"><span><b>También generar PDF tamaño carta</b><br>El correo siempre se enviará. El PDF es opcional para descargar o compartir.</span></label>
+  </div>
+
+  <div class="card">
+    <h2>Resumen</h2>
+    <div id="resumen" class="preview"></div>
+  </div>
+
+  <div class="actions">
+    <button id="btnEnviar" class="btn" onclick="enviarAlta()">Enviar alta por correo</button>
+    <button class="btn sec" onclick="generarPDFManual()">Solo generar PDF</button>
+  </div>
+  <div id="status" class="status"></div>
+</div>
+
+<script>
+const MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let ultimoPDF=null;
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function hoy(){return iso(new Date())}
+function fechaLarga(v){if(!v)return'';const [y,m,d]=v.split('-');return parseInt(d)+' de '+MESES[parseInt(m)-1]+' de '+y}
+function fechaCorta(v){if(!v)return'';const [y,m,d]=v.split('-');return d+'/'+m+'/'+y}
+function edad(){const v=document.getElementById('fn').value;if(!v)return'';const h=new Date(),b=new Date(v+'T12:00:00');let e=h.getFullYear()-b.getFullYear();const m=h.getMonth()-b.getMonth();if(m<0||(m===0&&h.getDate()<b.getDate()))e--;return e}
+function actualizarEdad(){const e=edad();document.getElementById('edadBox').textContent=e?e+' años':'Ingrese fecha de nacimiento'}
+function setCita(dias){const d=new Date();d.setDate(d.getDate()+dias);document.getElementById('fechaCita').value=iso(d);preview()}
+function datos(){return{nombre:document.getElementById('nombre').value.trim(),fn:document.getElementById('fn').value,edad:edad(),procedimiento:document.getElementById('procedimiento').value.trim(),fechaAlta:document.getElementById('fechaAlta').value,fechaCita:document.getElementById('fechaCita').value,extra:document.getElementById('indicacionesExtra').value.trim(),especiales:document.getElementById('indicacionesEspeciales').value.trim()}}
+function preview(){const d=datos();document.getElementById('resumen').innerHTML=`<b>Paciente:</b> ${d.nombre||'-'}<br><b>Edad:</b> ${d.edad?d.edad+' años':'-'} &nbsp; <b>FN:</b> ${d.fn||'-'}<br><b>Procedimiento:</b> ${d.procedimiento||'-'}<br><b>Fecha de alta:</b> ${fechaLarga(d.fechaAlta)||'-'}<br><b>Próxima cita:</b> ${fechaCorta(d.fechaCita)||'-'}<ul><li>Se enviará correo con indicaciones de alta y receta.</li><li>PDF opcional si está marcado.</li></ul>`}
+function validar(d){if(!d.nombre)return'Falta el nombre del paciente.';if(!d.fn)return'Falta fecha de nacimiento.';if(!d.procedimiento)return'Falta procedimiento.';if(!d.fechaAlta)return'Falta fecha de alta.';if(!d.fechaCita)return'Falta próxima consulta.';return''}
+function status(t,cls){const s=document.getElementById('status');s.className='status '+(cls||'');s.textContent=t}
+async function enviarAlta(){const d=datos();const err=validar(d);if(err){status(err,'err');return}const btn=document.getElementById('btnEnviar');btn.disabled=true;status('Enviando correo de alta...');try{const res=await fetch('/api/generar-alta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre:d.nombre,edad:d.edad?d.edad+' años':'',fechaNacimiento:d.fn,procedimiento:d.procedimiento,fecha:fechaLarga(d.fechaAlta),fechaCita:fechaCorta(d.fechaCita),indicacionesExtra:d.extra,indicacionesEspeciales:d.especiales})});const data=await res.json();if(!res.ok||data.status!=='ok')throw new Error(data.error||'No se pudo enviar');status('Correo enviado con indicaciones de alta y receta.','ok');if(document.getElementById('hacerPDF').checked){await generarPDF(d);status('Correo enviado y PDF generado.','ok')}}catch(e){status('Error: '+e.message,'err')}finally{btn.disabled=false}}
+async function generarPDFManual(){const d=datos();const err=validar(d);if(err){status(err,'err');return}await generarPDF(d);status('PDF generado.','ok')}
+function addWrapped(pdf,txt,x,y,w,lineH,opt){const lines=pdf.splitTextToSize(txt,w);pdf.text(lines,x,y,opt||{});return y+lines.length*lineH}
+async function imgToData(url){return new Promise((resolve,reject)=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);resolve(c.toDataURL('image/png'))};im.onerror=reject;im.src=url})}
+async function generarPDF(d){const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'pt',format:'letter'});const W=612,H=792;let header=null,footer=null,firma=null;try{header=await imgToData('assets/header.jpg');footer=await imgToData('assets/footer.jpg');firma=await imgToData('assets/firma.png')}catch(e){}
+if(header)pdf.addImage(header,'JPEG',0,0,W,105);if(footer)pdf.addImage(footer,'JPEG',0,H-88,W,88);
+pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.text('CDMX a '+fechaLarga(d.fechaAlta),W-54,130,{align:'right'});
+pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('Paciente: '+d.nombre,54,155);pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text('Edad: '+d.edad+' años        FN: '+d.fn,54,172);
+pdf.setFont('helvetica','normal');let y=205;y=addWrapped(pdf,'Indicaciones médicas para paciente post-operado de '+d.procedimiento.toUpperCase(),54,y,500,14);y+=18;
+pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('MEDICAMENTOS:',54,y);y+=18;pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
+['ULSEN (Omeprazol) cápsulas 40mg. Tomar una cápsula vía oral cada 24 horas en ayuno por 15 días.','BIOMICS (Cefixima) cápsulas 400 mg. Tomar una cápsula vía oral cada 24 horas después de la cena por 6 días.','TYLEX (Paracetamol) tabletas 750 mg. Tomar una tableta vía oral cada 8 horas por 5 días.','DOLAC (Ketorolaco) tableta 10 mg. Tomar una tableta vía oral hasta cada 8 horas sólo en caso de dolor.'].forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,70,y,470,13);y+=7});
+y+=8;pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('MEDIDAS GENERALES:',54,y);y+=18;pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);
+['Dieta blanda, sin grasas, lácteos, irritantes, ni condimentos por 10 días.','No realizar esfuerzos físicos grandes ni cargar objetos de más de 5 kg.','Lavado de heridas con agua y jabón durante el baño. No usar Isodine ni merthiolate.','No manejar automóvil por 7 días.','No sumergirse en tinas, jacuzzi o albercas.','Hielo intermitente en heridas quirúrgicas y pared abdominal.'].forEach((t,i)=>{y=addWrapped(pdf,(i+1)+'.- '+t,70,y,470,13);y+=6});
+y+=10;y=addWrapped(pdf,'Solicitar cita de revisión en consultorio para el '+fechaCorta(d.fechaCita)+'.',54,y,500,14);if(d.extra){y+=12;y=addWrapped(pdf,'Cambios / notas: '+d.extra,54,y,500,13)}if(d.especiales){y+=12;y=addWrapped(pdf,'Indicaciones especiales: '+d.especiales,54,y,500,13)}
+if(firma)pdf.addImage(firma,'PNG',345,610,130,70);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-54,700,{align:'right'});
+const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';pdf.save(nombre);ultimoPDF=pdf.output('blob');return ultimoPDF}
+
+document.getElementById('fechaAlta').value=hoy();setCita(7);['nombre','procedimiento','indicacionesExtra','indicacionesEspeciales'].forEach(id=>document.getElementById(id).addEventListener('input',preview));preview();
+</script>
+</body>
+</html>
