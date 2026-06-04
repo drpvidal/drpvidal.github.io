@@ -325,7 +325,7 @@ async function generarPDF(d,modo){
   const W=612,H=792;
   const azul=[54,95,145];
   const x=68;
-  let y=128;
+  let y=142;
 
   let header=null,footer=null,firma=null;
   try{header=await imgToData('assets/header.jpg')}catch(e){console.warn(e)}
@@ -349,7 +349,7 @@ async function generarPDF(d,modo){
   pdf.text('Edad: '+(d.edad||'-')+' años',x,y);
   pdf.text('FN: '+(d.fn||'-'),335,y);
 
-  y += 24;
+  y += 34;
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.2);pdf.setTextColor(0,0,0);
   const intro='Indicaciones médicas para paciente post-operado de';
   pdf.text(intro,x,y);
@@ -399,17 +399,25 @@ async function generarPDF(d,modo){
   pdf.setFont('helvetica','bold');
   pdf.text(fechaCorta(d.fechaCita)+'.',x+citaW+2,y);
 
-  if(firma)pdf.addImage(firma,'PNG',345,590,150,75);
+  if(firma)pdf.addImage(firma,'PNG',335,575,160,80);
   pdf.setFont('helvetica','bold');pdf.setFontSize(9.5);pdf.setTextColor(...azul);
-  pdf.text('DR. PABLO VIDAL GONZÁLEZ',W-68,682,{align:'right'});
+  pdf.text('DR. PABLO VIDAL GONZÁLEZ',415,668,{align:'center'});
 
   const nombre='Alta_'+d.nombre.replace(/\s+/g,'_')+'.pdf';
   ultimoPDF=pdf.output('blob');
   if(modo==='ver'){
-    const dataUrl = pdf.output('datauristring');
+    const url = URL.createObjectURL(ultimoPDF);
+    window._altaPdfUrl = url;
     const card=document.getElementById('pdfCard');
     const viewer=document.getElementById('pdfViewer');
-    if(card&&viewer){viewer.removeAttribute('src');setTimeout(()=>{viewer.src=dataUrl;},50);card.style.display='block';card.scrollIntoView({behavior:'smooth',block:'start'});}else{const win=window.open();if(win)win.document.write('<iframe width="100%" height="100%" style="border:0" src="'+dataUrl+'"></iframe>');}
+    if(card&&viewer){
+      viewer.removeAttribute('src');
+      setTimeout(()=>{viewer.src=url+'#view=FitH&toolbar=1';},50);
+      card.style.display='block';
+      card.scrollIntoView({behavior:'smooth',block:'start'});
+    }else{
+      window.open(url,'_blank');
+    }
   }else if(modo==='blob'){
     return ultimoPDF;
   }else{
