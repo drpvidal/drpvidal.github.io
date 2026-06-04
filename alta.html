@@ -44,6 +44,20 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
 .sheet .lista-alta li{margin:5px 0!important;font-size:13px!important;color:#111!important;font-weight:400!important;line-height:1.3!important}
 .sheet .note{background:#fff8e8!important;border:1px solid #f0d080!important;border-radius:10px!important;padding:9px 11px!important;margin-top:12px!important;color:#76520a!important;font-size:13px!important}
 
+
+/* Alta preview FINAL: medicamento separado de indicación */
+.alta-sheet{background:#fff!important;border:1px solid #dbe4ef!important;border-radius:14px!important;padding:20px 22px!important;margin-top:8px!important;box-shadow:inset 4px 0 0 #365F91!important;font-family:Arial,sans-serif!important;color:#111!important;line-height:1.35!important;text-align:left!important}
+.alta-sheet .fecha{text-align:right!important;font-size:13px!important;margin-bottom:14px!important;color:#111!important}
+.alta-sheet .linea{font-size:14px!important;margin:5px 0!important;color:#111!important}
+.alta-sheet .azul{color:#365F91!important;font-weight:800!important}
+.alta-sheet .proc{font-size:14px!important;margin:14px 0 14px!important;color:#111!important}
+.alta-sheet .sec{font-size:15px!important;color:#365F91!important;margin:16px 0 8px!important;text-transform:uppercase!important;font-weight:800!important;letter-spacing:.02em!important}
+.alta-sheet .medblock{display:block!important;margin:12px 0 15px 24px!important}
+.alta-sheet .medtitle{display:block!important;color:#365F91!important;font-weight:800!important;text-decoration:underline!important;font-size:14px!important;line-height:1.25!important;margin-bottom:3px!important}
+.alta-sheet .medinstr{display:block!important;color:#111!important;font-weight:400!important;font-size:13px!important;line-height:1.3!important;margin-left:28px!important}
+.alta-sheet ol{padding-left:20px!important;margin:0!important;color:#111!important}
+.alta-sheet li{margin:5px 0!important;font-size:13px!important;color:#111!important;font-weight:400!important;line-height:1.3!important}
+
 </style>
 </head>
 <body>
@@ -147,6 +161,7 @@ textarea{min-height:92px;resize:vertical;line-height:1.45}.age{background:#f5f0f
   <div id="status" class="status"></div>
   <div class="card" id="pdfCard" style="display:none;margin-top:16px">
     <h2>PDF generado</h2>
+    <button class="btn sec" type="button" onclick="compartirPDF()" style="margin-bottom:10px;width:100%">Compartir este PDF</button>
     <iframe id="pdfViewer" title="PDF de alta" style="width:100%;height:680px;border:1px solid #ddd6fe;border-radius:14px;background:#fff"></iframe>
   </div>
 </div>
@@ -172,7 +187,7 @@ const INDICACIONES_BASE_CLIENTE = [
     {instruccion:'Fiebre.'},
     {instruccion:'Dolor abdominal importante, distensión, náusea o vómito.'},
     {instruccion:'Salida de secreción fétida, sangre o pus por las heridas.'},
-    {instruccion:'Alguna duda con algún síntoma o medicamento.'}
+    {instruccion:'Alguna duda con algún síntoma o algún medicamento.'}
   ]}
 ];
 let seccionesPreview = INDICACIONES_BASE_CLIENTE;
@@ -186,32 +201,40 @@ function formatoMedicamentoPreview(nombre){
   }
   return esc(n.toUpperCase());
 }
+function formatoMedicamentoPreview(nombre){
+  let n=String(nombre||'').trim().replace(/\s+/g,' ');
+  const m=n.match(/^([^()]+)\(([^)]+)\)(.*)$/);
+  if(m){
+    return `${esc(m[1].trim().toUpperCase())} (${esc(m[2].trim().toLowerCase())}) ${esc(m[3].trim())}`;
+  }
+  return esc(n.toUpperCase());
+}
 function renderHojaPreview(secciones, especial){
-  const box=document.getElementById('hojaPreview');if(!box)return;
+  const box=document.getElementById('hojaPreview');
+  if(!box)return;
   const d = datos ? datos() : {};
   const secs = secciones || seccionesPreview || INDICACIONES_BASE_CLIENTE;
-  let h = `<div class="sheet">`;
-  h += `<div class="fecha-alta">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>`;
-  h += `<div class="linea-alta"><span class="azul-alta">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>`;
-  h += `<div class="linea-alta"><span class="azul-alta">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} &nbsp;&nbsp;&nbsp; <span class="azul-alta">FN:</span> ${esc(d.fn||'-')}</div>`;
-  h += `<div class="proc-alta">Indicaciones médicas para paciente post-operado de <b>${esc((d.procedimiento||'-').toUpperCase())}</b></div>`;
-
+  let h = '<div class="alta-sheet">';
+  h += `<div class="fecha">CDMX a ${esc(fechaLarga(d.fechaAlta)||'-')}</div>`;
+  h += `<div class="linea"><span class="azul">Paciente:</span> <b>${esc((d.nombre||'-').toUpperCase())}</b></div>`;
+  h += `<div class="linea"><span class="azul">Edad:</span> ${d.edad?esc(d.edad)+' años':'-'} &nbsp;&nbsp;&nbsp; <span class="azul">FN:</span> ${esc(d.fn||'-')}</div>`;
+  h += `<div class="proc">Indicaciones médicas para paciente post-operado de <b>${esc((d.procedimiento||'-').toUpperCase())}</b></div>`;
   secs.forEach(sec=>{
     const titulo=String(sec.seccion||'').toUpperCase();
-    h += `<div class="sec-alta">${esc(titulo)}:</div>`;
+    h += `<div class="sec">${esc(titulo)}:</div>`;
     if(titulo==='MEDICAMENTOS'){
       (sec.items||[]).forEach((item,i)=>{
-        h += `<div class="med-block"><span class="med-title">${i+1}.- ${formatoMedicamentoPreview(item.nombre)}</span><span class="med-instr">${esc(item.instruccion)}</span></div>`;
+        h += `<div class="medblock"><span class="medtitle">${i+1}.- ${formatoMedicamentoPreview(item.nombre)}</span><span class="medinstr">${esc(item.instruccion)}</span></div>`;
       });
-    } else {
-      h += '<ol class="lista-alta">';
+    }else{
+      h += '<ol>';
       (sec.items||[]).forEach(item=>{h += `<li>${esc(item.instruccion)}</li>`});
       h += '</ol>';
     }
   });
   if(especial){h += `<div class="note"><b>Indicaciones especiales:</b><br>${esc(especial).replace(/\n/g,'<br>')}</div>`}
-  h += `<div class="proc-alta">Solicitar cita de revisión en consultorio para el <b><u>${esc(fechaCorta(d.fechaCita)||'-')}</u></b>.</div>`;
-  h += `</div>`;
+  h += `<div class="proc">Solicitar cita de revisión en consultorio para el <b><u>${esc(fechaCorta(d.fechaCita)||'-')}</u></b>.</div>`;
+  h += '</div>';
   box.innerHTML = h;
 }
 function procedimientoCambio(){
