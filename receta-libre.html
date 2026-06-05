@@ -11,6 +11,7 @@
 </style>
 <!-- receta-libre-definitiva-edad-fecha-ia-pdf-v1 -->
 <!-- receta-libre-letra-mas-1-fecha-abajo-v1 -->
+<!-- receta-libre-fecha-edad-init-blindado-v1 -->
 </head>
 <body>
 <div class="wrap">
@@ -52,8 +53,31 @@ async function crearPDF(){const d=datos();const err=validar(d);if(err){status(er
 pdf.setFont('helvetica','normal');pdf.setFontSize(9);pdf.setTextColor(0,0,0);pdf.text('CDMX a '+fechaLarga(d.fecha),198,47,{align:'right'});let x=16,y=57,w=180,lh=5.5;pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('Paciente:',x,y);pdf.setTextColor(0,0,0);pdf.text((d.nombre||'-').toUpperCase(),x+15,y);y+=5;pdf.setTextColor(54,95,145);pdf.text('Edad:',x,y);pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text(d.edad?d.edad+' años':'-',x+10,y);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);pdf.text('FN:',x+45,y);pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);pdf.text(d.fn||'-',x+52,y);y+=8;if(d.libre){pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.setTextColor(0,0,0);y=put(pdf,lines(pdf,d.libre,w),x,y,lh);y+=4}if(d.texto){const parts=d.texto.split('
 ');pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(54,95,145);y=put(pdf,lines(pdf,parts.shift()||'',w),x,y,lh);pdf.setFont('helvetica','normal');pdf.setTextColor(0,0,0);parts.forEach(t=>{y=put(pdf,lines(pdf,t,w),x+8,y,lh)});y+=4}if(d.libre2){pdf.setFont('helvetica','normal');pdf.setFontSize(10);pdf.setTextColor(0,0,0);y=put(pdf,lines(pdf,d.libre2,w),x,y,lh)}pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(54,95,145);pdf.text('DR. PABLO VIDAL GONZÁLEZ',160,154,{align:'center'});ultimoPDF=pdf.output('blob');return ultimoPDF}
 async function verPDF(){const b=await crearPDF();if(!b)return;if(ultimoUrl)URL.revokeObjectURL(ultimoUrl);ultimoUrl=URL.createObjectURL(b);el('pdfViewer').src=ultimoUrl+'#view=FitH';el('pdfCard').style.display='block';el('pdfCard').scrollIntoView({behavior:'smooth'});status('PDF generado.')}async function descargarPDF(){const b=await crearPDF();if(!b)return;const d=datos();const url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download='Receta_'+(d.nombre?d.nombre.replace(/\s+/g,'_'):'Libre')+'.pdf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status('PDF descargado.')}async function compartirPDF(){const b=ultimoPDF||await crearPDF();if(!b)return;const d=datos();const file=new File([b],'Receta_'+(d.nombre?d.nombre.replace(/\s+/g,'_'):'Libre')+'.pdf',{type:'application/pdf'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:file.name});status('PDF listo para compartir.')}else await descargarPDF()}
-function init(){if(!el('fecha').value)el('fecha').value=hoy();['nombre','fn','fecha','libre','texto','libre2'].forEach(id=>{el(id).addEventListener('input',preview);el(id).addEventListener('change',preview)});el('btnIA').addEventListener('click',formatoIA);el('btnVer').addEventListener('click',verPDF);el('btnDescargar').addEventListener('click',descargarPDF);el('btnCompartir').addEventListener('click',compartirPDF);el('btnCompartir2').addEventListener('click',compartirPDF);preview()}
+function init(){
+  const f=el('fecha');
+  if(f && !f.value) f.value=hoy();
+  const fn=el('fn');
+  if(fn){
+    ['input','change','blur'].forEach(ev=>fn.addEventListener(ev,function(){actualizarEdad();preview()}));
+  }
+  ['nombre','fecha','libre','texto','libre2'].forEach(id=>{const n=el(id); if(n){n.addEventListener('input',preview);n.addEventListener('change',preview)}});
+  el('btnIA').addEventListener('click',formatoIA);
+  el('btnVer').addEventListener('click',verPDF);
+  el('btnDescargar').addEventListener('click',descargarPDF);
+  el('btnCompartir').addEventListener('click',compartirPDF);
+  el('btnCompartir2').addEventListener('click',compartirPDF);
+  actualizarEdad();
+  preview();
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+
+setTimeout(function(){
+  const f=el('fecha');
+  if(f && !f.value) f.value=hoy();
+  actualizarEdad();
+  preview();
+},300);
+
 })();
 </script>
 </body>
