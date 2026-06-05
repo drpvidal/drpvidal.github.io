@@ -8,12 +8,8 @@ module.exports = async (req, res) => {
   if (!texto) return res.status(400).json({ error: 'Texto vacío' });
   try {
     if (!process.env.ANTHROPIC_API_KEY) return res.status(200).json({ texto });
-    const prompt = `Formato de receta. No inventes ni cambies dosis. Devuelve sólo texto final. Formato: 1.- NOMBRE (sustancia) presentación dosis.\nTomar/aplicar/usar ...\nTexto: ${texto}`;
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'},
-      body: JSON.stringify({ model:'claude-sonnet-4-5', max_tokens:600, temperature:0, messages:[{role:'user',content:prompt}] })
-    });
+    const prompt = `Ordena este texto como receta médica sin inventar ni cambiar dosis. Devuelve sólo texto final. Formato: 1.- NOMBRE (sustancia) presentación dosis.\nTomar/aplicar/usar ...\nTexto: ${texto}`;
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method:'POST', headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_API_KEY,'anthropic-version':'2023-06-01'}, body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:600,temperature:0,messages:[{role:'user',content:prompt}]}) });
     const data = await r.json();
     const salida = Array.isArray(data.content) ? data.content.map(x=>x.text||'').join('').trim() : '';
     res.status(200).json({ texto: salida || texto });
