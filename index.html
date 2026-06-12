@@ -143,9 +143,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--sync-blue)!important;
         <select id="procedimiento" onchange="checkOtro('procedimiento','otro-procedimiento');cargarNotaBase()">
           <option value="">Seleccionar...</option>
           <optgroup label="Hernia inguinal">
-            <option>Plastia inguinal bilateral con colocación de malla</option>
-            <option>Plastia inguinal por laparoscopia derecha con colocación de malla</option>
-            <option>Plastia inguinal por laparoscopia izquierda con colocación de malla</option>
+            <option>Plastia inguinal bilateral por laparoscopia más colocación de mallas</option>
+            <option>Plastia inguinal derecha por laparoscopia con colocación de malla</option>
+            <option>Plastia inguinal izquierda por laparoscopia más colocación de malla</option>
           </optgroup>
           <optgroup label="Vesícula biliar">
             <option>Colecistectomía laparoscópica</option>
@@ -269,9 +269,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--sync-blue)!important;
           <select id="nota-procedimiento" onchange="mostrarNotaBase()">
             <option value="">Seleccionar procedimiento...</option>
             <optgroup label="Hernia inguinal">
-              <option>Plastia inguinal bilateral con colocación de malla</option>
-              <option>Plastia inguinal por laparoscopia derecha con colocación de malla</option>
-              <option>Plastia inguinal por laparoscopia izquierda con colocación de malla</option>
+              <option>Plastia inguinal bilateral por laparoscopia más colocación de mallas</option>
+              <option>Plastia inguinal derecha por laparoscopia con colocación de malla</option>
+              <option>Plastia inguinal izquierda por laparoscopia más colocación de malla</option>
             </optgroup>
             <optgroup label="Vesícula biliar">
               <option>Colecistectomía laparoscópica</option>
@@ -371,21 +371,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--sync-blue)!important;
 const WEBHOOK_URL='/api/webhook';
   
 const NOTAS_BASE = {
-  'Plastia inguinal por laparoscopia izquierda con colocación de malla': `HERNIA INGUINAL IZQUIERDA
+  'Plastia inguinal izquierda por laparoscopia más colocación de malla': `HERNIA INGUINAL IZQUIERDA
 TÉCNICA QUIRÚRGICA
 Previo consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.
 Se infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.
 Se explora la región inguinal izquierda. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando el orificio miopectíneo y reduciendo el contenido herniario correspondiente. Se respeta en todo momento el cordón espermático y las estructuras vasculares. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis.
 Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo. Una vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0.
 Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-  'Plastia inguinal por laparoscopia derecha con colocación de malla': `HERNIA INGUINAL DERECHA
+  'Plastia inguinal derecha por laparoscopia con colocación de malla': `HERNIA INGUINAL DERECHA
 TÉCNICA QUIRÚRGICA
 Previo consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.
 Se infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.
 Se explora la región inguinal derecha. Se realiza apertura del peritoneo y desarrollo del espacio preperitoneal. Se disecan y verifican las estructuras anatómicas, identificando el orificio miopectíneo y reduciendo el contenido herniario correspondiente. Se respeta en todo momento el cordón espermático y las estructuras vasculares. Se continúa la disección hasta exponer adecuadamente el ligamento de Cooper hacia el pubis.
 Se coloca malla Progrip de 16 x 12 cm, cubriendo en su totalidad el orificio miopectíneo. Una vez colocada la malla, se realiza cierre del flap peritoneal con sutura continua tipo V-Loc 2-0.
 Se verifica adecuada hemostasia, se retiran trocares bajo visión directa y se realiza cierre de aponeurosis con Monomax 0. Se afronta piel con sutura subcuticular de Monocryl 4-0. Finalmente, se colocan apósitos estériles y se da por terminado el procedimiento quirúrgico.`,
-  'Plastia inguinal bilateral con colocación de malla': `HERNIA INGUINAL BILATERAL
+  'Plastia inguinal bilateral por laparoscopia más colocación de mallas': `HERNIA INGUINAL BILATERAL
 TÉCNICA QUIRÚRGICA
 Previo consentimiento informado, se coloca sonda Foley con técnica estéril, sin incidentes. Posteriormente, el paciente se coloca en decúbito supino bajo anestesia general balanceada. Se realiza protocolo de asepsia y antisepsia de la región abdominal y colocación de campos estériles.
 Se infiltra la región umbilical con anestésico local y se realiza incisión, continuando con disección por planos hasta el acceso a cavidad abdominal mediante técnica de Hasson. Se inserta puerto umbilical de 11 mm y se insufla neumoperitoneo con CO₂ a 12 mmHg. Se introduce óptica de 30°. Bajo visión directa, se colocan trocares accesorios en flancos derecho e izquierdo.
