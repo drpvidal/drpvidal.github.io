@@ -103,14 +103,16 @@ module.exports = async (req, res) => {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
     const t  = (text, opts) => new TextRun({ text: text || '', font: FONT, size: SZ, color: NEGRO, ...opts });
-    const tb = (text, opts) => t(text, { bold: true, ...opts });
-    const sp = (after, before) => ({ spacing: { after: after||0, before: before||0 } });
+    const tb = (text, opts) => t(text, { bold: true, color: AZUL, ...opts });
+    const sp = (after, before, line) => ({ spacing: { after: after||0, before: before||0, ...(line ? { line } : {}) } });
+    const blank = (after) => new Paragraph({ children: [t('')], ...sp(after || 240) });
 
     // ── Hoja de indicaciones de alta ──────────────────────────────────────────
     function buildHojaAlta(addPageBreak) {
       const pp = [];
+      pp.push(blank(240));
       pp.push(new Paragraph({ children: [t('CDMX a  ' + (fecha||''))], alignment: AlignmentType.RIGHT, ...sp(160) }));
-      pp.push(new Paragraph({ children: [tb('Paciente:  '), tb(nombre||'')], ...sp(40) }));
+      pp.push(new Paragraph({ children: [tb('Paciente:  '), tb((nombre||'').toUpperCase())], ...sp(40) }));
       pp.push(new Paragraph({
         children: [
           tb('Edad: '), t((edad||'').replace(/\s*años\s*$/i,'') + ' años'),
@@ -122,11 +124,11 @@ module.exports = async (req, res) => {
       pp.push(new Paragraph({ children: [t('Indicaciones médicas para paciente post-operado de '), tb((procedimiento||'').toUpperCase())], ...sp(160) }));
 
       for (const seccion of seccionesFinales) {
-        pp.push(new Paragraph({ children: [tb((seccion.seccion || '').toUpperCase() + ':')], ...sp(80, 120) }));
+        pp.push(new Paragraph({ children: [tb((seccion.seccion || '').toUpperCase() + ':')], ...sp(240, 120) }));
         seccion.items.forEach((item, idx) => {
           const num = (idx+1) + '.-  ';
           if (item.nombre) {
-            pp.push(new Paragraph({ children: [tb(num), tb(item.nombre)], ...sp(20) }));
+            pp.push(new Paragraph({ children: [tb(num), tb(item.nombre, { underline: { type: UnderlineType.SINGLE } })], ...sp(20) }));
             pp.push(new Paragraph({ children: [t(item.instruccion)], indent: { left: 360 }, ...sp(100) }));
           } else {
             pp.push(new Paragraph({ children: [t(num + item.instruccion)], ...sp(60) }));
@@ -134,8 +136,8 @@ module.exports = async (req, res) => {
         });
       }
 
-      pp.push(new Paragraph({ children: [t('Solicitar cita de revisión en consultorio para el '), tb(fechaCita||'', { underline: { type: UnderlineType.SINGLE } }), t('.')], ...sp(200, 160) }));
-      pp.push(new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT }));
+      pp.push(new Paragraph({ children: [t('Solicitar cita de revisión en consultorio para el '), tb(fechaCita||'', { underline: { type: UnderlineType.SINGLE } }), t('.')], ...sp(260, 320) }));
+      pp.push(new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT, ...sp(0, 240) }));
       if (addPageBreak) pp.push(new Paragraph({ children: [new PageBreak()] }));
       return pp;
     }
@@ -144,8 +146,9 @@ module.exports = async (req, res) => {
     function buildIndicacionesGenerales() {
       const pp = [];
 
-      pp.push(new Paragraph({ children: [tb('INDICACIONES GENERALES POSTERIORES A PROCEDIMIENTO DE LAPAROSCOPIA')], alignment: AlignmentType.CENTER, ...sp(200) }));
-      pp.push(new Paragraph({ children: [t('Después de un procedimiento de laparoscopia, es normal que te sientas un poco incómodo y necesites tiempo para descansar y recuperarse. Aquí te dejo algunas indicaciones generales para el cuidado postoperatorio.')], ...sp(160) }));
+      pp.push(blank(480));
+      pp.push(new Paragraph({ children: [tb('INDICACIONES GENERALES POSTERIORES A PROCEDIMIENTO DE LAPAROSCOPIA')], alignment: AlignmentType.CENTER, ...sp(240, 0, 276) }));
+      pp.push(new Paragraph({ children: [t('Después de un procedimiento de laparoscopia, es normal que te sientas un poco incómodo y necesites tiempo para descansar y recuperarse. Aquí te dejo algunas indicaciones generales para el cuidado postoperatorio.')], ...sp(180, 0, 276) }));
 
       const items3 = [
         { sub: 'Descanso:', texto: 'En los primeros días después de la cirugía, descansa y evita actividades físicas extenuantes. No levantes objetos pesados.' },
@@ -159,11 +162,12 @@ module.exports = async (req, res) => {
       ];
 
       for (const item of items3) {
-        pp.push(new Paragraph({ children: [tb(item.sub), t(' ' + item.texto)], ...sp(120) }));
+        pp.push(new Paragraph({ children: [tb(item.sub), t(' ' + item.texto)], ...sp(140, 0, 276) }));
       }
 
       pp.push(new Paragraph({ children: [new PageBreak()] }));
 
+      pp.push(blank(480));
       pp.push(new Paragraph({ children: [tb('INDICACIONES DIETA SALUDABLE PARA PACIENTE POSTOPERADO DE CIRUGÍA ABDOMINAL')], alignment: AlignmentType.CENTER, ...sp(200) }));
 
       const dieta = [
@@ -188,6 +192,7 @@ module.exports = async (req, res) => {
     // ── Hoja especial generada por IA ─────────────────────────────────────────
     function buildHojaEspecial(texto) {
       const pp = [];
+      pp.push(blank(240));
       // Limpiar markdown que la IA pueda haber generado
       const limpio = texto
         .replace(/^#{1,3}\s*/gm, '')
@@ -224,16 +229,17 @@ module.exports = async (req, res) => {
     // ── Receta (documento separado) ───────────────────────────────────────────
     function buildReceta() {
       return [
+        blank(240),
         new Paragraph({ children: [t('CDMX a  ' + (fecha||''))], alignment: AlignmentType.RIGHT, ...sp(200) }),
-        new Paragraph({ children: [tb('Paciente:  '), t(nombre||'')], ...sp(80) }),
+        new Paragraph({ children: [tb('Paciente:  '), tb((nombre||'').toUpperCase())], ...sp(80) }),
         new Paragraph({
           children: [tb('Edad: '), t((edad||'').replace(/\s*años\s*$/i,'') + ' años'), new TextRun({ text: '                                                                    ', font: FONT, size: SZ }), tb('FN: '), t(fechaNacimiento||'')],
           ...sp(280)
         }),
-        new Paragraph({ children: [tb('1.-  '), tb(biomicsItem.nombre)], ...sp(20) }),
+        new Paragraph({ children: [tb('1.-  '), tb(biomicsItem.nombre, { underline: { type: UnderlineType.SINGLE } })], ...sp(20) }),
         new Paragraph({ children: [t(biomicsItem.instruccion)], indent: { left: 360 }, ...sp(60) }),
         new Paragraph({ children: [t('Favor de surtir una caja con 6 cápsulas')], indent: { left: 360 }, ...sp(400) }),
-        new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT }),
+        new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT, ...sp(0, 240) }),
       ];
     }
 
