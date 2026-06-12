@@ -38,9 +38,9 @@ const PROCEDURES = [
   "Colecistectomía por laparoscopia",
   "Colecistectomía por laparoscopia más colangiografía transoperatoria",
   "Colecistectomía por laparoscopia más colangiografía transoperatoria más identificación de tejidos por fluorescencia",
-  "Plastia inguinal bilateral por laparoscopia tipo TAPP",
-  "Plastia inguinal derecha por laparoscopia tipo TAPP",
-  "Plastia inguinal izquierda por laparoscopia tipo TAPP",
+  "Plastia inguinal bilateral con colocación de malla",
+  "Plastia inguinal por laparoscopia derecha con colocación de malla",
+  "Plastia inguinal por laparoscopia izquierda con colocación de malla",
   "Plastia ventral por laparoscopia más colocación de malla (IPOM Plus)",
   "Funduplicatura tipo Toupet por laparoscopia",
   "Funduplicatura tipo Nissen por laparoscopia",
@@ -89,17 +89,17 @@ const DIAGNOSES_BY_PROCEDURE = {
     "Anatomía biliar compleja",
     "Síndrome de Mirizzi probable"
   ],
-  "Plastia inguinal bilateral por laparoscopia tipo TAPP": [
+  "Plastia inguinal bilateral con colocación de malla": [
     "Hernia inguinal bilateral",
     "Hernia inguinal bilateral recidivante",
     "Hernia inguinoescrotal bilateral"
   ],
-  "Plastia inguinal derecha por laparoscopia tipo TAPP": [
+  "Plastia inguinal por laparoscopia derecha con colocación de malla": [
     "Hernia inguinal derecha",
     "Hernia inguinal derecha recidivante",
     "Hernia inguinoescrotal derecha"
   ],
-  "Plastia inguinal izquierda por laparoscopia tipo TAPP": [
+  "Plastia inguinal por laparoscopia izquierda con colocación de malla": [
     "Hernia inguinal izquierda",
     "Hernia inguinal izquierda recidivante",
     "Hernia inguinoescrotal izquierda"

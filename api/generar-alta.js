@@ -6,7 +6,7 @@ const {
 const AZUL  = '365F91';
 const NEGRO = '000000';
 const SZ    = 22;
-const FONT  = 'Calibri';
+const FONT  = 'Arial';
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -89,7 +89,7 @@ module.exports = async (req, res) => {
         body: JSON.stringify({
           model: 'claude-sonnet-4-5',
           max_tokens: 1200,
-          messages: [{ role: 'user', content: 'Eres un asistente médico cirujano. El médico quiere agregar una hoja de indicaciones específicas para este paciente postoperado de: ' + (procedimiento || '') + '.\n\nEl médico indicó los temas a incluir:\n' + indicacionesEspeciales + '\n\nGenera una página de indicaciones postoperatorias específicas. REGLAS DE FORMATO OBLIGATORIAS:\n- El título va en MAYÚSCULAS en la primera línea\n- Los subtítulos de sección terminan con dos puntos, ejemplo: Cuidados de la herida:\n- Cada punto empieza con guión: - texto\n- NO uses #, ##, **, *, ni ningún formato Markdown\n- Responde SOLO con las indicaciones, sin explicaciones adicionales' }]
+          messages: [{ role: 'user', content: 'Eres un asistente médico cirujano. El médico quiere agregar una hoja de indicaciones específicas para este paciente postoperado de: ' + (procedimiento || '') + '.\n\nEl médico indicó los temas a incluir:\n' + indicacionesEspeciales + '\n\nGenera una página de indicaciones postoperatorias específicas. REGLAS DE FORMATO OBLIGATORIAS:\n- El título va en MAYÚSCULAS en la primera línea\n- Los subtítulos de sección terminan con dos puntos, ejemplo: Cuidados de la herida:\n- Cada punto empieza con formato 1.- texto\n- NO uses #, ##, **, *, ni ningún formato Markdown\n- Responde SOLO con las indicaciones, sin explicaciones adicionales' }]
         })
       });
       const aiData2 = await aiRes2.json();
@@ -122,11 +122,11 @@ module.exports = async (req, res) => {
       pp.push(new Paragraph({ children: [t('Indicaciones médicas para paciente post-operado de '), tb((procedimiento||'').toUpperCase())], ...sp(160) }));
 
       for (const seccion of seccionesFinales) {
-        pp.push(new Paragraph({ children: [tb(seccion.seccion + ':', { color: AZUL })], ...sp(80, 120) }));
+        pp.push(new Paragraph({ children: [tb((seccion.seccion || '').toUpperCase() + ':')], ...sp(80, 120) }));
         seccion.items.forEach((item, idx) => {
           const num = (idx+1) + '.-  ';
           if (item.nombre) {
-            pp.push(new Paragraph({ children: [tb(num, { color: AZUL }), tb(item.nombre, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(20) }));
+            pp.push(new Paragraph({ children: [tb(num), tb(item.nombre)], ...sp(20) }));
             pp.push(new Paragraph({ children: [t(item.instruccion)], indent: { left: 360 }, ...sp(100) }));
           } else {
             pp.push(new Paragraph({ children: [t(num + item.instruccion)], ...sp(60) }));
@@ -135,7 +135,7 @@ module.exports = async (req, res) => {
       }
 
       pp.push(new Paragraph({ children: [t('Solicitar cita de revisión en consultorio para el '), tb(fechaCita||'', { underline: { type: UnderlineType.SINGLE } }), t('.')], ...sp(200, 160) }));
-      pp.push(new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ', { color: AZUL })], alignment: AlignmentType.RIGHT }));
+      pp.push(new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT }));
       if (addPageBreak) pp.push(new Paragraph({ children: [new PageBreak()] }));
       return pp;
     }
@@ -144,7 +144,7 @@ module.exports = async (req, res) => {
     function buildIndicacionesGenerales() {
       const pp = [];
 
-      pp.push(new Paragraph({ children: [tb('INDICACIONES GENERALES POSTERIORES A PROCEDIMIENTO DE LAPAROSCOPIA', { color: AZUL })], alignment: AlignmentType.CENTER, ...sp(200) }));
+      pp.push(new Paragraph({ children: [tb('INDICACIONES GENERALES POSTERIORES A PROCEDIMIENTO DE LAPAROSCOPIA')], alignment: AlignmentType.CENTER, ...sp(200) }));
       pp.push(new Paragraph({ children: [t('Después de un procedimiento de laparoscopia, es normal que te sientas un poco incómodo y necesites tiempo para descansar y recuperarse. Aquí te dejo algunas indicaciones generales para el cuidado postoperatorio.')], ...sp(160) }));
 
       const items3 = [
@@ -159,12 +159,12 @@ module.exports = async (req, res) => {
       ];
 
       for (const item of items3) {
-        pp.push(new Paragraph({ children: [tb(item.sub, { color: AZUL, underline: { type: UnderlineType.SINGLE } }), t(' ' + item.texto)], ...sp(120) }));
+        pp.push(new Paragraph({ children: [tb(item.sub), t(' ' + item.texto)], ...sp(120) }));
       }
 
       pp.push(new Paragraph({ children: [new PageBreak()] }));
 
-      pp.push(new Paragraph({ children: [tb('INDICACIONES DIETA SALUDABLE PARA PACIENTE POSTOPERADO DE CIRUGÍA ABDOMINAL', { color: AZUL })], alignment: AlignmentType.CENTER, ...sp(200) }));
+      pp.push(new Paragraph({ children: [tb('INDICACIONES DIETA SALUDABLE PARA PACIENTE POSTOPERADO DE CIRUGÍA ABDOMINAL')], alignment: AlignmentType.CENTER, ...sp(200) }));
 
       const dieta = [
         { sub: '1. Hidratación:', items: ['Beber al menos 8-10 vasos de agua al día.', 'Incluir caldos claros, té de hierbas y jugos diluidos.'] },
@@ -175,9 +175,9 @@ module.exports = async (req, res) => {
       ];
 
       for (const grupo of dieta) {
-        pp.push(new Paragraph({ children: [tb(grupo.sub, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(60, 100) }));
-        for (const item of grupo.items) {
-          pp.push(new Paragraph({ children: [t('• ' + item)], indent: { left: 360 }, ...sp(40) }));
+        pp.push(new Paragraph({ children: [tb(grupo.sub)], ...sp(60, 100) }));
+        for (let i = 0; i < grupo.items.length; i++) {
+          pp.push(new Paragraph({ children: [t((i+1) + '.- ' + grupo.items[i])], indent: { left: 360 }, ...sp(40) }));
         }
       }
 
@@ -196,19 +196,22 @@ module.exports = async (req, res) => {
         .trim();
       const lineas = limpio.split('\n');
       let primero = true;
+      let lista = 1;
       for (const linea of lineas) {
         const trimmed = linea.trim();
         if (!trimmed) { pp.push(new Paragraph({ children: [t('')], ...sp(60) })); continue; }
         // Título principal: primera línea o toda en mayúsculas
         if (primero || /^[A-ZÁÉÍÓÚÑ\s\-]{10,}$/.test(trimmed)) {
-          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL })], alignment: AlignmentType.CENTER, ...sp(200, primero?0:160) }));
+          pp.push(new Paragraph({ children: [tb(trimmed.toUpperCase())], alignment: AlignmentType.CENTER, ...sp(200, primero?0:160) }));
           primero = false;
+          lista = 1;
         // Subtítulo de sección: termina en :
         } else if (/^[A-Za-záéíóúñÁÉÍÓÚÑ].{2,}:$/.test(trimmed)) {
-          pp.push(new Paragraph({ children: [tb(trimmed, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(80, 140) }));
+          pp.push(new Paragraph({ children: [tb(trimmed.toUpperCase())], ...sp(80, 140) }));
+          lista = 1;
         // Punto de lista
-        } else if (/^[-•]/.test(trimmed)) {
-          pp.push(new Paragraph({ children: [t('• ' + trimmed.replace(/^[-•]\s*/, ''))], indent: { left: 360 }, ...sp(60) }));
+        } else if (/^([-•]|\d+\.-)/.test(trimmed)) {
+          pp.push(new Paragraph({ children: [t((lista++) + '.- ' + trimmed.replace(/^([-•]|\d+\.-)\s*/, ''))], indent: { left: 360 }, ...sp(60) }));
         // Texto normal
         } else {
           pp.push(new Paragraph({ children: [t(trimmed)], ...sp(80) }));
@@ -227,10 +230,10 @@ module.exports = async (req, res) => {
           children: [tb('Edad: '), t((edad||'').replace(/\s*años\s*$/i,'') + ' años'), new TextRun({ text: '                                                                    ', font: FONT, size: SZ }), tb('FN: '), t(fechaNacimiento||'')],
           ...sp(280)
         }),
-        new Paragraph({ children: [tb('1.-  ', { color: AZUL }), tb(biomicsItem.nombre, { color: AZUL, underline: { type: UnderlineType.SINGLE } })], ...sp(20) }),
+        new Paragraph({ children: [tb('1.-  '), tb(biomicsItem.nombre)], ...sp(20) }),
         new Paragraph({ children: [t(biomicsItem.instruccion)], indent: { left: 360 }, ...sp(60) }),
         new Paragraph({ children: [t('Favor de surtir una caja con 6 cápsulas')], indent: { left: 360 }, ...sp(400) }),
-        new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ', { color: AZUL })], alignment: AlignmentType.RIGHT }),
+        new Paragraph({ children: [tb('DR. PABLO VIDAL GONZÁLEZ')], alignment: AlignmentType.RIGHT }),
       ];
     }
 
